@@ -21,6 +21,7 @@ const viewConfigStr = JSON.stringify({
 		noLyrics: i18n(I18nKey.musicNoLyrics),
 		loadingLyrics: i18n(I18nKey.musicLoadingLyrics),
 		failedLyrics: i18n(I18nKey.musicFailedLyrics),
+		instrumental: i18n(I18nKey.musicInstrumental),
 		noSongs: i18n(I18nKey.musicNoSongs),
 		error: i18n(I18nKey.musicError),
 		play: i18n(I18nKey.musicPlay),
@@ -541,6 +542,10 @@ const widgetId =
             ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10">' + cfg.i18n.failedLyrics + '</div>';
             return;
         }
+        if (status === 'instrumental') {
+            ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10" role="option">' + cfg.i18n.instrumental + '</div>';
+            return;
+        }
         if (!lyrics || lyrics.length === 0) {
             ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10" role="option">' + cfg.i18n.noLyrics + '</div>';
             return;
@@ -616,7 +621,7 @@ const widgetId =
         }
 
         // Lyrics
-        renderLyricsUI(s.lyrics, s.lyrics.length > 0 ? 'loaded' : 'none');
+        renderLyricsUI(s.lyrics, s.lyricsStatus || (s.lyrics.length > 0 ? 'loaded' : 'none'));
         if (s.currentLrcIndex >= 0) updateLrcHighlight(s.currentLrcIndex);
 
         // Cover image: if already set, show it

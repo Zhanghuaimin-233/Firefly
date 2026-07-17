@@ -24,6 +24,7 @@ const localPlaylist =
 							? song.lrc
 							: url(song.lrc)
 						: undefined,
+					instrumental: song.instrumental === true,
 				};
 			})
 		: [];
@@ -112,6 +113,7 @@ const managerConfigStr = JSON.stringify({
             : (config.volume || 0.7),
         isMuted: false,
         lyrics: [],
+        lyricsStatus: 'none',
         currentLrcIndex: -1,
         initialized: false,
         initializing: false,
@@ -173,7 +175,15 @@ const managerConfigStr = JSON.stringify({
         state.lyrics = [];
         state.currentLrcIndex = -1;
 
+        // 纯音乐：不加载歌词，显示"纯音乐，请欣赏"
+        if (track.instrumental) {
+            state.lyricsStatus = 'instrumental';
+            emit('fm:lyrics', { lyrics: [], status: 'instrumental' });
+            return;
+        }
+
         if (!track.lrc) {
+            state.lyricsStatus = 'none';
             emit('fm:lyrics', { lyrics: [], status: 'none' });
             return;
         }
@@ -183,20 +193,24 @@ const managerConfigStr = JSON.stringify({
             || /\.(lrc|txt)(\?|#|$)/i.test(track.lrc);
 
         if (isLrcUrl) {
+            state.lyricsStatus = 'loading';
             emit('fm:lyrics', { lyrics: [], status: 'loading' });
             fetch(track.lrc)
                 .then(function (r) { return r.text(); })
                 .then(function (text) {
                     state.lyrics = parseLRC(text);
+                    state.lyricsStatus = 'loaded';
                     emit('fm:lyrics', { lyrics: state.lyrics, status: 'loaded' });
                 })
                 .catch(function () {
                     state.lyrics = [];
+                    state.lyricsStatus = 'failed';
                     emit('fm:lyrics', { lyrics: [], status: 'failed' });
                 });
         } else {
             state.lyrics = parseLRC(track.lrc);
-            emit('fm:lyrics', { lyrics: state.lyrics, status: state.lyrics.length > 0 ? 'loaded' : 'none' });
+            state.lyricsStatus = state.lyrics.length > 0 ? 'loaded' : 'none';
+            emit('fm:lyrics', { lyrics: state.lyrics, status: state.lyricsStatus });
         }
     }
 
@@ -424,6 +438,7 @@ const managerConfigStr = JSON.stringify({
                 currentTimeStr: formatTime(audio.currentTime),
                 durationStr: formatTime(audio.duration),
                 lyrics: state.lyrics,
+                lyricsStatus: state.lyricsStatus,
                 currentLrcIndex: state.currentLrcIndex,
                 initialized: state.initialized,
                 error: state.error,

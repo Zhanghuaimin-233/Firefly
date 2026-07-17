@@ -34,6 +34,7 @@ export const zh_TW: Translation = {
 	[Key.musicNoLyrics]: "暫無歌詞",
 	[Key.musicLoadingLyrics]: "正在加載歌詞...",
 	[Key.musicFailedLyrics]: "歌詞加載失敗",
+	[Key.musicInstrumental]: "純音樂，請欣賞",
 	[Key.musicNoSongs]: "暫無歌曲",
 	[Key.musicError]: "播放器錯誤",
 	[Key.musicPlay]: "播放",

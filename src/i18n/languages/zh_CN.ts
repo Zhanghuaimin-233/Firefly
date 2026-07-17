@@ -34,6 +34,7 @@ export const zh_CN: Translation = {
 	[Key.musicNoLyrics]: "暂无歌词",
 	[Key.musicLoadingLyrics]: "正在加载歌词...",
 	[Key.musicFailedLyrics]: "歌词加载失败",
+	[Key.musicInstrumental]: "纯音乐，请欣赏",
 	[Key.musicNoSongs]: "暂无歌曲",
 	[Key.musicError]: "播放器错误",
 	[Key.musicPlay]: "播放",

@@ -34,6 +34,7 @@ export const en: Translation = {
 	[Key.musicNoLyrics]: "No lyrics available",
 	[Key.musicLoadingLyrics]: "Loading lyrics...",
 	[Key.musicFailedLyrics]: "Failed to load lyrics",
+	[Key.musicInstrumental]: "Instrumental — enjoy",
 	[Key.musicNoSongs]: "No songs",
 	[Key.musicError]: "Player Error",
 	[Key.musicPlay]: "Play",

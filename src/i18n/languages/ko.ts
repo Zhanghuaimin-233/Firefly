@@ -34,6 +34,7 @@ export const ko: Translation = {
 	[Key.musicNoLyrics]: "가사 없음",
 	[Key.musicLoadingLyrics]: "가사 불러오는 중...",
 	[Key.musicFailedLyrics]: "가사를 불러오지 못했습니다",
+	[Key.musicInstrumental]: "연주곡 — 감상해 주세요",
 	[Key.musicNoSongs]: "곡 없음",
 	[Key.musicError]: "플레이어 오류",
 	[Key.musicPlay]: "재생",

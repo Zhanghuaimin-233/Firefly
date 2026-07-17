@@ -11,7 +11,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 	showInNavbar: true,
 
 	// 使用方式："meting" 使用 Meting API，"local" 使用本地音乐列表
-	mode: "meting",
+	mode: "local",
 
 	// 默认音量 (0-1)
 	volume: 0.7,
@@ -44,17 +44,19 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 
 	// 本地音乐配置（当 mode 为 'local' 时使用）
 	// 1. 支持传入歌词文件的路径
-	// lrc: "/assets/music/lrc/使一颗心免于哀伤-哼唱.lrc",
+	// lrc: "/assets/music/lrc/内海孝彰 - 心想い ～ココロオモイ～.lrc",
 	// 2. 或者直接填入歌词字符串内容
 	// lrc: "[00:00.00]歌词内容...",
+	// 3. 支持配置项instrumental: true 显示为纯音乐
 	local: {
 		playlist: [
 			{
-				name: "使一颗心免于哀伤",
-				artist: "知更鸟 / HOYO-MiX / Chevy",
-				url: "/assets/music/使一颗心免于哀伤-哼唱.mp3",
-				cover: "/assets/music/cover/109951169585655912.webp",
+				name: "心想い ～ココロオモイ～",
+				artist: "内海孝彰",
+				url: "/assets/music/内海孝彰 - 心想い ～ココロオモイ～ -絆、つないで。こころ、結んで。離別と決意-.flac",
+				cover: "/assets/music/cover/内海孝彰 - 心想い ～ココロオモイ～ -絆、つないで。こころ、結んで。離別と決意-.avif",
 				lrc: "",
+				instrumental: true
 			},
 		],
 	},
