@@ -266,6 +266,7 @@ enum I18nKey {
 	wavesAnimation = "wavesAnimation",
 	gradientTransition = "gradientTransition",
 	sakuraEffect = "sakuraEffect",
+	customCursor = "customCursor",
 	effectsSettings = "effectsSettings",
 	overlaySettings = "overlaySettings",
 	overlayOpacity = "overlayOpacity",

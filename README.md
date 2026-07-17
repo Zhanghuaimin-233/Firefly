@@ -95,6 +95,7 @@
 - [x] **导航栏自定义** - Logo、标题、链接全面自定义
 - [x] **壁纸模式切换** - 横幅壁纸、全屏壁纸、全屏透明壁纸、纯色背景
 - [x] **主题色自定义** - 360° 色相调节
+- [x] **自定义光标** - CSS 光标替换，支持 `.cur` 资源映射与用户开关
 
 如果你有好用的功能和优化，请提交 [Pull Request](https://github.com/CuteLeaf/Firefly/pulls)
 
@@ -191,6 +192,7 @@ src/
 │   ├── commentConfig.ts          # 评论系统配置
 │   ├── coverImageConfig.ts       # 封面图配置
 │   ├── effectsConfig.ts          # 动画特效配置（樱花等）
+│   ├── cursorConfig.ts           # 自定义光标配置
 │   ├── expressiveCodeConfig.ts   # 代码高亮配置
 │   ├── fontConfig.ts             # 字体配置
 │   ├── footerConfig.ts           # 页脚配置

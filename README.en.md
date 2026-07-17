@@ -94,6 +94,7 @@
 - [x] **Navbar Customization** - Logo, title, links fully customizable
 - [x] **Wallpaper Mode Switching** - Banner wallpaper, fullscreen wallpaper, fullscreen transparent wallpaper, solid background
 - [x] **Theme Color Customization** - 360° hue adjustment
+- [x] **Custom Cursor** - CSS cursor replacement with `.cur` resource mapping and user toggle
 
 
 If you have useful features and optimizations, please submit a [Pull Request](https://github.com/CuteLeaf/Firefly/pulls)
@@ -188,6 +189,7 @@ src/
 │   ├── commentConfig.ts          # Comment system configuration
 │   ├── coverImageConfig.ts       # Cover image configuration
 │   ├── effectsConfig.ts          # Animation effects config (sakura, etc.)
+│   ├── cursorConfig.ts           # Custom cursor configuration
 │   ├── expressiveCodeConfig.ts   # Code highlighting configuration
 │   ├── fontConfig.ts             # Font configuration
 │   ├── footerConfig.ts           # Footer configuration

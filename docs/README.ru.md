@@ -190,6 +190,7 @@ src/
 │   ├── commentConfig.ts          # Конфигурация системы комментариев
 │   ├── coverImageConfig.ts       # Конфигурация обложек статей
 │   ├── effectsConfig.ts          # Конфигурация анимационных эффектов (сакура и др.)
+│   ├── cursorConfig.ts           # Конфигурация пользовательского курсора
 │   ├── expressiveCodeConfig.ts   # Конфигурация подсветки кода
 │   ├── fontConfig.ts             # Конфигурация шрифтов
 │   ├── footerConfig.ts           # Конфигурация подвала

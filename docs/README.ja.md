@@ -189,6 +189,7 @@ src/
 │   ├── commentConfig.ts          # コメントシステム設定
 │   ├── coverImageConfig.ts       # カバー画像設定
 │   ├── effectsConfig.ts          # アニメーションエフェクト設定（桜など）
+│   ├── cursorConfig.ts           # カスタムカーソル設定
 │   ├── expressiveCodeConfig.ts   # コードハイライト設定
 │   ├── fontConfig.ts             # フォント設定
 │   ├── footerConfig.ts           # フッター設定

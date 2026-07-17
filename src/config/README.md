@@ -14,6 +14,7 @@ src/config/
 ├── commentConfig.ts          # 评论系统配置
 ├── coverImageConfig.ts       # 封面图配置
 ├── effectsConfig.ts          # 动画特效配置（樱花等）
+├── cursorConfig.ts           # 自定义光标配置
 ├── expressiveCodeConfig.ts   # 代码高亮配置
 ├── fontConfig.ts             # 字体配置
 ├── footerConfig.ts           # 页脚配置
@@ -55,6 +56,7 @@ import { profileConfig } from "@/config/profileConfig";
 | `commentConfig.ts` | 评论系统配置（Twikoo、Waline、Artalk、Giscus、Disqus） |
 | `coverImageConfig.ts` | 封面图配置（文章封面图、随机封面图 API） |
 | `effectsConfig.ts` | 动画特效配置（樱花数量、速度、尺寸等） |
+| `cursorConfig.ts` | 自定义光标配置（光标资源路径映射、启用开关） |
 | `expressiveCodeConfig.ts` | 代码高亮配置（亮色/暗色主题、折叠、语言徽章） |
 | `fontConfig.ts` | 字体配置（字体列表、回退、预加载） |
 | `footerConfig.ts` | 页脚配置（自定义 HTML 注入，如备案号） |

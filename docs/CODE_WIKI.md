@@ -266,6 +266,96 @@ rehype 阶段（HAST）
   └─ rehypeAutolinkHeadings           （标题锚点）
 ```
 
+### 4.8 自定义光标系统
+
+通过 CSS `cursor: url()` 替换浏览器默认光标，支持 `.cur` 格式（含内置热点坐标）与 `.png` 混用。**仅作用于网页内 DOM，无法影响浏览器系统级 UI（如右键菜单、滚动条、表单原生下拉等）**——这是浏览器固有行为，非 Bug。
+
+#### 配置入口
+
+[cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts)：
+
+```ts
+export const cursorConfig: CursorConfig = {
+  enable: false,           // 默认关闭
+  switchable: true,        // 是否允许用户在显示设置中切换
+  paths: {                 // 资源路径（相对于 public 目录）
+    default:    "/assets/cursors/Arrow.cur",
+    pointer:    "/assets/cursors/hand.cur",
+    text:       "/assets/cursors/IBeam.cur",
+    crosshair:  "/assets/cursors/Cross.cur",
+    help:       "/assets/cursors/Help.cur",
+    notAllowed: "/assets/cursors/No.cur",
+    move:       "/assets/cursors/SizeAll.cur",
+    nResize:    "/assets/cursors/SizeNS.cur",
+    sResize:    "/assets/cursors/SizeNS.cur",
+    eResize:    "/assets/cursors/SizeWE.cur",
+    wResize:    "/assets/cursors/SizeWE.cur",
+    neResize:   "/assets/cursors/SizeNESW.cur",
+    swResize:   "/assets/cursors/SizeNESW.cur",
+    nwResize:   "/assets/cursors/SizeNWSE.cur",
+    seResize:   "/assets/cursors/SizeNWSE.cur",
+  },
+};
+```
+
+类型定义在 [types/effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/types/effectsConfig.ts) 的 `CursorConfig`，与 `SakuraConfig` 同文件。`paths` 中每个字段对应一种 CSS 光标语义，留空则该类型回退到浏览器默认。
+
+#### 应用机制
+
+由 [CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) 在 [Layout.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/Layout.astro) 中 `<SakuraEffect />` 之后挂载。核心流程：
+
+1. 通过 `define:vars` 将 `cursorConfig` 注入到 `is:inline` 内联脚本（不走 Astro 编译，零延迟执行）
+2. 读取 `localStorage.cursorEnabled`（缺省回退到 `cursorConfig.enable`）
+3. 启用时调用 `applyCursorStyle(paths)` 动态创建 `<style id="firefly-cursor-style">` 注入到 `<head>`，按元素类型生成多组 `cursor: url('...'), <keyword> !important;` 规则覆盖 Tailwind 的 `cursor-pointer` 等类
+4. 监听 `cursorToggle` 自定义事件，响应用户在显示设置面板的开关切换
+
+#### Swup 持久化
+
+Swup 页面切换会替换整个 `<head>`，注入的 `<style>` 会丢失，而 `window.__fireflyCursorInitialized` 全局标记仍为 `true` 阻止重新初始化。为此 `setup()` 注册三重监听保证样式重新注入：
+
+- `document.addEventListener('swup:contentReplaced', ...)` —— Swup v3 兼容
+- `document.addEventListener('swup:content:replace', ...)` —— Swup v4 兼容
+- `document.addEventListener('swup:enable', ...)` + 直接 `window.swup.hooks.on('content:replace', ...)` —— Swup 初始化后注册 hook
+
+每次回调都重新读 `localStorage.cursorEnabled` 判断是否需要重新注入 `<style>`。
+
+#### 用户开关
+
+显示设置面板 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 的"特效设置"区块（与樱花特效同区）渲染开关按钮，仅当 `cursorConfig.switchable === true` 时显示。切换流程：
+
+1. UI 调用 `toggleCursorEnabled()` → `setCursorEnabled(value)`
+2. `setCursorEnabled` 写入 `localStorage`、设置 `documentElement.dataset.cursorEnabled`、派发 `cursorToggle` 事件
+3. `CustomCursor.astro` 监听到事件后 `applyCursorStyle` 或 `removeCursorStyle`
+
+#### 资源约定
+
+- 路径目录：`public/assets/cursors/`
+- 推荐格式：`.cur`（Windows 光标格式，浏览器原生支持，含热点坐标）
+- 不支持格式：`.ani`（动态光标，浏览器不支持）
+- 可混用：`.png` 可与 `.cur` 混用，但需手动指定热点（CSS `cursor: url(x.png) 4 4, auto`），项目未采用
+- 资源整理：用户提供的 14 个标准 Windows 光标资源（Arrow / hand / IBeam / Cross / Help / No / SizeAll / SizeNS / SizeWE / SizeNESW / SizeNWSE / AppStarting / UpArrow / Handwriting）
+
+#### i18n
+
+I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/i18n/i18nKey.ts)），6 语言翻译：
+
+| 语言 | 文案 |
+|------|------|
+| zh_CN | 自定义光标 |
+| zh_TW | 自訂游標 |
+| en | Custom Cursor |
+| ja | カスタムカーソル |
+| ko | 커스텀 커서 |
+| ru | Кастомный курсор |
+
+设置面板图标使用 `mdi:cursor-default`（[Icon.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/common/Icon.svelte) 预构建内联 SVG），新增图标需运行 `pnpm icons` 重新生成 [icons.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons.ts)。
+
+#### 已知限制
+
+- 右键菜单、滚动条、原生表单下拉等浏览器系统 UI 仍显示原生光标，无法通过 CSS 覆盖
+- 项目暂未实现自定义右键菜单组件，因此右键区域始终为原生光标
+- `!important` 必须用于覆盖 Tailwind 的 `cursor-pointer` / `cursor-not-allowed` 等类
+
 ---
 
 ## 5. 主要模块职责
@@ -287,6 +377,7 @@ rehype 阶段（HAST）
 | [coverImageConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/coverImageConfig.ts) | `coverImageConfig` | 封面图在列表/文章页的显示开关 |
 | [expressiveCodeConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/expressiveCodeConfig.ts) | `expressiveCodeConfig` | 代码块主题、折叠插件、语言徽章插件 |
 | [effectsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/effectsConfig.ts) | `sakuraConfig` | 樱花飘落特效 |
+| [cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) | `cursorConfig` | 自定义鼠标光标（`.cur` 资源映射 + 用户开关，详见 §4.8） |
 | [announcementConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/announcementConfig.ts) | `announcementConfig` | 公告内容 |
 | [footerConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/footerConfig.ts) | `footerConfig` | 页脚 HTML 注入 |
 | [licenseConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/licenseConfig.ts) | `licenseConfig` | 文章许可证显示 |
@@ -309,7 +400,7 @@ rehype 阶段（HAST）
 | `comment/` | Artalk / Disqus / Giscus / Twikoo / Waline + `index.astro` 路由 | `.astro`，运行时加载远程脚本 |
 | `common/` | ButtonLink / ButtonTag / ClientPagination / CoverImage / DropdownItem / DropdownPanel / FloatingButton / Icon / ImageWrapper / Markdown / Pagination / PioMessageBox / WidgetLayout | `.astro` + `.svelte` 混合 |
 | `controls/` | ArchivePanel / BackToComment / BackToHome / BackToTop / DisplaySettings / FloatingControls / FloatingTOC / LayoutSwitchButton / LightDarkSwitch / ScrollDownIndicator / Search / WallpaperSwitch | `.svelte` 为主（交互控件） |
-| `features/` | BackgroundPlayer / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
+| `features/` | BackgroundPlayer / CustomCursor / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
 | `layout/` | CategoryBar / ConfigCarrier / DropdownMenu / Footer / NavMenuPanel / Navbar / PostCard / PostMeta / PostPage / PostStats / SideBar | `.astro`，页面骨架 |
 | `misc/` | License / RecommendedPost / SharePoster | `.astro` + `.svelte` |
 | `pages/` | anime / bangumi / gallery / AdvancedSearch | `.svelte` 为主（页面级交互组件） |
@@ -400,7 +491,7 @@ rehype 阶段（HAST）
 | [icon-loader.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/icon-loader.ts) | `initIconLoader()` | 监听 `[data-icon-container]` 的 iconify-icon shadowRoot，显示加载指示器/图标；`MutationObserver` 监听新增容器，5 秒超时保护 |
 | [navigation-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/navigation-utils.ts) | `navigateToPage(url, options?)`、`isSwupReady()`、`waitForSwup(timeout=5000)`、`preloadPage(url)`、`getCurrentPath()`、`isHomePage()`、`isPostPage()`、`pathsEqual(path1, path2)` | 优先用 `window.swup.navigate` 无刷新跳转，失败降级 `location.href`；外部链接 `window.open`；锚点 `scrollIntoView` |
 | [sakura-manager.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/sakura-manager.ts) | `SakuraManager` 类、`initSakura(config)`、`toggleSakura()`、`stopSakura()`、`getSakuraStatus()` | Canvas + `requestAnimationFrame` 樱花飘落特效；支持位置/速度/旋转/透明度配置、`limitTimes` 限制次数、resize 处理；全局单例 `globalSakuraManager` |
-| [setting-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/setting-utils.ts) | 见下 | **客户端设置中心**：统一管理 localStorage 持久化 + DOM 应用，涵盖主题/壁纸模式/Overlay 透明度模糊/Waves/Gradient/Sakura/Banner 标题与轮播。每个设置项遵循 `getDefault*` / `getStored*` / `set*` / `apply*ToDocument` 四件套模式 |
+| [setting-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/setting-utils.ts) | 见下 | **客户端设置中心**：统一管理 localStorage 持久化 + DOM 应用，涵盖主题/壁纸模式/Overlay 透明度模糊/Waves/Gradient/Sakura/Banner 标题与轮播/自定义光标。每个设置项遵循 `getDefault*` / `getStored*` / `set*` / `apply*ToDocument` 四件套模式（光标仅前三步，DOM 应用在 `CustomCursor.astro` 中完成） |
 | [toc-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/toc-utils.ts) | `TOCManager` 类、`isPostPage()`、类型 `TOCConfig` | `IntersectionObserver` 监听标题可见性、活动指示器定位、点击平滑滚动（节流 100ms）、`anchorsMatchCurrentContent` 检测 SSR 锚点是否过期；`attach()` 优先复用 SSR 锚点，失败回退 `render()` 重建 |
 
 `setting-utils.ts` 详细导出清单：
@@ -412,6 +503,7 @@ rehype 阶段（HAST）
 - **Gradient**：`getDefaultGradientEnabled` / `setGradientEnabled` / `applyGradientEnabledToDocument`
 - **Sakura**：`getDefaultSakuraEnabled` / `getStoredSakuraEnabled` / `setSakuraEnabled`
 - **Banner**：`getDefaultBannerTitleEnabled` / `getStoredBannerTitleEnabled` / `setBannerTitleEnabled` / `applyBannerTitleEnabledToDocument` / `getDefaultBannerCarouselEnabled` / `getStoredBannerCarouselEnabled` / `setBannerCarouselEnabled` / `applyBannerCarouselEnabledToDocument`
+- **Cursor**：`getDefaultCursorEnabled` / `getStoredCursorEnabled` / `setCursorEnabled`（无 `applyCursorEnabledToDocument`，DOM 应用由 `CustomCursor.astro` 监听 `cursorToggle` 事件完成；`setCursorEnabled` 派发事件时同步写入 `documentElement.dataset.cursorEnabled`）
 
 #### 两端通用
 
@@ -567,6 +659,36 @@ function buildUrl(server: string, encoded: string): string  // <server>/svg/<enc
 
 PlantUML 自定义 base64 字母表为 `0-9A-Za-z-_`，无 `=` 填充。
 
+### 6.7 自定义光标系统（[CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) + [cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts)）
+
+#### CSS 规则生成
+
+`buildCursorCSS(paths)` 按元素类型生成多组 `cursor: url('...'), <keyword> !important;` 规则：
+
+| 配置字段 | CSS 选择器（精简） | 关键字 |
+|---------|------------------|-------|
+| `default` | `*, *::before, *::after` | `auto` |
+| `pointer` | `a, button, [role="button"], input[type="button"/"submit"/"reset"/"checkbox"/"radio"], label, select, summary, [tabindex], .clickable, .cursor-pointer` | `pointer` |
+| `text` | `input[type="text"/"password"/"email"/"number"/"search"/"tel"/"url"], textarea, [contenteditable]` | `text` |
+| `crosshair` | `.cursor-crosshair` | `crosshair` |
+| `help` | `.cursor-help` | `help` |
+| `notAllowed` | `[disabled], [aria-disabled="true"], .cursor-not-allowed` | `not-allowed` |
+| `move` | `.cursor-move, .cursor-grab` | `move` |
+| `nResize` / `sResize` | `.cursor-n-resize, .cursor-s-resize` | `ns-resize` |
+| `eResize` / `wResize` | `.cursor-e-resize, .cursor-w-resize` | `ew-resize` |
+| `neResize` / `swResize` | `.cursor-ne-resize, .cursor-sw-resize` | `nesw-resize` |
+| `nwResize` / `seResize` | `.cursor-nw-resize, .cursor-se-resize` | `nwse-resize` |
+
+`!important` 用于覆盖 Tailwind 的 `cursor-pointer` 等类。空字段跳过该规则，回退到浏览器默认。
+
+#### 单例保护
+
+`window.__fireflyCursorInitialized` 标记防止 `setup()` 重复执行。但 Swup 切页后 `<head>` 被替换导致 `<style id="firefly-cursor-style">` 丢失，因此不能依赖单例跳过样式注入——三重 Swup 监听器每次回调都重新调用 `applyCursorStyle()`。
+
+#### 配置-组件解耦
+
+`setting-utils.ts` 只负责 localStorage 读写与事件派发，不操作 DOM；`CustomCursor.astro` 负责监听事件与 `<style>` 注入。这种解耦让 SSR 阶段（`setting-utils.ts` 在 `.svelte` 中被 import 时）不会因 `document` / `localStorage` 缺失而崩溃。
+
 ---
 
 ## 7. 依赖关系
@@ -647,6 +769,7 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 | `password:decrypted` | `EncryptedContent.astro` | `diagram-panzoom-script.js`（重新初始化图表交互，100ms 延迟） |
 | `wallpaperModeChange` | `setting-utils.ts#setWallpaperMode` | 壁纸轮播脚本（启停 autoplay） |
 | `bannerCarouselChange` | 设置面板 | 壁纸轮播脚本 |
+| `cursorToggle` | `setting-utils.ts#setCursorEnabled` | `CustomCursor.astro`（启停光标样式注入） |
 | `firefly:page:loaded` | `Layout.astro`（评论容器存在时） | 评论系统初始化 |
 
 ---
@@ -806,6 +929,9 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - **加密文章图表交互失效**：检查 `password:decrypted` 事件是否被监听（`diagram-panzoom-script.js` 已处理，100ms 延迟）
 - **构建慢**：`src/` 下图片越多 Astro 优化越慢；考虑用 `public/` 直接服务
 - **Pagefind 索引异常**：检查元素是否误加 `data-pagefind-ignore`
+- **自定义光标切页后失效**：检查 `CustomCursor.astro` 的三重 Swup 监听器是否齐全（`swup:contentReplaced` / `swup:content:replace` / `swup:enable` + `window.swup.hooks.on('content:replace')`），以及 `localStorage.cursorEnabled` 是否被正确读取
+- **自定义光标开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 后必须运行 `pnpm icons` 重新生成 `src/constants/icons.ts`，否则运行时 `hasIcon()` 返回 false 显示占位圆圈
+- **自定义光标对右键菜单无效**：浏览器系统级 UI 限制，CSS `cursor: url()` 无法覆盖右键菜单、滚动条、原生表单下拉等，非 Bug
 
 ---
 
@@ -833,6 +959,8 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - [src/components/layout/Navbar.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/layout/Navbar.astro) —— 导航栏
 - [src/components/controls/DisplaySettings.svelte](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/controls/DisplaySettings.svelte) —— 显示设置面板
 - [src/components/features/EncryptedPost.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/features/EncryptedPost.astro) —— 加密文章容器
+- [src/components/features/CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) —— 自定义光标注入（详见 §4.8 / §6.7）
+- [src/config/cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) —— 自定义光标配置
 - [src/components/comment/index.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/comment/index.astro) —— 评论系统路由
 
 ### 官方资源

@@ -1,0 +1,150 @@
+---
+import { cursorConfig } from "@/config";
+
+const config = cursorConfig;
+---
+
+<script is:inline define:vars={{ cursorConfig: config }}>
+	(function () {
+		// 全局标记，确保只初始化一次（兼容 Swup 页面切换）
+		if (window.__fireflyCursorInitialized) return;
+
+		// 构建光标 CSS 规则
+		function buildCursorCSS(paths) {
+			const rules = [];
+			// 默认指针应用到所有元素
+			if (paths.default) {
+				rules.push(`*, *::before, *::after { cursor: url('${paths.default}'), auto !important; }`);
+			}
+			// 链接/可点击元素
+			if (paths.pointer) {
+				rules.push(
+					`a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], input[type="checkbox"], input[type="radio"], label, select, summary, [tabindex], .clickable, .cursor-pointer { cursor: url('${paths.pointer}'), pointer !important; }`,
+				);
+			}
+			// 文本选择
+			if (paths.text) {
+				rules.push(
+					`input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="url"], textarea, [contenteditable="true"], [contenteditable=""] { cursor: url('${paths.text}'), text !important; }`,
+				);
+			}
+			// 十字
+			if (paths.crosshair) {
+				rules.push(`[class*="cursor-crosshair"], .cursor-crosshair { cursor: url('${paths.crosshair}'), crosshair !important; }`);
+			}
+			// 帮助
+			if (paths.help) {
+				rules.push(`[class*="cursor-help"], .cursor-help { cursor: url('${paths.help}'), help !important; }`);
+			}
+			// 不可用
+			if (paths.notAllowed) {
+				rules.push(`[disabled], [aria-disabled="true"], .cursor-not-allowed { cursor: url('${paths.notAllowed}'), not-allowed !important; }`);
+			}
+			// 移动
+			if (paths.move) {
+				rules.push(`[class*="cursor-move"], .cursor-move, .cursor-grab { cursor: url('${paths.move}'), move !important; }`);
+			}
+			// 调整大小：n/s/e/w/ne/sw/nw/se
+			if (paths.nResize) {
+				rules.push(`.cursor-n-resize, .cursor-s-resize { cursor: url('${paths.nResize}'), ns-resize !important; }`);
+			}
+			if (paths.eResize) {
+				rules.push(`.cursor-e-resize, .cursor-w-resize { cursor: url('${paths.eResize}'), ew-resize !important; }`);
+			}
+			if (paths.neResize) {
+				rules.push(`.cursor-ne-resize, .cursor-sw-resize { cursor: url('${paths.neResize}'), nesw-resize !important; }`);
+			}
+			if (paths.nwResize) {
+				rules.push(`.cursor-nw-resize, .cursor-se-resize { cursor: url('${paths.nwResize}'), nwse-resize !important; }`);
+			}
+			return rules.join('\n');
+		}
+
+		// 移除已存在的光标样式
+		function removeCursorStyle() {
+			const existing = document.getElementById('firefly-cursor-style');
+			if (existing) existing.remove();
+		}
+
+		// 应用光标样式
+		function applyCursorStyle(paths) {
+			removeCursorStyle();
+			if (!paths) return;
+			const css = buildCursorCSS(paths);
+			if (!css) return;
+			const style = document.createElement('style');
+			style.id = 'firefly-cursor-style';
+			style.textContent = css;
+			document.head.appendChild(style);
+		}
+
+		// 初始化
+		function setup() {
+			if (window.__fireflyCursorInitialized) return;
+			window.__fireflyCursorInitialized = true;
+
+			// 读取用户偏好
+			var stored = localStorage.getItem('cursorEnabled');
+			var isEnabled = stored !== null ? stored === 'true' : cursorConfig.enable;
+
+			if (isEnabled) {
+				applyCursorStyle(cursorConfig.paths);
+			}
+
+			// 监听设置面板切换事件
+			window.addEventListener('cursorToggle', function (e) {
+				var enabled = e.detail.enabled;
+				if (enabled) {
+					applyCursorStyle(cursorConfig.paths);
+				} else {
+					removeCursorStyle();
+				}
+			});
+
+			// Swup 页面切换后会替换 <head>，导致注入的 <style> 丢失，需要重新应用
+			// 同时监听两种事件以兼容不同 Swup 版本/插件
+			document.addEventListener('swup:contentReplaced', function () {
+				var s = localStorage.getItem('cursorEnabled');
+				var enabled = s !== null ? s === 'true' : cursorConfig.enable;
+				if (enabled) {
+					applyCursorStyle(cursorConfig.paths);
+				}
+			});
+			document.addEventListener('swup:content:replace', function () {
+				var s = localStorage.getItem('cursorEnabled');
+				var enabled = s !== null ? s === 'true' : cursorConfig.enable;
+				if (enabled) {
+					applyCursorStyle(cursorConfig.paths);
+				}
+			});
+			// Swup 启用后注册 hook（首次加载时 Swup 可能还未初始化）
+			document.addEventListener('swup:enable', function () {
+				if (window.swup && window.swup.hooks) {
+					window.swup.hooks.on('content:replace', function () {
+						var s = localStorage.getItem('cursorEnabled');
+						var enabled = s !== null ? s === 'true' : cursorConfig.enable;
+						if (enabled) {
+							applyCursorStyle(cursorConfig.paths);
+						}
+					});
+				}
+			});
+			// 若 Swup 已就绪（如从详情页返回时），直接注册 hook
+			if (window.swup && window.swup.hooks) {
+				window.swup.hooks.on('content:replace', function () {
+					var s = localStorage.getItem('cursorEnabled');
+					var enabled = s !== null ? s === 'true' : cursorConfig.enable;
+					if (enabled) {
+						applyCursorStyle(cursorConfig.paths);
+					}
+				});
+			}
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', setup);
+		} else {
+			setup();
+		}
+	})();
+</script>

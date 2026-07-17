@@ -25,3 +25,28 @@ export type SakuraConfig = {
 	};
 	zIndex: number; // 层级，确保樱花在合适的层级显示
 };
+
+// 自定义鼠标光标配置
+export type CursorConfig = {
+	enable: boolean; // 是否启用自定义光标
+	switchable?: boolean; // 是否允许用户在设置中切换
+	// 光标资源路径（相对于 public 目录），每个对应一种 CSS 光标类型
+	// 留空则该类型使用浏览器默认光标
+	paths: {
+		default?: string; // 默认指针（Arrow）
+		pointer?: string; // 链接/可点击（hand）
+		text?: string; // 文本选择（IBeam）
+		crosshair?: string; // 十字（Cross）
+		help?: string; // 帮助（Help）
+		notAllowed?: string; // 不可用（No）
+		move?: string; // 移动（SizeAll）
+		nResize?: string; // 上下调整（SizeNS）
+		sResize?: string; // 上下调整（SizeNS）
+		eResize?: string; // 左右调整（SizeWE）
+		wResize?: string; // 左右调整（SizeWE）
+		neResize?: string; // 东北西南调整（SizeNESW）
+		swResize?: string; // 东北西南调整（SizeNESW）
+		nwResize?: string; // 西北东南调整（SizeNWSE）
+		seResize?: string; // 西北东南调整（SizeNWSE）
+	};
+};

@@ -192,6 +192,7 @@ src/
 │   ├── commentConfig.ts          # 留言系統配置
 │   ├── coverImageConfig.ts       # 封面圖配置
 │   ├── effectsConfig.ts          # 動畫特效配置（櫻花等）
+│   ├── cursorConfig.ts           # 自訂游標配置
 │   ├── expressiveCodeConfig.ts   # 程式碼高亮配置
 │   ├── fontConfig.ts             # 字型配置
 │   ├── footerConfig.ts           # 頁尾配置

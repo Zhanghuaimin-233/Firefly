@@ -12,6 +12,7 @@ import {
 import type { LIGHT_DARK_MODE, WALLPAPER_MODE } from "@/types/config";
 import {
 	backgroundWallpaper,
+	cursorConfig,
 	expressiveCodeConfig,
 	sakuraConfig,
 	siteConfig,
@@ -1176,6 +1177,37 @@ export function setSakuraEnabled(enabled: boolean): void {
 	// 实时切换樱花特效
 	window.dispatchEvent(
 		new CustomEvent("sakuraToggle", { detail: { enabled } }),
+	);
+}
+
+// Custom cursor functions
+export function getDefaultCursorEnabled(): boolean {
+	return cursorConfig?.enable ?? false;
+}
+
+export function getStoredCursorEnabled(): boolean {
+	if (typeof localStorage === "undefined") {
+		return getDefaultCursorEnabled();
+	}
+	const stored = localStorage.getItem("cursorEnabled");
+	if (stored === null) {
+		return getDefaultCursorEnabled();
+	}
+	return stored === "true";
+}
+
+export function setCursorEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("cursorEnabled", String(enabled));
+	document.documentElement.setAttribute("data-cursor-enabled", String(enabled));
+	// 实时切换自定义光标
+	window.dispatchEvent(
+		new CustomEvent("cursorToggle", { detail: { enabled } }),
 	);
 }
 
