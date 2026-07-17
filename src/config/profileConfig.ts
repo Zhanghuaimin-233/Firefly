@@ -12,7 +12,7 @@ export const profileConfig: ProfileConfig = {
 	name: "Kokkoro",
 
 	// 个人签名
-	bio: "就让身为引导者的我,全力支持主人吧!(OxO)",
+	bio: "就让身为引导者的我,全力支持主人吧(OxO)",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons
