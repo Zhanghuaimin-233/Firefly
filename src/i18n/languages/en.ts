@@ -277,6 +277,7 @@ export const en: Translation = {
 	[Key.gradientTransition]: "Gradient Transition",
 	[Key.sakuraEffect]: "Sakura Effect",
 	[Key.customCursor]: "Custom Cursor",
+	[Key.cursorTrail]: "Cursor Trail",
 	[Key.effectsSettings]: "Effects Settings",
 	[Key.overlaySettings]: "Transparency Settings",
 	[Key.overlayOpacity]: "Wallpaper Opacity",

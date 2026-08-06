@@ -16,6 +16,7 @@ import {
 	getDefaultOverlayCardOpacity,
 	getDefaultOverlayOpacity,
 	getDefaultSakuraEnabled,
+	getDefaultCursorTrailEnabled,
 	getDefaultWavesEnabled,
 	getDefaultCursorEnabled,
 	getHue,
@@ -27,6 +28,7 @@ import {
 	getStoredOverlayOpacity,
 	getStoredSakuraEnabled,
 	getStoredCursorEnabled,
+	getStoredCursorTrailEnabled,
 	getStoredWallpaperMode,
 	getStoredWavesEnabled,
 	setBannerCarouselEnabled,
@@ -38,12 +40,13 @@ import {
 	setOverlayOpacity,
 	setSakuraEnabled,
 	setCursorEnabled,
+	setCursorTrailEnabled,
 	setWallpaperMode,
 	setWavesEnabled,
 } from "@utils/setting-utils";
 import { onMount } from "svelte";
 import Icon from "@/components/common/Icon.svelte";
-import { backgroundWallpaper, cursorConfig, sakuraConfig, siteConfig } from "@/config";
+import { backgroundWallpaper, cursorConfig, cursorTrailConfig, sakuraConfig, siteConfig } from "@/config";
 import type { WALLPAPER_MODE } from "@/types/config";
 
 type OverlaySliderItem = {
@@ -87,6 +90,8 @@ let sakuraEnabled = $state(true);
 const defaultSakuraEnabled = getDefaultSakuraEnabled();
 let cursorEnabled = $state(false);
 const defaultCursorEnabled = getDefaultCursorEnabled();
+let cursorTrailEnabled = $state(false);
+const defaultCursorTrailEnabled = getDefaultCursorTrailEnabled();
 let overlayOpacity = $state(getDefaultOverlayOpacity());
 const defaultOverlayOpacity = getDefaultOverlayOpacity();
 let overlayBlur = $state(getDefaultOverlayBlur());
@@ -120,6 +125,8 @@ const isBannerCarouselSwitchable =
 const isSakuraSwitchable = sakuraConfig?.switchable ?? false;
 // 是否允许用户切换自定义光标
 const isCursorSwitchable = cursorConfig?.switchable ?? false;
+// 是否允许用户切换光标花瓣特效
+const isCursorTrailSwitchable = cursorTrailConfig?.switchable ?? false;
 // 是否有任何横幅设置可显示（后续添加新设置时在此处添加条件）
 const hasBannerSettings =
 	isWavesSwitchable ||
@@ -169,7 +176,8 @@ const hasAnyContent =
 	hasBannerSettings ||
 	hasOverlaySettings ||
 	isSakuraSwitchable ||
-	isCursorSwitchable;
+	isCursorSwitchable ||
+	isCursorTrailSwitchable;
 
 let overlaySliderItems = $derived<OverlaySliderItem[]>([
 	{
@@ -322,6 +330,11 @@ function toggleCursorEnabled() {
 	setCursorEnabled(cursorEnabled);
 }
 
+function toggleCursorTrailEnabled() {
+	cursorTrailEnabled = !cursorTrailEnabled;
+	setCursorTrailEnabled(cursorTrailEnabled);
+}
+
 function switchWallpaperMode(newMode: WALLPAPER_MODE) {
 	wallpaperMode = newMode;
 	setWallpaperMode(newMode);
@@ -410,6 +423,7 @@ onMount(() => {
 	// 从localStorage读取樱花特效状态
 	sakuraEnabled = getStoredSakuraEnabled();
 	cursorEnabled = getStoredCursorEnabled();
+	cursorTrailEnabled = getStoredCursorTrailEnabled();
 
 	// 从localStorage读取全屏透明设置状态
 	overlayOpacity = getStoredOverlayOpacity();
@@ -726,7 +740,7 @@ $effect(() => {
     {/if}
 
     <!-- Effects Settings Section -->
-    {#if isSakuraSwitchable || isCursorSwitchable}
+    {#if isSakuraSwitchable || isCursorSwitchable || isCursorTrailSwitchable}
         <div class="mt-2 mb-2">
             <div class="flex gap-2 font-bold text-lg text-neutral-900 dark:text-neutral-100 transition relative ml-3 mb-2
                 before:w-1 before:h-4 before:rounded-md before:bg-(--primary)
@@ -734,7 +748,7 @@ $effect(() => {
             >
                 {i18n(I18nKey.effectsSettings)}
                 <button aria-label="Reset to Default" class="btn-regular w-7 h-7 rounded-md  active:scale-90"
-                        class:opacity-0={(sakuraEnabled === defaultSakuraEnabled || !isSakuraSwitchable) && (cursorEnabled === defaultCursorEnabled || !isCursorSwitchable)} class:pointer-events-none={(sakuraEnabled === defaultSakuraEnabled || !isSakuraSwitchable) && (cursorEnabled === defaultCursorEnabled || !isCursorSwitchable)} onclick={() => { if (isSakuraSwitchable) { sakuraEnabled = defaultSakuraEnabled; setSakuraEnabled(defaultSakuraEnabled); } if (isCursorSwitchable) { cursorEnabled = defaultCursorEnabled; setCursorEnabled(defaultCursorEnabled); } }}>
+                        class:opacity-0={(sakuraEnabled === defaultSakuraEnabled || !isSakuraSwitchable) && (cursorEnabled === defaultCursorEnabled || !isCursorSwitchable) && (cursorTrailEnabled === defaultCursorTrailEnabled || !isCursorTrailSwitchable)} class:pointer-events-none={(sakuraEnabled === defaultSakuraEnabled || !isSakuraSwitchable) && (cursorEnabled === defaultCursorEnabled || !isCursorSwitchable) && (cursorTrailEnabled === defaultCursorTrailEnabled || !isCursorTrailSwitchable)} onclick={() => { if (isSakuraSwitchable) { sakuraEnabled = defaultSakuraEnabled; setSakuraEnabled(defaultSakuraEnabled); } if (isCursorSwitchable) { cursorEnabled = defaultCursorEnabled; setCursorEnabled(defaultCursorEnabled); } if (isCursorTrailSwitchable) { cursorTrailEnabled = defaultCursorTrailEnabled; setCursorTrailEnabled(defaultCursorTrailEnabled); } }}>
                     <div class="text-(--btn-content)">
                         <Icon icon="fa7-solid:arrow-rotate-left" class="text-[0.875rem]"></Icon>
                     </div>
@@ -772,6 +786,23 @@ $effect(() => {
                         <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
                              class:left-0.5={!cursorEnabled}
                              class:left-5={cursorEnabled}></div>
+                    </div>
+                </button>
+                {/if}
+                {#if isCursorTrailSwitchable}
+                <button
+                    class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+                    class:bg-(--btn-regular-bg-hover)={cursorTrailEnabled}
+                    onclick={toggleCursorTrailEnabled}
+                >
+                    <Icon icon="mdi:cursor-default-click-outline" class="text-[1.25rem] shrink-0"></Icon>
+                    <span class="text-sm flex-1">{i18n(I18nKey.cursorTrail)}</span>
+                    <div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+                         class:bg-(--primary)={cursorTrailEnabled}
+                         class:bg-(--btn-regular-bg-active)={!cursorTrailEnabled}>
+                        <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+                             class:left-0.5={!cursorTrailEnabled}
+                             class:left-5={cursorTrailEnabled}></div>
                     </div>
                 </button>
                 {/if}

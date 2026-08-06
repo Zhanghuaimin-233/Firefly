@@ -279,6 +279,7 @@ export const ru: Translation = {
 	[Key.gradientTransition]: "Градиентный переход",
 	[Key.sakuraEffect]: "Эффект сакуры",
 	[Key.customCursor]: "Кастомный курсор",
+	[Key.cursorTrail]: "След курсора",
 	[Key.effectsSettings]: "Настройки эффектов",
 	[Key.overlaySettings]: "Настройки прозрачности",
 	[Key.overlayOpacity]: "Прозрачность обоев",

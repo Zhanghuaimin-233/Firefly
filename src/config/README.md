@@ -13,7 +13,7 @@ src/config/
 ├── backgroundWallpaper.ts    # 背景壁纸配置
 ├── commentConfig.ts          # 评论系统配置
 ├── coverImageConfig.ts       # 封面图配置
-├── effectsConfig.ts          # 动画特效配置（樱花等）
+├── effectsConfig.ts          # 动画特效配置（樱花、光标尾迹等）
 ├── cursorConfig.ts           # 自定义光标配置
 ├── expressiveCodeConfig.ts   # 代码高亮配置
 ├── fontConfig.ts             # 字体配置
@@ -55,7 +55,7 @@ import { profileConfig } from "@/config/profileConfig";
 | `backgroundWallpaper.ts` | 背景壁纸配置（壁纸模式、图片、横幅文字、水波纹等） |
 | `commentConfig.ts` | 评论系统配置（Twikoo、Waline、Artalk、Giscus、Disqus） |
 | `coverImageConfig.ts` | 封面图配置（文章封面图、随机封面图 API） |
-| `effectsConfig.ts` | 动画特效配置（樱花数量、速度、尺寸等） |
+| `effectsConfig.ts` | 动画特效配置（樱花飘落、光标尾迹粒子系统） |
 | `cursorConfig.ts` | 自定义光标配置（光标资源路径映射、启用开关） |
 | `expressiveCodeConfig.ts` | 代码高亮配置（亮色/暗色主题、折叠、语言徽章） |
 | `fontConfig.ts` | 字体配置（字体列表、回退、预加载） |

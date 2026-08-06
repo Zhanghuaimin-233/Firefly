@@ -271,6 +271,7 @@ export const zh_TW: Translation = {
 	[Key.gradientTransition]: "漸變過渡",
 	[Key.sakuraEffect]: "櫻花特效",
 	[Key.customCursor]: "自訂游標",
+	[Key.cursorTrail]: "游標尾跡",
 	[Key.effectsSettings]: "特效設定",
 	[Key.overlaySettings]: "透明設定",
 	[Key.overlayOpacity]: "桌布透明度",

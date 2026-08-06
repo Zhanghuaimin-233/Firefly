@@ -13,6 +13,7 @@ import type { LIGHT_DARK_MODE, WALLPAPER_MODE } from "@/types/config";
 import {
 	backgroundWallpaper,
 	cursorConfig,
+	cursorTrailConfig,
 	expressiveCodeConfig,
 	sakuraConfig,
 	siteConfig,
@@ -1208,6 +1209,40 @@ export function setCursorEnabled(enabled: boolean): void {
 	// 实时切换自定义光标
 	window.dispatchEvent(
 		new CustomEvent("cursorToggle", { detail: { enabled } }),
+	);
+}
+
+// Cursor trail effect functions
+export function getDefaultCursorTrailEnabled(): boolean {
+	return cursorTrailConfig?.enable ?? false;
+}
+
+export function getStoredCursorTrailEnabled(): boolean {
+	if (typeof localStorage === "undefined") {
+		return getDefaultCursorTrailEnabled();
+	}
+	const stored = localStorage.getItem("cursorTrailEnabled");
+	if (stored === null) {
+		return getDefaultCursorTrailEnabled();
+	}
+	return stored === "true";
+}
+
+export function setCursorTrailEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("cursorTrailEnabled", String(enabled));
+	document.documentElement.setAttribute(
+		"data-cursor-trail-enabled",
+		String(enabled),
+	);
+	// 实时切换光标花瓣特效
+	window.dispatchEvent(
+		new CustomEvent("cursorTrailToggle", { detail: { enabled } }),
 	);
 }
 

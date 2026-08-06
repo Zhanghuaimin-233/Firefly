@@ -176,7 +176,7 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 - 注册 Swup 生命周期钩子（`link:click` / `visit:start` / `content:replace` / `page:view` / `visit:end` / `scroll:top`）
 - 初始化 TOC、icon loader、内容溢出容器、scroll 函数、网格列数计算
 - 通过 `<ConfigCarrier />` 将 SSR 配置注入到客户端可读取的 DOM
-- 通过 `<MusicManager />` / `<SakuraEffect />` / `<FancyboxManager />` 挂载全局特性
+- 通过 `<MusicManager />` / `<SakuraEffect />` / `<CursorTrail />` / `<FancyboxManager />` 挂载全局特性
 
 #### MainGridLayout.astro 关键职责
 
@@ -356,6 +356,85 @@ I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-tra
 - 项目暂未实现自定义右键菜单组件，因此右键区域始终为原生光标
 - `!important` 必须用于覆盖 Tailwind 的 `cursor-pointer` / `cursor-not-allowed` 等类
 
+### 4.9 光标尾迹粒子系统
+
+Canvas 2D 粒子系统，鼠标跟随的五瓣花形旋涡特效。复刻自 Wallpaper Engine `Cherry_Blossoms_2.json` 粒子配置，物理参数对照原版逐项映射。
+
+#### 配置入口
+
+[effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) 的 `cursorTrailConfig`：
+
+```ts
+export const cursorTrailConfig: CursorTrailConfig = {
+  enable: false,           // 默认关闭
+  switchable: true,        // 是否允许用户在显示设置中切换
+  imageSrc: "/assets/images/effects/cursor-petal-trimmed.png",
+  maxParticles: 1000,      // 粒子池上限
+  emitRate: 100,           // 每秒发射数量
+  particleLife: { min: 1, max: 2.25 },   // 生命周期（秒）
+  size: { min: 2.5, max: 3.5 },          // 花瓣宽度（像素）
+  speed: { min: 0, max: 5 },             // 随机扩散速度
+  gravity: { x: 0, y: 50 },              // 重力（Canvas Y 向下为正）
+  drag: 1,                               // 阻力系数
+  repel: { scale: -600, threshold: 25 }, // 近距离排斥
+  attract: { scale: 500, threshold: 5000 }, // 远距离吸引
+  vortex: { distanceOuter: 25, speed: 300 }, // 涡旋（线性衰减）
+  trailLength: 1,                        // 拖尾长度
+  sequenceCount: 5,                      // 序列分组数（五瓣花形）
+  orbitRadius: 4,                        // 初始轨道偏移半径
+  tangentSpeed: 50,                      // 初始切向速度
+  colorRange: { min: [255, 173, 169], max: [249, 222, 255] }, // 粉红→淡紫
+  zIndex: 100,
+  ambient: { enable: false, ... },       // 环境落花层（已禁用）
+};
+```
+
+类型定义在 [types/effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/types/effectsConfig.ts) 的 `CursorTrailConfig`。
+
+#### 物理模型
+
+粒子受到 5 种力的叠加作用，形成稳定的五瓣花形旋涡：
+
+1. **排斥力**（`repel`）：距鼠标 < 25px 时施加反向力，线性衰减，防止粒子堆积在中心
+2. **吸引力**（`attract`）：距鼠标 < 5000px 时施加正向力，线性衰减，将远处粒子拉回
+3. **涡旋力**（`vortex`）：距鼠标 < 25px 时施加切向力，**线性衰减** `force = speed × (1 - dist/distanceOuter)`，形成圆周旋转
+4. **重力**（`gravity`）：向下拉粒子，与涡旋叠加产生摆线/旋轮线轨迹
+5. **阻力**（`drag`）：速度衰减，防止粒子无限加速
+
+排斥 + 吸引在 `dist ≈ 4.2px` 处形成稳态环半径，涡旋使粒子绕环旋转，重力使轨迹向下偏移形成摆线。
+
+#### 五瓣花形原理
+
+`sequenceCount: 5` 实现原版 `mapsequencearoundcontrolpoint count:5` 语义：
+
+- 粒子分 5 组，按 `2π/5 = 72°` 相位差围绕控制点发射
+- Manager 维护 `_sequenceCounter`，每个新粒子递增并对 5 取模
+- 5 组粒子以 72° 相位差同时做摆线运动，叠加后视觉上形成五瓣花形旋涡（而非简单圆环）
+
+#### 颜色着色
+
+原版 `colorrandom` 是运行时代码着色（非纹理资源）：纹理 `cursor-petal-trimmed.png` (78×138) 只是花瓣形状底图，粉色由代码在粒子诞生时随机插值 `粉红(255,173,169) → 淡紫(249,222,255)` 并与纹理 multiply 混合。
+
+为性能采用**预渲染颜色档位缓存**：`buildTintedCache()` 将颜色范围量化为 8 档，每档用 `fillRect + multiply + destination-in` 三步生成着色后的离屏 canvas，粒子诞生时按随机色选档，draw 时直接用缓存，无需每帧混合。
+
+#### 渲染混合
+
+使用 `globalCompositeOperation = "lighter"`（加色混合）模拟原版 `overbright: 1.21` 发光感。配合**随机亮度层次**：15% 高亮粒子（alpha 0.5-0.7）制造闪烁，85% 普通粒子（alpha 0.15-0.35）构成紫红色锐利轮廓。加色混合下降低 alpha 避免大量粒子叠加过曝。
+
+#### 应用机制
+
+由 [CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) 在 [Layout.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/Layout.astro) 中挂载。核心流程：
+
+1. 通过 `define:vars` 将 `cursorTrailConfig` 注入到 `is:inline` 内联脚本
+2. 读取 `localStorage.cursorTrailEnabled`（缺省回退到 `cursorTrailConfig.enable`）
+3. 启用时创建 `<canvas id="canvas_cursor_trail">` 固定全屏覆盖层，启动 `requestAnimationFrame` 动画循环
+4. 监听 `cursorTrailToggle` 自定义事件，响应用户在显示设置面板的开关切换
+5. `window.__fireflyCursorTrailInitialized` 全局标记防止 Swup 切页后重复初始化
+
+#### 配置-组件解耦
+
+同自定义光标系统：`setting-utils.ts` 只负责 localStorage 读写与事件派发，`CursorTrail.astro` 负责监听事件与 Canvas 动画循环。SSR 阶段不会因 `document` / `localStorage` 缺失而崩溃。
+
 ---
 
 ## 5. 主要模块职责
@@ -376,7 +455,7 @@ I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-tra
 | [fontConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/fontConfig.ts) | `fontConfig`, `fontsList` | Astro Font API 字体定义 + 区域字体选择 + 子集化 |
 | [coverImageConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/coverImageConfig.ts) | `coverImageConfig` | 封面图在列表/文章页的显示开关 |
 | [expressiveCodeConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/expressiveCodeConfig.ts) | `expressiveCodeConfig` | 代码块主题、折叠插件、语言徽章插件 |
-| [effectsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/effectsConfig.ts) | `sakuraConfig` | 樱花飘落特效 |
+| [effectsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/effectsConfig.ts) | `sakuraConfig`, `cursorTrailConfig` | 樱花飘落特效、光标尾迹粒子系统 |
 | [cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) | `cursorConfig` | 自定义鼠标光标（`.cur` 资源映射 + 用户开关，详见 §4.8） |
 | [announcementConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/announcementConfig.ts) | `announcementConfig` | 公告内容 |
 | [footerConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/footerConfig.ts) | `footerConfig` | 页脚 HTML 注入 |
@@ -400,7 +479,7 @@ I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-tra
 | `comment/` | Artalk / Disqus / Giscus / Twikoo / Waline + `index.astro` 路由 | `.astro`，运行时加载远程脚本 |
 | `common/` | ButtonLink / ButtonTag / ClientPagination / CoverImage / DropdownItem / DropdownPanel / FloatingButton / Icon / ImageWrapper / Markdown / Pagination / PioMessageBox / WidgetLayout | `.astro` + `.svelte` 混合 |
 | `controls/` | ArchivePanel / BackToComment / BackToHome / BackToTop / DisplaySettings / FloatingControls / FloatingTOC / LayoutSwitchButton / LightDarkSwitch / ScrollDownIndicator / Search / WallpaperSwitch | `.svelte` 为主（交互控件） |
-| `features/` | BackgroundPlayer / CustomCursor / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
+| `features/` | BackgroundPlayer / CustomCursor / CursorTrail / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
 | `layout/` | CategoryBar / ConfigCarrier / DropdownMenu / Footer / NavMenuPanel / Navbar / PostCard / PostMeta / PostPage / PostStats / SideBar | `.astro`，页面骨架 |
 | `misc/` | License / RecommendedPost / SharePoster | `.astro` + `.svelte` |
 | `pages/` | anime / bangumi / gallery / AdvancedSearch | `.svelte` 为主（页面级交互组件） |
@@ -504,6 +583,7 @@ I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-tra
 - **Sakura**：`getDefaultSakuraEnabled` / `getStoredSakuraEnabled` / `setSakuraEnabled`
 - **Banner**：`getDefaultBannerTitleEnabled` / `getStoredBannerTitleEnabled` / `setBannerTitleEnabled` / `applyBannerTitleEnabledToDocument` / `getDefaultBannerCarouselEnabled` / `getStoredBannerCarouselEnabled` / `setBannerCarouselEnabled` / `applyBannerCarouselEnabledToDocument`
 - **Cursor**：`getDefaultCursorEnabled` / `getStoredCursorEnabled` / `setCursorEnabled`（无 `applyCursorEnabledToDocument`，DOM 应用由 `CustomCursor.astro` 监听 `cursorToggle` 事件完成；`setCursorEnabled` 派发事件时同步写入 `documentElement.dataset.cursorEnabled`）
+- **CursorTrail**：`getDefaultCursorTrailEnabled` / `getStoredCursorTrailEnabled` / `setCursorTrailEnabled`（同 Cursor 模式，DOM 应用由 `CursorTrail.astro` 监听 `cursorTrailToggle` 事件完成）
 
 #### 两端通用
 
@@ -689,6 +769,36 @@ PlantUML 自定义 base64 字母表为 `0-9A-Za-z-_`，无 `=` 填充。
 
 `setting-utils.ts` 只负责 localStorage 读写与事件派发，不操作 DOM；`CustomCursor.astro` 负责监听事件与 `<style>` 注入。这种解耦让 SSR 阶段（`setting-utils.ts` 在 `.svelte` 中被 import 时）不会因 `document` / `localStorage` 缺失而崩溃。
 
+### 6.8 光标尾迹粒子系统（[CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) + [effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts)）
+
+#### 粒子类 `PetalParticle`
+
+每个粒子维护位置、速度、生命周期、尺寸、旋转、颜色、拖尾历史：
+
+```javascript
+constructor(x, y, config, tintedCache, sequenceIndex) {
+  // sequenceIndex % sequenceCount 决定 72° 相位偏移
+  const phase = (sequenceIndex % seqCount) * (Math.PI * 2 / seqCount);
+  this.x = x + Math.cos(phase) * orbitR;    // 初始位置偏移
+  this.vx = -Math.sin(phase) * tangentSpeed; // 切向初速度
+  this.baseAlpha = Math.random() < 0.15 ? 0.5-0.7 : 0.15-0.35; // 随机亮度
+}
+```
+
+`update(dt, mouseX, mouseY)` 依次施加排斥、吸引、涡旋（线性衰减）、重力、阻力，然后积分位置与生命衰减。
+
+#### 管理器 `CursorTrailManager`
+
+- `init()`：加载花瓣图片 → `buildTintedCache()` 预渲染 8 档着色纹理 → 创建 canvas → 绑定鼠标事件 → 启动 RAF
+- `emit(dt)`：按 `emitRate` 累积发射，`_sequenceCounter++` 传递给每个新粒子
+- `startAnimation()`：RAF 循环，每帧 clearRect → emit → update + draw（光标花瓣）
+- `stop()`：cancelAnimationFrame + 移除事件 + 移除 canvas
+- `updateConfig(newConfig)`：配置变更时 stop → 更新 → init
+
+#### Swup 持久化
+
+`window.__fireflyCursorTrailInitialized` 全局标记防止重复初始化。Canvas 是 `document.body.appendChild` 创建的独立元素，Swup 切页时只替换 `[data-swup]` 容器，canvas 不在容器内因此不会丢失。但若 Swup 替换了整个 body，`setup()` 在 `DOMContentLoaded` 后会重新执行——此时全局标记为 true 直接 return，需要依赖 `cursorTrailToggle` 事件恢复。
+
 ---
 
 ## 7. 依赖关系
@@ -770,6 +880,7 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 | `wallpaperModeChange` | `setting-utils.ts#setWallpaperMode` | 壁纸轮播脚本（启停 autoplay） |
 | `bannerCarouselChange` | 设置面板 | 壁纸轮播脚本 |
 | `cursorToggle` | `setting-utils.ts#setCursorEnabled` | `CustomCursor.astro`（启停光标样式注入） |
+| `cursorTrailToggle` | `setting-utils.ts#setCursorTrailEnabled` | `CursorTrail.astro`（启停粒子动画循环） |
 | `firefly:page:loaded` | `Layout.astro`（评论容器存在时） | 评论系统初始化 |
 
 ---
@@ -930,7 +1041,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - **构建慢**：`src/` 下图片越多 Astro 优化越慢；考虑用 `public/` 直接服务
 - **Pagefind 索引异常**：检查元素是否误加 `data-pagefind-ignore`
 - **自定义光标切页后失效**：检查 `CustomCursor.astro` 的三重 Swup 监听器是否齐全（`swup:contentReplaced` / `swup:content:replace` / `swup:enable` + `window.swup.hooks.on('content:replace')`），以及 `localStorage.cursorEnabled` 是否被正确读取
-- **自定义光标开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 后必须运行 `pnpm icons` 重新生成 `src/constants/icons.ts`，否则运行时 `hasIcon()` 返回 false 显示占位圆圈
+- **自定义光标/光标尾迹开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 或修改图标名后必须运行 `pnpm icons` 重新生成 `src/constants/icons.ts`，否则运行时 `hasIcon()` 返回 false 显示占位圆圈
 - **自定义光标对右键菜单无效**：浏览器系统级 UI 限制，CSS `cursor: url()` 无法覆盖右键菜单、滚动条、原生表单下拉等，非 Bug
 
 ---
@@ -960,7 +1071,9 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - [src/components/controls/DisplaySettings.svelte](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/controls/DisplaySettings.svelte) —— 显示设置面板
 - [src/components/features/EncryptedPost.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/features/EncryptedPost.astro) —— 加密文章容器
 - [src/components/features/CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) —— 自定义光标注入（详见 §4.8 / §6.7）
+- [src/components/features/CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) —— 光标尾迹粒子特效（详见 §4.9 / §6.8）
 - [src/config/cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) —— 自定义光标配置
+- [src/config/effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) —— 樱花飘落 + 光标尾迹特效配置
 - [src/components/comment/index.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/comment/index.astro) —— 评论系统路由
 
 ### 官方资源

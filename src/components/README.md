@@ -85,6 +85,7 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 
 **管理器（初始化和管理功能）**
 - `CustomCursor.astro` - 自定义光标注入（CSS `cursor: url()` 替换，含 Swup 持久化）
+- `CursorTrail.astro` - 光标尾迹粒子特效（Canvas 2D 粒子系统，五瓣花形旋涡，含 Swup 持久化）
 - `FancyboxManager.astro` - Fancybox 图片查看器管理
 - `FontSetup.astro` - 字体加载和管理（基于 Astro Font API）
 - `KatexManager.astro` - Katex 数学公式渲染管理

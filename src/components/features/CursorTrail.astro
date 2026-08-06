@@ -1,0 +1,613 @@
+---
+import { cursorTrailConfig } from "@/config";
+
+const config = cursorTrailConfig;
+---
+
+<script is:inline define:vars={{ cursorTrailConfig: config }}>
+	(function () {
+		// 全局标记，确保只初始化一次（兼容 Swup 页面切换）
+		if (window.__fireflyCursorTrailInitialized) return;
+
+		// 粒子类：复刻 WE Cherry_Blossoms_2.json 的完整物理
+		class PetalParticle {
+			constructor(x, y, config, tintedCache, sequenceIndex) {
+				this.config = config;
+				this.tintedCache = tintedCache || [];
+				// WE: mapsequencearoundcontrolpoint count 5
+				// 粒子分5组，按 72°(2π/5) 相位差围绕控制点发射
+				// 配合 vortex 旋转 + gravity 下拉，5组摆线运动叠加形成五瓣花形旋涡
+				const seqCount = config.sequenceCount || 5;
+				const seqIdx = sequenceIndex % seqCount;
+				const phase = seqIdx * ((Math.PI * 2) / seqCount);
+				const orbitR = config.orbitRadius || 4;
+				// 初始位置：控制点 + 轨道偏移（按相位分布）
+				this.x = x + Math.cos(phase) * orbitR;
+				this.y = y + Math.sin(phase) * orbitR;
+				// 初始切向速度（形成圆周旋转，切向 = 径向旋转90°）
+				const tangentSpeed = config.tangentSpeed || 50;
+				this.vx = -Math.sin(phase) * tangentSpeed;
+				this.vy = Math.cos(phase) * tangentSpeed;
+				// 叠加少量随机扩散速度（WE: emitter sphererandom, speed 0-20）
+				const randAngle = Math.random() * Math.PI * 2;
+				const sp =
+					config.speed.min +
+					Math.random() * (config.speed.max - config.speed.min);
+				this.vx += Math.cos(randAngle) * sp;
+				this.vy += Math.sin(randAngle) * sp;
+				// 生命周期（WE: lifetimerandom 1-2.25）
+				this.maxLife =
+					config.particleLife.min +
+					Math.random() *
+						(config.particleLife.max - config.particleLife.min);
+				this.life = this.maxLife;
+				// 尺寸（WE: sizerandom 30-40）
+				this.size =
+					config.size.min +
+					Math.random() * (config.size.max - config.size.min);
+				// 旋转
+				this.rotation = Math.random() * Math.PI * 2;
+				this.rotationSpeed = (Math.random() - 0.5) * 6;
+				// 颜色（WE: colorrandom 255 173 169 → 249 222 255）
+				const t = Math.random();
+				const cmin = config.colorRange.min;
+				const cmax = config.colorRange.max;
+				this.color = [
+					Math.round(cmin[0] + (cmax[0] - cmin[0]) * t),
+					Math.round(cmin[1] + (cmax[1] - cmin[1]) * t),
+					Math.round(cmin[2] + (cmax[2] - cmin[2]) * t),
+				];
+				// 着色纹理：从预渲染缓存中按随机色档位选取
+				this.tintedCanvas =
+					this.tintedCache.length > 0
+						? this.tintedCache[
+								Math.min(
+									this.tintedCache.length - 1,
+									Math.floor(t * this.tintedCache.length),
+								)
+							]
+						: null;
+				// 随机亮度（15%高亮粒子制造闪烁，85%普通粒子）
+				// 加色混合下降低 alpha 避免过曝
+				this.baseAlpha =
+					Math.random() < 0.15 ? 0.5 + Math.random() * 0.2 : 0.15 + Math.random() * 0.2;
+				// 拖尾历史（WE: spritetrail maxlength 1）
+				this.trail = [];
+				this.dead = false;
+			}
+
+			update(dt, mouseX, mouseY) {
+				const cfg = this.config;
+				// 记录拖尾
+				this.trail.push({ x: this.x, y: this.y });
+				const maxTrail = Math.max(0, Math.floor(cfg.trailLength));
+				while (this.trail.length > maxTrail + 1) this.trail.shift();
+
+				// 距鼠标距离（从粒子指向鼠标）
+				const dx = mouseX - this.x;
+				const dy = mouseY - this.y;
+				const dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
+
+				// 近距离排斥（WE: controlpointattract scale -600, threshold 50）
+				// 线性衰减：dist=0 时力最大，dist=threshold 时为 0
+				if (dist < cfg.repel.threshold) {
+					const force =
+						cfg.repel.scale * (1 - dist / cfg.repel.threshold);
+					this.vx += (dx / dist) * force * dt;
+					this.vy += (dy / dist) * force * dt;
+				}
+
+				// 远距离吸引（WE: controlpointattract scale 500, threshold 5000）
+				if (dist < cfg.attract.threshold) {
+					const force =
+						cfg.attract.scale * (1 - dist / cfg.attract.threshold);
+					this.vx += (dx / dist) * force * dt;
+					this.vy += (dy / dist) * force * dt;
+				}
+
+				// 涡旋（WE: vortex distanceinner 0, distanceouter 50, speedinner 300, speedouter 0）
+				// 线性衰减：dist=0 时切向力最大(300)，dist=distanceOuter 时为 0
+				if (dist < cfg.vortex.distanceOuter) {
+					const tx = -dy / dist;
+					const ty = dx / dist;
+					const vortexForce =
+						cfg.vortex.speed * (1 - dist / cfg.vortex.distanceOuter);
+					this.vx += tx * vortexForce * dt;
+					this.vy += ty * vortexForce * dt;
+				}
+
+				// 重力（Canvas Y 向下为正）
+				this.vx += cfg.gravity.x * dt;
+				this.vy += cfg.gravity.y * dt;
+
+				// 阻力（WE: movement drag 1）
+				const dragFactor = Math.max(0, 1 - cfg.drag * dt);
+				this.vx *= dragFactor;
+				this.vy *= dragFactor;
+
+				// 位置积分
+				this.x += this.vx * dt;
+				this.y += this.vy * dt;
+				this.rotation += this.rotationSpeed * dt;
+
+				// 生命衰减
+				this.life -= dt;
+				if (this.life <= 0) this.dead = true;
+			}
+
+			draw(ctx) {
+				// WE: sizechange endtime 0.05 size 0→1, starttime 0.2 后淡出
+				// 按时间而非比例计算
+				const elapsed = this.maxLife - this.life;
+				let alpha = this.baseAlpha;
+				let scale = 1;
+				if (elapsed < 0.05) {
+					// 前 0.05 秒：放大淡入
+					const t = elapsed / 0.05;
+					scale = t;
+					alpha = this.baseAlpha * t;
+				} else if (this.life < 0.2) {
+					// 最后 0.2 秒：淡出
+					alpha = this.baseAlpha * (this.life / 0.2);
+				}
+
+				ctx.save();
+				ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+				// 加色混合（模拟 WE overbright 1.21 发光感）
+				ctx.globalCompositeOperation = "lighter";
+
+				// 拖尾（WE: spritetrail）：用 colorRange 着色
+				if (this.trail.length > 1) {
+					ctx.globalAlpha *= 0.4;
+					ctx.strokeStyle = `rgba(${this.color[0]},${this.color[1]},${this.color[2]},1)`;
+					ctx.lineWidth = this.size * 0.15;
+					ctx.beginPath();
+					ctx.moveTo(this.trail[0].x, this.trail[0].y);
+					for (let i = 1; i < this.trail.length; i++) {
+						ctx.lineTo(this.trail[i].x, this.trail[i].y);
+					}
+					ctx.stroke();
+					ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+				}
+
+				// 花瓣本体：用预渲染的着色纹理（colorrandom × 纹理 multiply）
+				// 按纹理宽高比绘制（this.size 为宽度，高度按比例计算）
+				ctx.translate(this.x, this.y);
+				ctx.rotate(this.rotation);
+				if (this.tintedCanvas) {
+					const aspect = this.tintedCanvas.height / this.tintedCanvas.width;
+					const drawW = this.size * scale;
+					const drawH = drawW * aspect;
+					ctx.drawImage(
+						this.tintedCanvas,
+						-drawW / 2,
+						-drawH / 2,
+						drawW,
+						drawH,
+					);
+				}
+				ctx.restore();
+			}
+		}
+
+		// 环境落花粒子类：复刻 WE particles/huya.json（从屏幕顶部斜向飘落，长寿命，湍流自转）
+		class AmbientPetalParticle {
+			constructor(config, tintedCache) {
+				this.config = config;
+				this.tintedCache = tintedCache || [];
+				// 发射点：屏幕顶部随机 x，略高于屏幕
+				this.x = Math.random() * window.innerWidth;
+				this.y = -50 - Math.random() * 100;
+				// 初始速度（WE: velocityrandom 140-250, 50-90）
+				const vmin = config.velocity.min;
+				const vmax = config.velocity.max;
+				this.vx = vmin[0] + Math.random() * (vmax[0] - vmin[0]);
+				this.vy = vmin[1] + Math.random() * (vmax[1] - vmin[1]);
+				// 生命周期（WE: lifetimerandom 11-16）
+				this.maxLife =
+					config.particleLife.min +
+					Math.random() *
+						(config.particleLife.max - config.particleLife.min);
+				this.life = this.maxLife;
+				// 尺寸（WE: sizerandom 40-80）
+				this.size =
+					config.size.min +
+					Math.random() * (config.size.max - config.size.min);
+				// 旋转（WE: rotationrandom + angularvelocity）
+				this.rotation = Math.random() * Math.PI * 2;
+				const av = config.angularVelocity;
+				this.rotationSpeed = av.min + Math.random() * (av.max - av.min);
+				// 颜色（WE: colorrandom 255 255 255 → 255 192 248）
+				const t = Math.random();
+				const cmin = config.colorRange.min;
+				const cmax = config.colorRange.max;
+				this.color = [
+					Math.round(cmin[0] + (cmax[0] - cmin[0]) * t),
+					Math.round(cmin[1] + (cmax[1] - cmin[1]) * t),
+					Math.round(cmin[2] + (cmax[2] - cmin[2]) * t),
+				];
+				this.tintedCanvas =
+					this.tintedCache.length > 0
+						? this.tintedCache[
+								Math.min(
+									this.tintedCache.length - 1,
+									Math.floor(t * this.tintedCache.length),
+								)
+							]
+						: null;
+				// 湍流相位（WE: turbulentvelocityrandom）
+				this._turbPhase = Math.random() * Math.PI * 2;
+				this.dead = false;
+			}
+
+			update(dt) {
+				const cfg = this.config;
+				// 湍流：基于时间的正弦扰动（近似 turbulentvelocityrandom）
+				this._turbPhase += dt * 2;
+				const turbSpeed =
+					cfg.turbulent.speedMin +
+					Math.random() *
+						(cfg.turbulent.speedMax - cfg.turbulent.speedMin);
+				const turbScale = cfg.turbulent.scale;
+				this.vx += Math.cos(this._turbPhase) * turbScale * turbSpeed * dt;
+				this.vy +=
+					Math.sin(this._turbPhase * 1.3) * turbScale * turbSpeed * dt;
+				// 重力（Canvas 坐标，斜向下方）
+				this.vx += cfg.gravity.x * dt;
+				this.vy += cfg.gravity.y * dt;
+				// 阻力
+				const dragFactor = Math.max(0, 1 - cfg.drag * dt);
+				this.vx *= dragFactor;
+				this.vy *= dragFactor;
+				// 位置积分
+				this.x += this.vx * dt;
+				this.y += this.vy * dt;
+				this.rotation += this.rotationSpeed * dt;
+				// 生命衰减
+				this.life -= dt;
+				if (this.life <= 0) this.dead = true;
+				// 越界销毁（飞出屏幕下方/右方）
+				if (
+					this.y > window.innerHeight + 100 ||
+					this.x > window.innerWidth + 100 ||
+					this.x < -100
+				) {
+					this.dead = true;
+				}
+			}
+
+			draw(ctx) {
+				// alphafade：淡入 + 淡出（WE: fadeintime 0.1, fadeouttime 0.9）
+				const lifeRatio = this.life / this.maxLife;
+				let alpha = 1;
+				const fadeIn = this.config.fadeIn;
+				const elapsed = this.maxLife - this.life;
+				if (elapsed < fadeIn) {
+					alpha = fadeIn > 0 ? elapsed / fadeIn : 1;
+				} else if (lifeRatio < this.config.fadeOut) {
+					alpha = lifeRatio / this.config.fadeOut;
+				}
+				alpha = Math.max(0, Math.min(1, alpha));
+
+				ctx.save();
+				ctx.globalAlpha = alpha;
+				ctx.globalCompositeOperation = "source-over";
+				ctx.translate(this.x, this.y);
+				ctx.rotate(this.rotation);
+				if (this.tintedCanvas) {
+					const aspect = this.tintedCanvas.height / this.tintedCanvas.width;
+					const drawW = this.size;
+					const drawH = drawW * aspect;
+					ctx.drawImage(
+						this.tintedCanvas,
+						-drawW / 2,
+						-drawH / 2,
+						drawW,
+						drawH,
+					);
+				}
+				ctx.restore();
+			}
+		}
+
+		// 管理器
+		class CursorTrailManager {
+			constructor(config) {
+				this.config = config;
+				this.canvas = null;
+				this.ctx = null;
+				this.particles = [];
+				this.mouseX = 0;
+				this.mouseY = 0;
+				this.lastTime = 0;
+				this.animationId = null;
+				this.img = null;
+				this.tintedCache = [];
+				this.ambientParticles = [];
+				this.ambientTintedCache = [];
+				this.isRunning = false;
+				this._emitAccum = 0;
+				this._ambientEmitAccum = 0;
+				this._sequenceCounter = 0;
+			}
+
+			async init() {
+				if (!this.config.enable || this.isRunning) return;
+
+				// 加载花瓣图片
+				this.img = new Image();
+				this.img.src = this.config.imageSrc;
+				await new Promise((resolve, reject) => {
+					if (this.img) {
+						this.img.onload = () => resolve();
+						this.img.onerror = () =>
+							reject(new Error("Failed to load petal image"));
+					}
+				});
+
+				// 预渲染颜色档位缓存：colorrandom 量化为 N 档，multiply 着色纹理
+				this.tintedCache = this.buildTintedCache(this.img);
+				// 环境落花层独立颜色缓存（颜色范围与光标花瓣不同）
+				if (this.config.ambient && this.config.ambient.enable) {
+					this.ambientTintedCache = this.buildTintedCache(
+						this.img,
+						this.config.ambient.colorRange,
+					);
+				}
+
+				this.createCanvas();
+				this.bindEvents();
+				this.lastTime = performance.now();
+				this.startAnimation();
+				this.isRunning = true;
+			}
+
+			buildTintedCache(img, colorRange) {
+				if (!img || !img.complete || img.naturalWidth <= 0) return [];
+				const cr = colorRange || this.config.colorRange;
+				const cache = [];
+				const steps = 8; // 颜色量化档位
+				// 预渲染尺寸 = 纹理原始尺寸（保持宽高比，避免变形）
+				const tw = img.naturalWidth;
+				const th = img.naturalHeight;
+				const cmin = cr.min;
+				const cmax = cr.max;
+				for (let i = 0; i < steps; i++) {
+					const t = steps === 1 ? 0 : i / (steps - 1);
+					const r = Math.round(cmin[0] + (cmax[0] - cmin[0]) * t);
+					const g = Math.round(cmin[1] + (cmax[1] - cmin[1]) * t);
+					const b = Math.round(cmin[2] + (cmax[2] - cmin[2]) * t);
+					const off = document.createElement("canvas");
+					off.width = tw;
+					off.height = th;
+					const octx = off.getContext("2d");
+					// 1. 填充随机色
+					octx.fillStyle = `rgb(${r},${g},${b})`;
+					octx.fillRect(0, 0, tw, th);
+					// 2. multiply 纹理（颜色相乘，模拟 WE genericparticle 着色）
+					octx.globalCompositeOperation = "multiply";
+					octx.drawImage(img, 0, 0, tw, th);
+					// 3. 用纹理 alpha 裁剪花瓣形状
+					octx.globalCompositeOperation = "destination-in";
+					octx.drawImage(img, 0, 0, tw, th);
+					cache.push(off);
+				}
+				return cache;
+			}
+
+			createCanvas() {
+				this.canvas = document.createElement("canvas");
+				this.canvas.width = window.innerWidth;
+				this.canvas.height = window.innerHeight;
+				this.canvas.setAttribute(
+					"style",
+					`position: fixed; left: 0; top: 0; pointer-events: none; z-index: ${this.config.zIndex}; transform: translateZ(0);`,
+				);
+				this.canvas.setAttribute("id", "canvas_cursor_trail");
+				document.body.appendChild(this.canvas);
+				this.ctx = this.canvas.getContext("2d");
+				this._boundHandleResize = this.handleResize.bind(this);
+				window.addEventListener("resize", this._boundHandleResize);
+			}
+
+			bindEvents() {
+				// 鼠标位置（WE: controlpoint flags:1 绑定鼠标）
+				this._boundHandleMouseMove = (e) => {
+					this.mouseX = e.clientX;
+					this.mouseY = e.clientY;
+				};
+				window.addEventListener("mousemove", this._boundHandleMouseMove);
+				// 触摸支持
+				this._boundHandleTouchMove = (e) => {
+					if (e.touches && e.touches[0]) {
+						this.mouseX = e.touches[0].clientX;
+						this.mouseY = e.touches[0].clientY;
+					}
+				};
+				window.addEventListener("touchmove", this._boundHandleTouchMove, {
+					passive: true,
+				});
+			}
+
+			handleResize() {
+				if (this.canvas) {
+					this.canvas.width = window.innerWidth;
+					this.canvas.height = window.innerHeight;
+				}
+			}
+
+			emit(dt) {
+				// 球形随机发射（WE: emitter sphererandom rate 100/秒）
+				const rate = this.config.emitRate;
+				this._emitAccum += rate * dt;
+				while (this._emitAccum >= 1) {
+					if (this.particles.length < this.config.maxParticles) {
+						this.particles.push(
+							new PetalParticle(
+								this.mouseX,
+								this.mouseY,
+								this.config,
+								this.tintedCache,
+								this._sequenceCounter,
+							),
+						);
+						this._sequenceCounter++;
+					}
+					this._emitAccum -= 1;
+				}
+			}
+
+			emitAmbient(dt) {
+				// 环境落花层发射（WE: huya rate 20/秒）
+				const amb = this.config.ambient;
+				if (!amb || !amb.enable) return;
+				this._ambientEmitAccum += amb.emitRate * dt;
+				while (this._ambientEmitAccum >= 1) {
+					if (this.ambientParticles.length < amb.maxParticles) {
+						this.ambientParticles.push(
+							new AmbientPetalParticle(amb, this.ambientTintedCache),
+						);
+					}
+					this._ambientEmitAccum -= 1;
+				}
+			}
+
+			startAnimation() {
+				const animate = (now) => {
+					if (!this.ctx || !this.canvas) return;
+					const dt = Math.min(0.05, (now - this.lastTime) / 1000);
+					this.lastTime = now;
+
+					// 清屏
+					this.ctx.clearRect(
+						0,
+						0,
+						this.canvas.width,
+						this.canvas.height,
+					);
+
+						// 发射新粒子（光标花瓣 + 环境落花）
+					this.emit(dt);
+					this.emitAmbient(dt);
+
+					// 更新并绘制：光标花瓣
+					for (let i = this.particles.length - 1; i >= 0; i--) {
+						const p = this.particles[i];
+						p.update(dt, this.mouseX, this.mouseY);
+						if (p.dead) {
+							this.particles.splice(i, 1);
+						} else {
+							p.draw(this.ctx);
+						}
+					}
+
+					// 更新并绘制：环境落花
+					for (let i = this.ambientParticles.length - 1; i >= 0; i--) {
+						const p = this.ambientParticles[i];
+						p.update(dt);
+						if (p.dead) {
+							this.ambientParticles.splice(i, 1);
+						} else {
+							p.draw(this.ctx);
+						}
+					}
+
+					this.animationId = requestAnimationFrame(animate);
+				};
+				this.animationId = requestAnimationFrame(animate);
+			}
+
+			stop() {
+				if (this.animationId) {
+					cancelAnimationFrame(this.animationId);
+					this.animationId = null;
+				}
+				if (this._boundHandleMouseMove) {
+					window.removeEventListener("mousemove", this._boundHandleMouseMove);
+					this._boundHandleMouseMove = null;
+				}
+				if (this._boundHandleTouchMove) {
+					window.removeEventListener("touchmove", this._boundHandleTouchMove);
+					this._boundHandleTouchMove = null;
+				}
+				if (this._boundHandleResize) {
+					window.removeEventListener("resize", this._boundHandleResize);
+					this._boundHandleResize = null;
+				}
+				if (this.canvas) {
+					document.body.removeChild(this.canvas);
+					this.canvas = null;
+				}
+				this.particles = [];
+				this.ambientParticles = [];
+				this.isRunning = false;
+			}
+
+			updateConfig(newConfig) {
+				const wasRunning = this.isRunning;
+				if (wasRunning) this.stop();
+				this.config = newConfig;
+				if (wasRunning && newConfig.enable) this.init();
+			}
+
+			getIsRunning() {
+				return this.isRunning;
+			}
+		}
+
+		// 全局实例
+		let globalManager = null;
+		window.cursorTrailManager = null;
+
+		function initCursorTrail(config) {
+			if (globalManager) {
+				globalManager.updateConfig(config);
+			} else {
+				globalManager = new CursorTrailManager(config);
+				window.cursorTrailManager = globalManager;
+				if (config.enable) globalManager.init();
+			}
+		}
+
+		// 初始化
+		function setup() {
+			if (window.__fireflyCursorTrailInitialized) return;
+			window.__fireflyCursorTrailInitialized = true;
+
+			// 尊重 prefers-reduced-motion
+			if (
+				window.matchMedia &&
+				window.matchMedia("(prefers-reduced-motion: reduce)").matches
+			) {
+				return;
+			}
+
+			var stored = localStorage.getItem("cursorTrailEnabled");
+			var isEnabled =
+				stored !== null ? stored === "true" : cursorTrailConfig.enable;
+			var cfg = Object.assign({}, cursorTrailConfig, {
+				enable: isEnabled,
+			});
+			initCursorTrail(cfg);
+		}
+
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", setup);
+		} else {
+			setup();
+		}
+
+		// 监听设置面板切换事件
+		window.addEventListener("cursorTrailToggle", function (e) {
+			var enabled = e.detail.enabled;
+			var mgr = window.cursorTrailManager;
+			if (!mgr) return;
+			if (enabled && !mgr.getIsRunning()) {
+				mgr.config.enable = true;
+				mgr.init();
+			} else if (!enabled && mgr.getIsRunning()) {
+				mgr.stop();
+			}
+		});
+	})();
+</script>

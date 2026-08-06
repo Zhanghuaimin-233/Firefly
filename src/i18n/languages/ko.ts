@@ -276,6 +276,7 @@ export const ko: Translation = {
 	[Key.gradientTransition]: "그라디언트 전환",
 	[Key.sakuraEffect]: "벚꽃 효과",
 	[Key.customCursor]: "커스텀 커서",
+	[Key.cursorTrail]: "커서 트레일",
 	[Key.effectsSettings]: "효과 설정",
 	[Key.overlaySettings]: "투명도 설정",
 	[Key.overlayOpacity]: "배경화면 불투명도",

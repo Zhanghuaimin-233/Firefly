@@ -188,7 +188,7 @@ src/
 │   ├── backgroundWallpaper.ts    # Background wallpaper configuration
 │   ├── commentConfig.ts          # Comment system configuration
 │   ├── coverImageConfig.ts       # Cover image configuration
-│   ├── effectsConfig.ts          # Animation effects config (sakura, etc.)
+│   ├── effectsConfig.ts          # Animation effects config (sakura, cursor trail, etc.)
 │   ├── cursorConfig.ts           # Custom cursor configuration
 │   ├── expressiveCodeConfig.ts   # Code highlighting configuration
 │   ├── fontConfig.ts             # Font configuration
