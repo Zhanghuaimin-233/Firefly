@@ -1017,57 +1017,59 @@ $effect(() => {
 					</div>
 				</button>
 			</div>
-			{#if isSakuraSwitchable}
-			<button
-				class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
-				class:bg-(--btn-regular-bg-hover)={sakuraEnabled}
-				onclick={toggleSakuraEnabled}
-			>
-				<Icon icon="mdi:flower-poppy" class="text-[1.25rem] shrink-0"></Icon>
-				<span class="text-sm flex-1">{i18n(I18nKey.sakuraEffect)}</span>
-				<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
-					 class:bg-(--primary)={sakuraEnabled}
-					 class:bg-(--btn-regular-bg-active)={!sakuraEnabled}>
-					<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
-						 class:left-0.5={!sakuraEnabled}
-						 class:left-5={sakuraEnabled}></div>
-				</div>
-			</button>
-			{/if}
-			{#if isCursorSwitchable}
-			<button
-				class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
-				class:bg-(--btn-regular-bg-hover)={cursorEnabled}
-				onclick={toggleCursorEnabled}
-			>
-				<Icon icon="mdi:cursor-default" class="text-[1.25rem] shrink-0"></Icon>
-				<span class="text-sm flex-1">{i18n(I18nKey.customCursor)}</span>
-				<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
-					 class:bg-(--primary)={cursorEnabled}
-					 class:bg-(--btn-regular-bg-active)={!cursorEnabled}>
-					<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
-						 class:left-0.5={!cursorEnabled}
-						 class:left-5={cursorEnabled}></div>
-				</div>
-			</button>
-			{/if}
-			{#if isCursorTrailSwitchable}
-			<button
-				class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
-				class:bg-(--btn-regular-bg-hover)={cursorTrailEnabled}
-				onclick={toggleCursorTrailEnabled}
-			>
-				<Icon icon="mdi:cursor-default-click-outline" class="text-[1.25rem] shrink-0"></Icon>
-				<span class="text-sm flex-1">{i18n(I18nKey.cursorTrail)}</span>
-				<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
-					 class:bg-(--primary)={cursorTrailEnabled}
-					 class:bg-(--btn-regular-bg-active)={!cursorTrailEnabled}>
-					<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
-						 class:left-0.5={!cursorTrailEnabled}
-						 class:left-5={cursorTrailEnabled}></div>
-				</div>
-			</button>
-			{/if}
+			<div class="space-y-1">
+				{#if isSakuraSwitchable}
+				<button
+					class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+					class:bg-(--btn-regular-bg-hover)={sakuraEnabled}
+					onclick={toggleSakuraEnabled}
+				>
+					<Icon icon="mdi:flower-poppy" class="text-[1.25rem] shrink-0"></Icon>
+					<span class="text-sm flex-1">{i18n(I18nKey.sakuraEffect)}</span>
+					<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+						 class:bg-(--primary)={sakuraEnabled}
+						 class:bg-(--btn-regular-bg-active)={!sakuraEnabled}>
+						<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+							 class:left-0.5={!sakuraEnabled}
+							 class:left-5={sakuraEnabled}></div>
+					</div>
+				</button>
+				{/if}
+				{#if isCursorSwitchable}
+				<button
+					class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+					class:bg-(--btn-regular-bg-hover)={cursorEnabled}
+					onclick={toggleCursorEnabled}
+				>
+					<Icon icon="mdi:cursor-default" class="text-[1.25rem] shrink-0"></Icon>
+					<span class="text-sm flex-1">{i18n(I18nKey.customCursor)}</span>
+					<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+						 class:bg-(--primary)={cursorEnabled}
+						 class:bg-(--btn-regular-bg-active)={!cursorEnabled}>
+						<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+							 class:left-0.5={!cursorEnabled}
+							 class:left-5={cursorEnabled}></div>
+					</div>
+				</button>
+				{/if}
+				{#if isCursorTrailSwitchable}
+				<button
+					class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+					class:bg-(--btn-regular-bg-hover)={cursorTrailEnabled}
+					onclick={toggleCursorTrailEnabled}
+				>
+					<Icon icon="mdi:cursor-default-click-outline" class="text-[1.25rem] shrink-0"></Icon>
+					<span class="text-sm flex-1">{i18n(I18nKey.cursorTrail)}</span>
+					<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+						 class:bg-(--primary)={cursorTrailEnabled}
+						 class:bg-(--btn-regular-bg-active)={!cursorTrailEnabled}>
+						<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+							 class:left-0.5={!cursorTrailEnabled}
+							 class:left-5={cursorTrailEnabled}></div>
+					</div>
+				</button>
+				{/if}
+			</div>
 		</div>
 		{/if}
 	{/if}
