@@ -51,9 +51,9 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// Favicon 配置
-	// 使用 PNG 多尺寸确保浏览器标签页全局稳定显示樱花图标
-	// （之前用 SVG <text>🌸</text> 依赖系统 emoji 字体，在浏览器 favicon 场景下渲染不稳定，
-	//  仅在首页偶发成功，其他页面会回退到默认/旧版图标）
+	// 使用 PNG 多尺寸（源自用户提供的 🌸.png），所有浏览器全局稳定显示樱花图标。
+	// 不用 emoji 渲染也不用 SVG：emoji SVG 在浏览器 favicon 场景字体渲染不稳定，
+	// SVG favicon 又不被 Safari 等浏览器支持；PNG 是最通用的 favicon 格式。
 	// 如果启用了 OpenGraph 图片功能，数组中需要包含 png 格式的 favicon 图标
 	favicon: [
 		{
