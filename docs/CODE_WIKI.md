@@ -1,8 +1,8 @@
 # Firefly 项目 Code Wiki
 
-> **文档版本**：v1.1 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
+> **文档版本**：v1.2 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
 >
-> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步）
+> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步），2026-08-06（v1.2 新增看板娘多模型架构）
 >
 > **适用对象**：维护本仓库的开发者、AI Agent、二次贡献者
 
@@ -436,6 +436,131 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 同自定义光标系统：`setting-utils.ts` 只负责 localStorage 读写与事件派发，`CursorTrail.astro` 负责监听事件与 Canvas 动画循环。SSR 阶段不会因 `document` / `localStorage` 缺失而崩溃。
 
+### 4.10 看板娘系统（SpineModel.astro + pioConfig.ts）
+
+基于 [Spine Web Player](https://esotericsoftware.com/spine-player) 4.2 的多模型看板娘，支持前端设置面板实时切换模型与开关，配置驱动，新增模型只需改 `pioConfig.ts`。
+
+#### 配置入口
+
+[pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/pioConfig.ts) 的 `spineModelConfig`：
+
+```ts
+export const spineModelConfig: SpineModelConfig = {
+  enable: true,                  // 总开关默认值（前端面板可覆盖）
+  models: [                      // 可切换模型列表（模板化：追加 entry 即新增模型）
+    {
+      key: "105913",             // 唯一标识，存入 localStorage.pioModel
+      name: "立绘",               // 前端按钮显示名（i18n 文案外的本地名）
+      model: {
+        path: "/pio/models/spine/105913/105913.json",
+        scale: 0.24,
+        skin: "normal",          // 立绘类模型眼嘴贴图在命名皮肤里，不指定只显示 base
+        premultipliedAlpha: true,// Spine 3.6 默认预乘 alpha，配 false 半透明区会变灰
+        viewportPadding: { left: 0, right: 0, top: 0, bottom: 0 }, // 全 0 贴底
+      },
+      size: { width: 150, height: 245 },
+      position: { corner: "bottom-left", offsetX: 0, offsetY: 0 },
+      interactive: {
+        enabled: true,
+        clickAnimations: ["mouth_talk", "eye_blink"],
+        clickMessages: ["你好呀！", ...],  // 该模型专属台词
+        messageDisplayTime: 3000,
+        idleAnimations: ["eye_idle"],      // 该模型专属待机
+        idleInterval: 8000,
+      },
+    },
+    // ...其他模型 entry
+  ],
+  defaultModel: "105913",        // 无 localStorage 时默认激活的 key
+  // 单模型字段（models 为空时回退使用，向后兼容）
+  model: { path: "...", scale: 0.24, ... },
+  position: { corner: "bottom-left", offsetX: 0, offsetY: 0 },
+  size: { width: 150, height: 245 },
+  interactive: { enabled: true, ... },
+  responsive: { hideOnMobile: true, mobileBreakpoint: 768 },
+};
+```
+
+类型定义在 [types/pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/types/pioConfig.ts) 的 `SpineModelConfig` / `SpineModelEntry`。每个 entry 字段独立，模型间互不干扰。
+
+#### 多模型架构
+
+[SpineModel.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/SpineModel.astro) 的 `getActiveModelConfig()` 按以下优先级解析当前激活模型：
+
+1. 读 `localStorage.pioModel` 获取 key
+2. key 为空时回退 `spineModelConfig.defaultModel`
+3. 在 `modelsWithURL` 中按 key 查找 entry，找不到回退 `models[0]`
+4. entry 字段为空时回退全局 `spineModelConfig.model.*` / `position.*` / `size.*` / `interactive.*`
+5. `models` 列表为空时整体回退单模型字段（向后兼容旧配置）
+
+返回的 `mc` 对象在运行时统一驱动容器尺寸、位置、SpinePlayer 创建、皮肤设置、点击/待机动画与消息显示，组件代码无任何模型特定硬编码（`"idle"` 仅作 Spine 行业惯例的兜底默认动画名）。
+
+#### viewportPadding 与贴底显示
+
+SpinePlayer 默认 `padLeft/Right/Top/Bottom: "10%"`，会在 canvas 四周留 10% 内边距。半身立绘类模型（如 105913）腿部截断，需要贴窗口底部显示时，通过 `viewportPadding: { left: 0, right: 0, top: 0, bottom: 0 }` 让 skeleton 贴 canvas 边。完整角色形象（如 firefly）不配 `viewportPadding`，保留 SpinePlayer 默认 10% 与底部的间距。
+
+[SpineModel.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/SpineModel.astro) 构造 SpinePlayer 时：
+
+```js
+const pad = mc.viewportPadding;
+const viewportCfg = pad
+  ? { padLeft: pad.left ?? "10%", padRight: pad.right ?? "10%",
+      padTop: pad.top ?? "10%", padBottom: pad.bottom ?? "10%" }
+  : undefined;  // 不传则用 SpinePlayer 默认 10%
+
+new window.spine.SpinePlayer("spine-player-container", {
+  skeleton: mc.path,
+  atlas: mc.atlas,           // 由 path 替换 .json→.atlas 推导
+  animation: mc.interactive?.idleAnimations?.[0] || "idle",
+  premultipliedAlpha: mc.premultipliedAlpha,
+  ...(viewportCfg ? { viewport: viewportCfg } : {}),
+  success: (player) => { /* ... */ },
+});
+```
+
+#### 应用机制
+
+由 [SpineModel.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/SpineModel.astro) 在 [MainGridLayout.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/MainGridLayout.astro) 中挂载。核心流程：
+
+1. frontmatter 预处理 `modelsWithURL`，把 `path` 转 URL 供运行时使用
+2. `initSpineModel()` 读 `localStorage.pioEnabled`，false 时隐藏容器直接返回
+3. 调 `getActiveModelConfig()` 取 `mc`，`applyContainerStyle(mc)` 应用容器尺寸/位置
+4. `cleanupSpineModel()` 清理旧实例 → `loadSpineCSS()` → 加载 Spine Web Player 运行时（CDN 失败回退本地 `/pio/static/spine-player.min.js`）
+5. 创建 `new window.spine.SpinePlayer(...)`，`success` 回调中：
+   - 构建 `availableAnimations` Set，过滤配置中不存在的动画名（避免 `loadSkeleton` 报错）
+   - 显式 `setSkinByName(mc.skin)`（立绘类模型眼嘴贴图在命名皮肤里）
+   - 绑定 canvas click：随机 `clickAnimations` + 随机 `clickMessages`（两者独立随机，未绑定对应关系）
+   - 启动 `idleInterval` 待机动画循环（至少两个有效待机动画时启用）
+6. `window.spineModelInitialized` 全局标记防重复初始化
+7. `window.spinePlayerInstance` 保存实例引用供 dispose 与调试
+
+#### 前端设置面板
+
+[DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 的独立「看板娘」选项卡（`mdi:cat` 图标），仅当 `isPioSwitchable = (spineModelConfig.models.length > 0) && spineModelConfig.enable` 为 true 时显示。选项卡内容：
+
+- 看板娘开关（`localStorage.pioEnabled`，派发 `pioToggle` 事件）
+- 模型选择按钮组（遍历 `spineModelConfig.models`，点击 `setPioModel(model.key)` 派发 `pioModelChange` 事件）
+- 恢复默认按钮（同时重置开关与模型到 `defaultPioEnabled` / `defaultPioModel`）
+
+#### 事件流
+
+| 用户操作 | setting-utils 函数 | 派发事件 | SpineModel.astro 响应 |
+|---------|-------------------|---------|----------------------|
+| 切换开关 | `setPioEnabled(bool)` | `pioToggle` | 开启 → `initSpineModel()`；关闭 → `cleanupSpineModel()` + 隐藏容器 |
+| 切换模型 | `setPioModel(key)` | `pioModelChange` | `cleanupSpineModel()` → `initSpineModel()`（读新 key 重建） |
+
+#### 新增模型步骤（模板化）
+
+1. 将 Spine 资源（`.json` / `.atlas` / `.png`）放入 `public/pio/models/spine/<key>/`
+2. 在 `spineModelConfig.models` 数组追加一个 `SpineModelEntry`，填 `key` / `name` / `model.path` / `scale` / `skin` / `premultipliedAlpha` / `viewportPadding` / `size` / `position` / `interactive`
+3. 无需改任何组件代码——前端按钮组会自动遍历 `models` 显示，`getActiveModelConfig()` 会按 key 解析
+
+#### 已知限制
+
+- 点击动画与点击消息是**独立随机**，未绑定对应关系（如「你好呀！」不一定配 `mouth_talk`）。需要绑定需扩展 schema（`clickEvents: [{message, animation}]`），见会话历史讨论
+- 某些 emoji 动画可能不适合做待机（如流萤的某个 emoji 会有雾气包裹脸部的视觉），从 `idleAnimations` 中移除该动画名即可（仅改 pioConfig.ts 一行）
+- `SpineModel.astro` frontmatter 的 `spineModelConfig.model.*` 引用是构建单模型回退路径，运行时优先使用 `models` 列表，不可删除
+
 ---
 
 ## 5. 主要模块职责
@@ -464,7 +589,7 @@ export const cursorTrailConfig: CursorTrailConfig = {
 | [friendsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/friendsConfig.ts) | `friendsPageConfig`, `getEnabledFriends()` | 友链页配置 |
 | [galleryConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/galleryConfig.ts) | `galleryConfig` | 相册页配置 |
 | [sponsorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/sponsorConfig.ts) | `sponsorConfig` | 打赏页配置 |
-| [pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/pioConfig.ts) | `live2dWidgetConfig`, `spineModelConfig` | Live2D / Spine 看板娘 |
+| [pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/pioConfig.ts) | `live2dWidgetConfig`, `spineModelConfig` | Live2D 看板娘；Spine 看板娘（多模型 + 前端切换，详见 §4.10） |
 | [mermaidConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/mermaidConfig.ts) | `mermaidConfig` | Mermaid 主题 |
 | [plantumlConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/plantumlConfig.ts) | `plantumlConfig` | PlantUML 服务器、主题 |
 | [analyticsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/analyticsConfig.ts) | `analyticsConfig` | Google / Microsoft Clarity / Umami / La51 统计 |
@@ -585,6 +710,7 @@ export const cursorTrailConfig: CursorTrailConfig = {
 - **Banner**：`getDefaultBannerTitleEnabled` / `getStoredBannerTitleEnabled` / `setBannerTitleEnabled` / `applyBannerTitleEnabledToDocument` / `getDefaultBannerCarouselEnabled` / `getStoredBannerCarouselEnabled` / `setBannerCarouselEnabled` / `applyBannerCarouselEnabledToDocument`
 - **Cursor**：`getDefaultCursorEnabled` / `getStoredCursorEnabled` / `setCursorEnabled`（无 `applyCursorEnabledToDocument`，DOM 应用由 `CustomCursor.astro` 监听 `cursorToggle` 事件完成；`setCursorEnabled` 派发事件时同步写入 `documentElement.dataset.cursorEnabled`）
 - **CursorTrail**：`getDefaultCursorTrailEnabled` / `getStoredCursorTrailEnabled` / `setCursorTrailEnabled`（同 Cursor 模式，DOM 应用由 `CursorTrail.astro` 监听 `cursorTrailToggle` 事件完成）
+- **PIO（Spine 看板娘）**：`getDefaultPioEnabled` / `getStoredPioEnabled` / `setPioEnabled`（开关，派发 `pioToggle` 事件，由 `SpineModel.astro` 监听启停）/ `getDefaultPioModel` / `getStoredPioModel`（校验 stored key 是否仍在 `spineModelConfig.models` 列表内，否则回退默认）/ `setPioModel`（派发 `pioModelChange` 事件，由 `SpineModel.astro` 监听重建模型）
 
 #### 两端通用
 
@@ -882,6 +1008,8 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 | `bannerCarouselChange` | 设置面板 | 壁纸轮播脚本 |
 | `cursorToggle` | `setting-utils.ts#setCursorEnabled` | `CustomCursor.astro`（启停光标样式注入） |
 | `cursorTrailToggle` | `setting-utils.ts#setCursorTrailEnabled` | `CursorTrail.astro`（启停粒子动画循环） |
+| `pioToggle` | `setting-utils.ts#setPioEnabled` | `SpineModel.astro`（启停看板娘：开启时 `initSpineModel()`，关闭时 `cleanupSpineModel()` + 隐藏容器） |
+| `pioModelChange` | `setting-utils.ts#setPioModel` | `SpineModel.astro`（`cleanupSpineModel()` → `initSpineModel()` 重建模型实例） |
 | `firefly:page:loaded` | `Layout.astro`（评论容器存在时） | 评论系统初始化 |
 
 ---
@@ -1042,6 +1170,10 @@ pagefind --site dist                # 4. Pagefind 全文搜索索引
 - **自定义光标切页后失效**：检查 `CustomCursor.astro` 的三重 Swup 监听器是否齐全（`swup:contentReplaced` / `swup:content:replace` / `swup:enable` + `window.swup.hooks.on('content:replace')`），以及 `localStorage.cursorEnabled` 是否被正确读取
 - **自定义光标/光标尾迹开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 或修改图标名后，必须从 `node_modules/@iconify-json/<prefix>/icons.json` 提取对应图标的 `body` 字段，追加到 [icons-data.json](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons-data.json) 对应集合的 `icons` 对象中，否则运行时 `iconExists()` 返回 false 显示占位灰圈
 - **自定义光标对右键菜单无效**：浏览器系统级 UI 限制，CSS `cursor: url()` 无法覆盖右键菜单、滚动条、原生表单下拉等，非 Bug
+- **看板娘选项卡不显示**：检查 `spineModelConfig.models.length > 0` 且 `spineModelConfig.enable === true`，两者皆满足时 `isPioSwitchable` 才为 true，否则「看板娘」tab 不出现在设置面板
+- **看板娘图标（mdi:cat）显示灰圈**：在 DisplaySettingsIntegrated.svelte 中新增 `icon="mdi:cat"` 后，必须从 `node_modules/@iconify-json/mdi/icons.json` 提取 `cat` 图标的 `body` 字段，追加到 [icons-data.json](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons-data.json) 的 `mdi.icons` 对象中
+- **看板娘模型底部有间隙**：半身立绘类模型需在 entry.model 配置 `viewportPadding: { left: 0, right: 0, top: 0, bottom: 0 }` 贴底；完整角色形象不配则保留 SpinePlayer 默认 10% 间距
+- **看板娘脸颊/半透明区变灰**：Spine 3.6 资源默认预乘 alpha，需在 entry.model 配 `premultipliedAlpha: true`
 
 ---
 
@@ -1071,8 +1203,10 @@ pagefind --site dist                # 4. Pagefind 全文搜索索引
 - [src/components/features/EncryptedPost.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/EncryptedPost.astro) —— 加密文章容器
 - [src/components/features/CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) —— 自定义光标注入（详见 §4.8 / §6.7）
 - [src/components/features/CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) —— 光标尾迹粒子特效（详见 §4.9 / §6.8）
+- [src/components/features/SpineModel.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/SpineModel.astro) —— Spine 看板娘渲染（多模型 + 前端切换，详见 §4.10）
 - [src/config/cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) —— 自定义光标配置
 - [src/config/effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) —— 樱花飘落 + 光标尾迹特效配置
+- [src/config/pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/pioConfig.ts) —— Spine / Live2D 看板娘配置（多模型架构）
 - [src/components/comment/index.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/comment/index.astro) —— 评论系统路由
 
 ### 官方资源
