@@ -51,11 +51,30 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// Favicon 配置
-	// 如果启用了OpenGraph图片功能，数组中需要包含png格式的favicon图标
+	// 使用 PNG 多尺寸确保浏览器标签页全局稳定显示樱花图标
+	// （之前用 SVG <text>🌸</text> 依赖系统 emoji 字体，在浏览器 favicon 场景下渲染不稳定，
+	//  仅在首页偶发成功，其他页面会回退到默认/旧版图标）
+	// 如果启用了 OpenGraph 图片功能，数组中需要包含 png 格式的 favicon 图标
 	favicon: [
 		{
-			// 图标文件路径（SVG 矢量花朵 emoji 🌸）
-			src: "/favicon/flower.svg",
+			src: "/favicon/flower-32.png",
+			sizes: "32x32",
+			type: "image/png",
+		},
+		{
+			src: "/favicon/flower-128.png",
+			sizes: "128x128",
+			type: "image/png",
+		},
+		{
+			src: "/favicon/flower-180.png",
+			sizes: "180x180",
+			type: "image/png",
+		},
+		{
+			src: "/favicon/flower-192.png",
+			sizes: "192x192",
+			type: "image/png",
 		},
 	],
 
