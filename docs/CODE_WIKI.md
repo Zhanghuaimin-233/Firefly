@@ -1,8 +1,8 @@
 # Firefly 项目 Code Wiki
 
-> **文档版本**：v1.0 · 基于 Firefly `6.13.10`（Astro 7.0.7 / Svelte 5.56 / TypeScript 6.0）
+> **文档版本**：v1.1 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
 >
-> **生成时间**：2026-07-16
+> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步）
 >
 > **适用对象**：维护本仓库的开发者、AI Agent、二次贡献者
 
@@ -71,13 +71,14 @@
 
 | 类别 | 技术 | 版本约束 |
 |------|------|---------|
-| 框架 | Astro | `7.0.7` |
-| UI 交互 | Svelte | `5.56.4` |
-| 样式 | Tailwind CSS v4 | `^4.3.2` |
+| 框架 | Astro | `7.1.3` |
+| UI 交互 | Svelte | `^5.56.7` |
+| 样式 | Tailwind CSS v4 | `^4.3.3` |
 | 语言 | TypeScript | `^6.0.3` |
 | 包管理 | pnpm | `9.14.4`（`preinstall` 强制） |
 | 运行时 | Node.js | `>= 22` |
-| Linter/Formatter | Biome | `2.5.2` |
+| Linter/Formatter | Biome | `2.5.5` |
+| 图标系统 | @iconify/svelte 离线模式 | `^2.3.0` |
 | 页面过渡 | Swup（`@swup/astro`） | `^1.8.0` |
 | 搜索 | Pagefind | `^1.5.2` |
 | 图像处理 | sharp | `^0.35.3` |
@@ -91,7 +92,7 @@
 - **Markdown 处理**：`remark-math`、`remark-directive`、`remark-sectionize`、`rehype-katex`、`rehype-slug`、`rehype-autolink-headings`、`rehype-callouts`、`rehype-components`
 - **特色功能**：`katex`、`qrcode`、`satori`（OG 图生成）、`pako`（PlantUML 编码）、`l2d-widget`、`@fancyapps/ui`（Fancybox 灯箱）、`sanitize-html`
 
-完整清单见 [package.json](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/package.json)。
+完整清单见 [package.json](file:///e:/Dev/Projects/Firefly-trae-custom/package.json)。
 
 ---
 
@@ -111,8 +112,8 @@ Firefly/
 │   ├── assets/images/            # 受 Astro 优化的源图（壁纸、头像、封面）
 │   ├── components/               # 按领域分组的组件（详见 §5.2）
 │   ├── config/                   # 所有功能开关配置（详见 §5.1）
-│   ├── constants/                # 构建期生成的常量（icons.ts / lqips.json）
-│   ├── content/                  # 内容集合源（posts / spec）
+│   ├── constants/                # 构建期生成的常量（icons-data.json / lqips.json）
+│   ├── content/                  # 内容集合源（posts / spec / dynamic）
 │   ├── i18n/                     # 国际化键与翻译
 │   ├── layouts/                  # 基础布局（Layout / MainGridLayout）
 │   ├── pages/                    # Astro 文件路由（详见 §5.3）
@@ -143,7 +144,7 @@ Firefly 采用 **Astro Islands 架构**：
 
 - `.astro` 组件 → 默认在服务端渲染，输出零 JS 的静态 HTML
 - `.svelte` 组件 → 通过 `client:load` / `client:visible` 指令水合，仅承担必要的交互（搜索、分页、设置面板、TOC、追番、相册网格等）
-- **Swup.js** 在客户端接管页面切换，按"容器"局部替换 DOM，提供 SPA 体验。Swup 配置的容器列表见 [astro.config.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/astro.config.mjs#L96-L123)：
+- **Swup.js** 在客户端接管页面切换，按"容器"局部替换 DOM，提供 SPA 体验。Swup 配置的容器列表见 [astro.config.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/astro.config.mjs#L96-L123)：
   - `#banner-overlay-container`、`#banner-dim-container`
   - `#swup-container`（主内容）
   - `#left-sidebar-dynamic`、`#right-sidebar-dynamic`
@@ -151,13 +152,13 @@ Firefly 采用 **Astro Islands 架构**：
 
 ### 4.2 配置驱动体系
 
-所有功能模块由 `src/config/*.ts` 控制，通过 [src/config/index.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/index.ts) 统一 barrel 导出。组件应从 `@/config` 而非具体文件导入，以减少 import 语句数。
+所有功能模块由 `src/config/*.ts` 控制，通过 [src/config/index.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/index.ts) 统一 barrel 导出。组件应从 `@/config` 而非具体文件导入，以减少 import 语句数。
 
 `astro.config.mjs` 在构建期读取这些配置（`siteConfig`、`fontConfig`、`expressiveCodeConfig`、`mermaidConfig`、`plantumlConfig`）传入 Astro 集成。**修改这些配置后必须重启 dev server**。
 
 ### 4.3 布局系统
 
-布局分两层，详见 [src/layouts/](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/layouts/)：
+布局分两层，详见 [src/layouts/](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/)：
 
 ```
 Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analytics / Swup hooks 注册
@@ -191,7 +192,7 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 
 ### 4.4 内容集合
 
-定义于 [src/content.config.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/content.config.ts)：
+定义于 [src/content.config.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/content.config.ts)：
 
 | 集合 | 加载路径 | Schema 概要 |
 |------|---------|------------|
@@ -224,9 +225,9 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 
 ### 4.6 i18n 国际化
 
-- **键定义**：[src/i18n/i18nKey.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/i18n/i18nKey.ts) 一个 `enum I18nKey`，新增 UI 文案时需在此扩展
-- **语言文件**：[src/i18n/languages/](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/i18n/languages/) 下 `en.ts` / `zh_CN.ts` / `zh_TW.ts` / `ja.ts` / `ru.ts` / `ko.ts`
-- **查找函数**：[src/i18n/translation.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/i18n/translation.ts) 的 `i18n(key: I18nKey): string`
+- **键定义**：[src/i18n/i18nKey.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/i18n/i18nKey.ts) 一个 `enum I18nKey`，新增 UI 文案时需在此扩展
+- **语言文件**：[src/i18n/languages/](file:///e:/Dev/Projects/Firefly-trae-custom/src/i18n/languages/) 下 `en.ts` / `zh_CN.ts` / `zh_TW.ts` / `ja.ts` / `ru.ts` / `ko.ts`
+- **查找函数**：[src/i18n/translation.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/i18n/translation.ts) 的 `i18n(key: I18nKey): string`
   - 默认语言为 `en`（兜底）
   - 当前语言缺失时回退到 `zh_CN`，再回退到 `en`
   - 别名映射：`en_us` → `en`，`zh_cn` → `zh_CN` 等
@@ -236,7 +237,7 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 
 ### 4.7 Markdown 处理管线
 
-Astro markdown processor（unified）的插件链见 [astro.config.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/astro.config.mjs#L229-L291)。完整插件职责见 §5.4。
+Astro markdown processor（unified）的插件链见 [astro.config.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/astro.config.mjs#L229-L291)。完整插件职责见 §5.4。
 
 ```
 remark 阶段（MDAST）
@@ -348,7 +349,7 @@ I18nKey 枚举 `customCursor`（[i18nKey.ts](file:///e:/Dev/Projects/Firefly-tra
 | ko | 커스텀 커서 |
 | ru | Кастомный курсор |
 
-设置面板图标使用 `mdi:cursor-default`（[Icon.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/common/Icon.svelte) 预构建内联 SVG），新增图标需运行 `pnpm icons` 重新生成 [icons.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons.ts)。
+设置面板图标使用 `mdi:cursor-default`（[Icon.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/common/Icon.svelte) 通过 `@iconify/svelte` 离线模式加载），新增图标需手动从 `@iconify-json/*` 包提取 SVG body 追加到 [icons-data.json](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons-data.json)。
 
 #### 已知限制
 
@@ -445,29 +446,29 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 | 配置文件 | 导出名 | 控制内容 |
 |---------|-------|---------|
-| [siteConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/siteConfig.ts) | `siteConfig` | 站点标题/URL/描述/关键词、主题色、页面宽度、favicon、navbar、页面开关（friends/sponsor/guestbook/bangumi/gallery/anime）、文章列表布局、文章页配置、bangumi、anime、分页、图像优化、语言 |
-| [navBarConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/navBarConfig.ts) | `navBarConfig`, `navBarSearchConfig` | 导航栏链接（含子菜单）与搜索配置 |
-| [sidebarConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/sidebarConfig.ts) | `sidebarLayoutConfig` | 侧边栏开关、position（left/right/both）、tabletSidebar、hideSidebarOnPostPage、showBothSidebarsOnPostPage、leftComponents / rightComponents / mobileBottomComponents |
-| [profileConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/profileConfig.ts) | `profileConfig` | 头像、姓名、签名、社交链接 |
-| [backgroundWallpaper.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/backgroundWallpaper.ts) | `backgroundWallpaper` | 壁纸模式、切换开关、背景视频播放、桌面/移动图源、轮播、水波纹、渐变过渡、homeText、overlay 透明度/模糊 |
-| [commentConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/commentConfig.ts) | `commentConfig` | 5 种评论系统：twikoo / waline / giscus / disqus / artalk |
-| [musicConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/musicConfig.ts) | `musicPlayerConfig` | Meting API / 本地音乐模式、音量、播放模式、歌词 |
-| [fontConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/fontConfig.ts) | `fontConfig`, `fontsList` | Astro Font API 字体定义 + 区域字体选择 + 子集化 |
-| [coverImageConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/coverImageConfig.ts) | `coverImageConfig` | 封面图在列表/文章页的显示开关 |
-| [expressiveCodeConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/expressiveCodeConfig.ts) | `expressiveCodeConfig` | 代码块主题、折叠插件、语言徽章插件 |
-| [effectsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/effectsConfig.ts) | `sakuraConfig`, `cursorTrailConfig` | 樱花飘落特效、光标尾迹粒子系统 |
+| [siteConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/siteConfig.ts) | `siteConfig` | 站点标题/URL/描述/关键词、主题色、页面宽度、favicon、navbar、页面开关（friends/sponsor/guestbook/bangumi/gallery/anime）、文章列表布局、文章页配置、bangumi、anime、分页、图像优化、语言 |
+| [navBarConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/navBarConfig.ts) | `navBarConfig`, `navBarSearchConfig` | 导航栏链接（含子菜单）与搜索配置 |
+| [sidebarConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/sidebarConfig.ts) | `sidebarLayoutConfig` | 侧边栏开关、position（left/right/both）、tabletSidebar、hideSidebarOnPostPage、showBothSidebarsOnPostPage、leftComponents / rightComponents / mobileBottomComponents |
+| [profileConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/profileConfig.ts) | `profileConfig` | 头像、姓名、签名、社交链接 |
+| [backgroundWallpaper.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/backgroundWallpaper.ts) | `backgroundWallpaper` | 壁纸模式、切换开关、背景视频播放、桌面/移动图源、轮播、水波纹、渐变过渡、homeText、overlay 透明度/模糊 |
+| [commentConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/commentConfig.ts) | `commentConfig` | 5 种评论系统：twikoo / waline / giscus / disqus / artalk |
+| [musicConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/musicConfig.ts) | `musicPlayerConfig` | Meting API / 本地音乐模式、音量、播放模式、歌词 |
+| [fontConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/fontConfig.ts) | `fontConfig`, `fontsList` | Astro Font API 字体定义 + 区域字体选择 + 子集化 |
+| [coverImageConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/coverImageConfig.ts) | `coverImageConfig` | 封面图在列表/文章页的显示开关 |
+| [expressiveCodeConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/expressiveCodeConfig.ts) | `expressiveCodeConfig` | 代码块主题、折叠插件、语言徽章插件 |
+| [effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) | `sakuraConfig`, `cursorTrailConfig` | 樱花飘落特效、光标尾迹粒子系统 |
 | [cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) | `cursorConfig` | 自定义鼠标光标（`.cur` 资源映射 + 用户开关，详见 §4.8） |
-| [announcementConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/announcementConfig.ts) | `announcementConfig` | 公告内容 |
-| [footerConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/footerConfig.ts) | `footerConfig` | 页脚 HTML 注入 |
-| [licenseConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/licenseConfig.ts) | `licenseConfig` | 文章许可证显示 |
-| [friendsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/friendsConfig.ts) | `friendsPageConfig`, `getEnabledFriends()` | 友链页配置 |
-| [galleryConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/galleryConfig.ts) | `galleryConfig` | 相册页配置 |
-| [sponsorConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/sponsorConfig.ts) | `sponsorConfig` | 打赏页配置 |
-| [pioConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/pioConfig.ts) | `live2dWidgetConfig`, `spineModelConfig` | Live2D / Spine 看板娘 |
-| [mermaidConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/mermaidConfig.ts) | `mermaidConfig` | Mermaid 主题 |
-| [plantumlConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/plantumlConfig.ts) | `plantumlConfig` | PlantUML 服务器、主题 |
-| [analyticsConfig.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/analyticsConfig.ts) | `analyticsConfig` | Google / Microsoft Clarity / Umami / La51 统计 |
-| [index.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/index.ts) | （barrel） | 统一导出全部配置 + 类型 |
+| [announcementConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/announcementConfig.ts) | `announcementConfig` | 公告内容 |
+| [footerConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/footerConfig.ts) | `footerConfig` | 页脚 HTML 注入 |
+| [licenseConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/licenseConfig.ts) | `licenseConfig` | 文章许可证显示 |
+| [friendsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/friendsConfig.ts) | `friendsPageConfig`, `getEnabledFriends()` | 友链页配置 |
+| [galleryConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/galleryConfig.ts) | `galleryConfig` | 相册页配置 |
+| [sponsorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/sponsorConfig.ts) | `sponsorConfig` | 打赏页配置 |
+| [pioConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/pioConfig.ts) | `live2dWidgetConfig`, `spineModelConfig` | Live2D / Spine 看板娘 |
+| [mermaidConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/mermaidConfig.ts) | `mermaidConfig` | Mermaid 主题 |
+| [plantumlConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/plantumlConfig.ts) | `plantumlConfig` | PlantUML 服务器、主题 |
+| [analyticsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/analyticsConfig.ts) | `analyticsConfig` | Google / Microsoft Clarity / Umami / La51 统计 |
+| [index.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/index.ts) | （barrel） | 统一导出全部配置 + 类型 |
 
 ### 5.2 `src/components/` —— 组件库
 
@@ -515,36 +516,36 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 | 文件 | 导出 | 作用 |
 |------|------|------|
-| [remark-mermaid.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-mermaid.js) | `remarkMermaid()` | 识别 ` ```mermaid ` 代码块，改写为 `div.mermaid-container` 自定义节点（代码存入 `data-mermaid-code` 与 `hChildren`，MDX 兼容） |
-| [remark-plantuml.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-plantuml.js) | `remarkPlantuml(options)` | 识别 ` ```plantuml ` 代码块，调用 `plantuml-encoder.js` 生成双主题 URL，改写为 `div.plantuml-container` 节点 |
-| [remark-excerpt.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-excerpt.js) | `remarkExcerpt()` | 取文章首个 paragraph 作为摘要，写入 `data.astro.frontmatter.excerpt` |
-| [remark-reading-time.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-reading-time.mjs) | `remarkReadingTime()` | 用 `reading-time` 计算阅读时长，写入 `frontmatter.minutes`（最小 1）与 `words` |
-| [remark-image-grid.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-image-grid.js) | `remarkImageGrid()` | 解析 `[grid]…[/grid]` 标记，按图片数自动选 1-4 列 Tailwind grid 类，包裹为 `div.image-grid` |
-| [remark-directive-rehype.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/remark-directive-rehype.js) | `parseDirectiveNode()` | 处理 remark directive 节点：将 28 种 admonition 类型转为 `blockquote` 并注入 `[!TYPE]`；其他 directive 转为自定义 HTML 标签（hastscript） |
+| [remark-mermaid.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-mermaid.js) | `remarkMermaid()` | 识别 ` ```mermaid ` 代码块，改写为 `div.mermaid-container` 自定义节点（代码存入 `data-mermaid-code` 与 `hChildren`，MDX 兼容） |
+| [remark-plantuml.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-plantuml.js) | `remarkPlantuml(options)` | 识别 ` ```plantuml ` 代码块，调用 `plantuml-encoder.js` 生成双主题 URL，改写为 `div.plantuml-container` 节点 |
+| [remark-excerpt.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-excerpt.js) | `remarkExcerpt()` | 取文章首个 paragraph 作为摘要，写入 `data.astro.frontmatter.excerpt` |
+| [remark-reading-time.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-reading-time.mjs) | `remarkReadingTime()` | 用 `reading-time` 计算阅读时长，写入 `frontmatter.minutes`（最小 1）与 `words` |
+| [remark-image-grid.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-image-grid.js) | `remarkImageGrid()` | 解析 `[grid]…[/grid]` 标记，按图片数自动选 1-4 列 Tailwind grid 类，包裹为 `div.image-grid` |
+| [remark-directive-rehype.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-directive-rehype.js) | `parseDirectiveNode()` | 处理 remark directive 节点：将 28 种 admonition 类型转为 `blockquote` 并注入 `[!TYPE]`；其他 directive 转为自定义 HTML 标签（hastscript） |
 
 #### 5.4.2 Rehype 插件（HAST）
 
 | 文件 | 导出 | 作用 | 运行阶段 |
 |------|------|------|---------|
-| [rehype-mermaid.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-mermaid.mjs) | `rehypeMermaid(options)` | **构建时**用 `@mermanjs/web` (WASM) 渲染 light/dark 双主题静态 SVG，注入 `div.mermaid-wrapper`；失败降级为错误提示 + 源码 fallback | 构建时（WASM） |
-| [rehype-plantuml.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-plantuml.mjs) | `rehypePlantuml()` | 改写为 `.plantuml-diagram-container` + `<img>` 携带 `data-light-src`/`data-dark-src`，每棵 tree 末尾注入 `plantuml-theme-switch.js` 客户端脚本 | 构建时（注入客户端脚本） |
-| [rehype-diagram-panzoom.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-diagram-panzoom.mjs) | `rehypeDiagramPanZoom()` | 共享图表交互：为 `.diagram-container` 注入 `diagram-panzoom-script.js`，提供 pan-zoom/全屏控制；`WeakSet` 防重复注入 | 构建时（注入客户端脚本） |
-| [rehype-component-github-card.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-component-github-card.mjs) | `GithubCardComponent(properties, children)` | 生成 GitHub 仓库卡片，内联 `<script>` 在客户端 fetch `api.github.com` 填充 avatar/stars/forks/license；校验 `repo` 必须为 `owner/repo` | 构建时（生成内联 fetch 脚本） |
-| [rehype-email-protection.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-email-protection.mjs) | `default rehypeEmailProtection(options)` | 加密 `mailto:` 链接（`base64` 或 `rot13`），`onclick` 内联脚本解码跳转，移除原 `href` 防爬虫 | 构建时 |
-| [rehype-external-links.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-external-links.mjs) | `default rehypeExternalLinks(options)` | 为 http/https 外部链接（排除 `siteUrl` 同域）添加 `target="_blank"` + `rel="noopener noreferrer"` | 构建时 |
-| [rehype-figure.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-figure.mjs) | `default rehypeFigure()` | 将带 alt 文本的 `<img>` 转为 `<center><figure><img><figcaption></figure></center>`；跳过 `.plantuml-image`；调用 `image-utils.ts#shouldAddNoReferrer` 补 `referrerpolicy` | 构建时 |
-| [rehype-image-referrerpolicy.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/rehype-image-referrerpolicy.mjs) | `default rehypeImageReferrerPolicy(options)` | 为匹配 `domains`（支持 `*` 通配符）域名的 `<img>` 添加 `referrerpolicy="no-referrer"` | 构建时 |
+| [rehype-mermaid.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-mermaid.mjs) | `rehypeMermaid(options)` | **构建时**用 `@mermanjs/web` (WASM) 渲染 light/dark 双主题静态 SVG，注入 `div.mermaid-wrapper`；失败降级为错误提示 + 源码 fallback | 构建时（WASM） |
+| [rehype-plantuml.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-plantuml.mjs) | `rehypePlantuml()` | 改写为 `.plantuml-diagram-container` + `<img>` 携带 `data-light-src`/`data-dark-src`，每棵 tree 末尾注入 `plantuml-theme-switch.js` 客户端脚本 | 构建时（注入客户端脚本） |
+| [rehype-diagram-panzoom.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-diagram-panzoom.mjs) | `rehypeDiagramPanZoom()` | 共享图表交互：为 `.diagram-container` 注入 `diagram-panzoom-script.js`，提供 pan-zoom/全屏控制；`WeakSet` 防重复注入 | 构建时（注入客户端脚本） |
+| [rehype-component-github-card.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-component-github-card.mjs) | `GithubCardComponent(properties, children)` | 生成 GitHub 仓库卡片，内联 `<script>` 在客户端 fetch `api.github.com` 填充 avatar/stars/forks/license；校验 `repo` 必须为 `owner/repo` | 构建时（生成内联 fetch 脚本） |
+| [rehype-email-protection.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-email-protection.mjs) | `default rehypeEmailProtection(options)` | 加密 `mailto:` 链接（`base64` 或 `rot13`），`onclick` 内联脚本解码跳转，移除原 `href` 防爬虫 | 构建时 |
+| [rehype-external-links.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-external-links.mjs) | `default rehypeExternalLinks(options)` | 为 http/https 外部链接（排除 `siteUrl` 同域）添加 `target="_blank"` + `rel="noopener noreferrer"` | 构建时 |
+| [rehype-figure.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-figure.mjs) | `default rehypeFigure()` | 将带 alt 文本的 `<img>` 转为 `<center><figure><img><figcaption></figure></center>`；跳过 `.plantuml-image`；调用 `image-utils.ts#shouldAddNoReferrer` 补 `referrerpolicy` | 构建时 |
+| [rehype-image-referrerpolicy.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/rehype-image-referrerpolicy.mjs) | `default rehypeImageReferrerPolicy(options)` | 为匹配 `domains`（支持 `*` 通配符）域名的 `<img>` 添加 `referrerpolicy="no-referrer"` | 构建时 |
 
 #### 5.4.3 辅助文件
 
 | 文件 | 关键导出 | 作用 |
 |------|---------|------|
-| [utils/diagramConstants.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/utils/diagramConstants.js) | `DIAGRAM_CONTAINER`、`DIAGRAM_WRAPPER`、`MERMAID_*`、`PLANTUML_*`、`DIAGRAM_CONTROLS`、`DIAGRAM_CTRL_BTN`、`DIAGRAM_FS_*` | 集中管理图表插件共享的 CSS 类名常量 |
-| [utils/extractText.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/utils/extractText.js) | `extractText(node)` | 递归提取 HAST 节点树的纯文本 |
-| [plantuml-encoder.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/plantuml-encoder.js) | `encodePlantUML(source)`、`injectTheme(source, themeName)`、`buildUrl(server, encoded)` | PlantUML 专用编码：UTF-8 → raw DEFLATE（`pako.deflateRaw` level 9）→ PlantUML 自定义 base64 字母表（`0-9A-Za-z-_`，无 `=` 填充）；`injectTheme` 在 `@startuml` 后注入 `!theme`（已显式声明主题时跳过） |
-| [diagram-panzoom-script.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/diagram-panzoom-script.js) | IIFE，挂载 `window._diagramPanZoomInit` / `window._diagramPanZoomReinit` | **客户端运行时**共享图表交互：拖拽平移、缩放控制栏、双击放大、全屏 overlay（pinch-to-zoom）、响应 `astro:page-load` / `astro:before-preparation` / `password:decrypted` 事件 |
-| [plantuml-theme-switch.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/plantuml-theme-switch.js) | IIFE，挂载 `window.plantumlThemeInit` | **客户端运行时**新版 PlantUML 脚本：主题切换（`MutationObserver` 监听 `<html>.dark`）、加载失败降级（重试时调 `window._diagramPanZoomReinit`） |
-| [plantuml-render-script.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/plantuml-render-script.js) | IIFE，挂载 `window.plantumlInitialized` | **客户端运行时**旧版一体化脚本（自带主题切换 + pan-zoom + 全屏，使用独立类名）。**当前未被 rehype-plantuml.mjs 引用**，疑似遗留代码 |
+| [utils/diagramConstants.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/utils/diagramConstants.js) | `DIAGRAM_CONTAINER`、`DIAGRAM_WRAPPER`、`MERMAID_*`、`PLANTUML_*`、`DIAGRAM_CONTROLS`、`DIAGRAM_CTRL_BTN`、`DIAGRAM_FS_*` | 集中管理图表插件共享的 CSS 类名常量 |
+| [utils/extractText.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/utils/extractText.js) | `extractText(node)` | 递归提取 HAST 节点树的纯文本 |
+| [plantuml-encoder.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/plantuml-encoder.js) | `encodePlantUML(source)`、`injectTheme(source, themeName)`、`buildUrl(server, encoded)` | PlantUML 专用编码：UTF-8 → raw DEFLATE（`pako.deflateRaw` level 9）→ PlantUML 自定义 base64 字母表（`0-9A-Za-z-_`，无 `=` 填充）；`injectTheme` 在 `@startuml` 后注入 `!theme`（已显式声明主题时跳过） |
+| [diagram-panzoom-script.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/diagram-panzoom-script.js) | IIFE，挂载 `window._diagramPanZoomInit` / `window._diagramPanZoomReinit` | **客户端运行时**共享图表交互：拖拽平移、缩放控制栏、双击放大、全屏 overlay（pinch-to-zoom）、响应 `astro:page-load` / `astro:before-preparation` / `password:decrypted` 事件 |
+| [plantuml-theme-switch.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/plantuml-theme-switch.js) | IIFE，挂载 `window.plantumlThemeInit` | **客户端运行时**新版 PlantUML 脚本：主题切换（`MutationObserver` 监听 `<html>.dark`）、加载失败降级（重试时调 `window._diagramPanZoomReinit`） |
+| [plantuml-render-script.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/plantuml-render-script.js) | IIFE，挂载 `window.plantumlInitialized` | **客户端运行时**旧版一体化脚本（自带主题切换 + pan-zoom + 全屏，使用独立类名）。**当前未被 rehype-plantuml.mjs 引用**，疑似遗留代码 |
 
 > **架构提示**：Mermaid 构建时静态渲染 SVG（无运行时网络依赖）；PlantUML 构建时只生成 URL，运行时浏览器请求 PlantUML 服务器获取 SVG，因此需要额外的主题切换/失败重试脚本。
 
@@ -554,24 +555,24 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 | 文件 | 关键导出 | 作用 |
 |------|---------|------|
-| [build-platform.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/build-platform.ts) | `detectBuildPlatform({...})` | 检测构建平台（FIREFLY_BUILD_PLATFORM env → ciName → EdgeOne Pages → ESA Pages → isCI → Local/Local Dev） |
-| [content-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/content-utils.ts) | `getSortedPosts()`、`getSortedPostsList()`、`getTagList()`、`getCategoryList()`、`getRelatedPosts(currentPost, maxCount=5)`、类型 `PostForList`/`Tag`/`Category` | 文章集合处理：按 pinned + published 排序、计算前后文链接、聚合标签/分类、相关文章推荐（标签 Jaccard ×100 + 标题分词 Jaccard ×100 + 6 个月半衰期 ×30 + 同分类 +10） |
-| [crypto-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/crypto-utils.ts) | `encryptContent(html, password, slug)` | AES-256-GCM 加密 HTML：HMAC-SHA256 派生确定性 salt/iv（同输入同输出，便于 sessionStorage 缓存），PBKDF2 10 万次迭代派生密钥，输出 `base64(salt[16]+iv[12]+authTag[16]+ciphertext)` |
-| [fontHelper.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/fontHelper.ts) | `collectUsedFontCssVars(config)`、`toPublicPath(rawSrc)` | 收集 `selected` / `bannerTitleFont` / `navbarTitleFont` / `codeFont` 中非 `system` 的 CSS 变量名；将 `./public/...`、`public/...`、`/public/...` 转为 `/...` 访问路径 |
-| [gallery-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/gallery-utils.ts) | `scanAlbumPhotos(albumId)`、`getAlbumCover(album, photos)` | 扫描 `public/gallery/<albumId>/` 下图片（jpg/png/webp/avif/gif），`cover.*` 排首位；读取 `urls.txt` 远程 URL；封面优先级：手动 > cover.* > 首图 |
-| [lqip-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/lqip-utils.ts) | `getLqipGradient(src, basePath?, isPublic?)`、`isExternalImage(src)`、`getLqipStyle(src, ...)`、`getLqipProps(src, ...)` | LQIP 渐变：从 `@constants/lqips.json` 读取 18 字符 hex 紧凑格式，解码为 `linear-gradient(135deg, #xxx 0%, #xxx 50%, #xxx 100%)`；外部图片降级 |
-| [responsive-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/responsive-utils.ts) | `getResponsiveSidebarConfig()`、`generateGridClasses(config)`、`generateSidebarClasses(config)`、`generateRightSidebarClasses(config)`、`generateMainContentClasses(config)`、类型 `ResponsiveSidebarConfig` | 基于 `sidebarLayoutConfig.position` 与 `tabletSidebar` 生成 Tailwind 网格类（768px / 769px / 1280px 三档断点） |
-| [image-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/image-utils.ts) | `processCoverImageSync(image, seed)`、`getApiUrlList(image, seed)`、`getImageFormats()`、`getImageQuality()`、`getFallbackFormat()`、`shouldAddNoReferrer(urlStr)` | 封面图处理：`image==="api"` 返回随机封面 API URL（带 seed 哈希）；读取 `siteConfig.imageOptimization`；通配符域名匹配 |
+| [build-platform.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/build-platform.ts) | `detectBuildPlatform({...})` | 检测构建平台（FIREFLY_BUILD_PLATFORM env → ciName → EdgeOne Pages → ESA Pages → isCI → Local/Local Dev） |
+| [content-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/content-utils.ts) | `getSortedPosts()`、`getSortedPostsList()`、`getTagList()`、`getCategoryList()`、`getRelatedPosts(currentPost, maxCount=5)`、类型 `PostForList`/`Tag`/`Category` | 文章集合处理：按 pinned + published 排序、计算前后文链接、聚合标签/分类、相关文章推荐（标签 Jaccard ×100 + 标题分词 Jaccard ×100 + 6 个月半衰期 ×30 + 同分类 +10） |
+| [crypto-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/crypto-utils.ts) | `encryptContent(html, password, slug)` | AES-256-GCM 加密 HTML：HMAC-SHA256 派生确定性 salt/iv（同输入同输出，便于 sessionStorage 缓存），PBKDF2 10 万次迭代派生密钥，输出 `base64(salt[16]+iv[12]+authTag[16]+ciphertext)` |
+| [fontHelper.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/fontHelper.ts) | `collectUsedFontCssVars(config)`、`toPublicPath(rawSrc)` | 收集 `selected` / `bannerTitleFont` / `navbarTitleFont` / `codeFont` 中非 `system` 的 CSS 变量名；将 `./public/...`、`public/...`、`/public/...` 转为 `/...` 访问路径 |
+| [gallery-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/gallery-utils.ts) | `scanAlbumPhotos(albumId)`、`getAlbumCover(album, photos)` | 扫描 `public/gallery/<albumId>/` 下图片（jpg/png/webp/avif/gif），`cover.*` 排首位；读取 `urls.txt` 远程 URL；封面优先级：手动 > cover.* > 首图 |
+| [lqip-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/lqip-utils.ts) | `getLqipGradient(src, basePath?, isPublic?)`、`isExternalImage(src)`、`getLqipStyle(src, ...)`、`getLqipProps(src, ...)` | LQIP 渐变：从 `@constants/lqips.json` 读取 18 字符 hex 紧凑格式，解码为 `linear-gradient(135deg, #xxx 0%, #xxx 50%, #xxx 100%)`；外部图片降级 |
+| [responsive-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/responsive-utils.ts) | `getResponsiveSidebarConfig()`、`generateGridClasses(config)`、`generateSidebarClasses(config)`、`generateRightSidebarClasses(config)`、`generateMainContentClasses(config)`、类型 `ResponsiveSidebarConfig` | 基于 `sidebarLayoutConfig.position` 与 `tabletSidebar` 生成 Tailwind 网格类（768px / 769px / 1280px 三档断点） |
+| [image-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/image-utils.ts) | `processCoverImageSync(image, seed)`、`getApiUrlList(image, seed)`、`getImageFormats()`、`getImageQuality()`、`getFallbackFormat()`、`shouldAddNoReferrer(urlStr)` | 封面图处理：`image==="api"` 返回随机封面 API URL（带 seed 哈希）；读取 `siteConfig.imageOptimization`；通配符域名匹配 |
 
 #### 客户端运行时
 
 | 文件 | 关键导出 | 作用 |
 |------|---------|------|
-| [icon-loader.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/icon-loader.ts) | `initIconLoader()` | 监听 `[data-icon-container]` 的 iconify-icon shadowRoot，显示加载指示器/图标；`MutationObserver` 监听新增容器，5 秒超时保护 |
-| [navigation-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/navigation-utils.ts) | `navigateToPage(url, options?)`、`isSwupReady()`、`waitForSwup(timeout=5000)`、`preloadPage(url)`、`getCurrentPath()`、`isHomePage()`、`isPostPage()`、`pathsEqual(path1, path2)` | 优先用 `window.swup.navigate` 无刷新跳转，失败降级 `location.href`；外部链接 `window.open`；锚点 `scrollIntoView` |
-| [sakura-manager.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/sakura-manager.ts) | `SakuraManager` 类、`initSakura(config)`、`toggleSakura()`、`stopSakura()`、`getSakuraStatus()` | Canvas + `requestAnimationFrame` 樱花飘落特效；支持位置/速度/旋转/透明度配置、`limitTimes` 限制次数、resize 处理；全局单例 `globalSakuraManager` |
-| [setting-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/setting-utils.ts) | 见下 | **客户端设置中心**：统一管理 localStorage 持久化 + DOM 应用，涵盖主题/壁纸模式/Overlay 透明度模糊/Waves/Gradient/Sakura/Banner 标题与轮播/自定义光标。每个设置项遵循 `getDefault*` / `getStored*` / `set*` / `apply*ToDocument` 四件套模式（光标仅前三步，DOM 应用在 `CustomCursor.astro` 中完成） |
-| [toc-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/toc-utils.ts) | `TOCManager` 类、`isPostPage()`、类型 `TOCConfig` | `IntersectionObserver` 监听标题可见性、活动指示器定位、点击平滑滚动（节流 100ms）、`anchorsMatchCurrentContent` 检测 SSR 锚点是否过期；`attach()` 优先复用 SSR 锚点，失败回退 `render()` 重建 |
+| [icon-loader.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/icon-loader.ts) | `initIconLoader()` | 监听 `[data-icon-container]` 的 iconify-icon shadowRoot，显示加载指示器/图标；`MutationObserver` 监听新增容器，5 秒超时保护 |
+| [navigation-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/navigation-utils.ts) | `navigateToPage(url, options?)`、`isSwupReady()`、`waitForSwup(timeout=5000)`、`preloadPage(url)`、`getCurrentPath()`、`isHomePage()`、`isPostPage()`、`pathsEqual(path1, path2)` | 优先用 `window.swup.navigate` 无刷新跳转，失败降级 `location.href`；外部链接 `window.open`；锚点 `scrollIntoView` |
+| [sakura-manager.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/sakura-manager.ts) | `SakuraManager` 类、`initSakura(config)`、`toggleSakura()`、`stopSakura()`、`getSakuraStatus()` | Canvas + `requestAnimationFrame` 樱花飘落特效；支持位置/速度/旋转/透明度配置、`limitTimes` 限制次数、resize 处理；全局单例 `globalSakuraManager` |
+| [setting-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/setting-utils.ts) | 见下 | **客户端设置中心**：统一管理 localStorage 持久化 + DOM 应用，涵盖主题/壁纸模式/Overlay 透明度模糊/Waves/Gradient/Sakura/Banner 标题与轮播/自定义光标。每个设置项遵循 `getDefault*` / `getStored*` / `set*` / `apply*ToDocument` 四件套模式（光标仅前三步，DOM 应用在 `CustomCursor.astro` 中完成） |
+| [toc-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/toc-utils.ts) | `TOCManager` 类、`isPostPage()`、类型 `TOCConfig` | `IntersectionObserver` 监听标题可见性、活动指示器定位、点击平滑滚动（节流 100ms）、`anchorsMatchCurrentContent` 检测 SSR 锚点是否过期；`attach()` 优先复用 SSR 锚点，失败回退 `render()` 重建 |
 
 `setting-utils.ts` 详细导出清单：
 
@@ -589,11 +590,11 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 | 文件 | 关键导出 | 作用 |
 |------|---------|------|
-| [date-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/date-utils.ts) | `formatDateToYYYYMMDD(date)`、`formatDateI18n(dateInput, includeTime?)`、`formatDateI18nWithTime(dateInput)`、`formatDateTimeToYYYYMMDDHHmm(dateInput)` | 日期格式化，支持 14 种语言 locale 映射，读取 `siteConfig.lang` 与 `siteConfig.timezone` |
-| [language-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/language-utils.ts) | `getLanguageDisplayName(langCode)` | `zh_CN` / `chinese_simplified` 等代码映射为显示名 |
-| [layout-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/layout-utils.ts) | `getBackgroundImages()`、`isBannerSrcObject(src)`、`getDefaultBackground()`、`isHomePage(pathname)`、`getBannerOffset(position)` | 背景图处理：统一 desktop/mobile 配置为数组；判断首页（考虑 `BASE_URL`）；banner 偏移量 |
-| [toc-shared.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/toc-shared.ts) | `computeTocItems(headings, {maxLevel})`、`escapeHtmlAttr(value)`、`renderBadgeInnerHTML(item)`、`renderTocItemHTML(item)`、类型 `TocInput`/`TocItem` | **无 DOM 依赖**：计算最小深度、过滤 `depth < minDepth + maxLevel`、按深度分级 `depthLevel`（0/1/2）、徽章类型；SSR 与客户端共用以保证结构一致 |
-| [url-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/url-utils.ts) | `removeFileExtension(id)`、`pathsEqual(path1, path2)`、`getPostUrlBySlug(slug)`、`getTagUrl(tag)`、`getCategoryUrl(category)`、`getDir(path)`、`getFileDirFromPath(filePath)`、`getSearchUrl(query)`、`url(path)` | URL 工具：剥离 `.md/.mdx/.markdown` 扩展名；智能拼接（网络 URL 直接返回，本地路径加 `BASE_URL`） |
+| [date-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/date-utils.ts) | `formatDateToYYYYMMDD(date)`、`formatDateI18n(dateInput, includeTime?)`、`formatDateI18nWithTime(dateInput)`、`formatDateTimeToYYYYMMDDHHmm(dateInput)` | 日期格式化，支持 14 种语言 locale 映射，读取 `siteConfig.lang` 与 `siteConfig.timezone` |
+| [language-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/language-utils.ts) | `getLanguageDisplayName(langCode)` | `zh_CN` / `chinese_simplified` 等代码映射为显示名 |
+| [layout-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/layout-utils.ts) | `getBackgroundImages()`、`isBannerSrcObject(src)`、`getDefaultBackground()`、`isHomePage(pathname)`、`getBannerOffset(position)` | 背景图处理：统一 desktop/mobile 配置为数组；判断首页（考虑 `BASE_URL`）；banner 偏移量 |
+| [toc-shared.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/toc-shared.ts) | `computeTocItems(headings, {maxLevel})`、`escapeHtmlAttr(value)`、`renderBadgeInnerHTML(item)`、`renderTocItemHTML(item)`、类型 `TocInput`/`TocItem` | **无 DOM 依赖**：计算最小深度、过滤 `depth < minDepth + maxLevel`、按深度分级 `depthLevel`（0/1/2）、徽章类型；SSR 与客户端共用以保证结构一致 |
+| [url-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/url-utils.ts) | `removeFileExtension(id)`、`pathsEqual(path1, path2)`、`getPostUrlBySlug(slug)`、`getTagUrl(tag)`、`getCategoryUrl(category)`、`getDir(path)`、`getFileDirFromPath(filePath)`、`getSearchUrl(query)`、`url(path)` | URL 工具：剥离 `.md/.mdx/.markdown` 扩展名；智能拼接（网络 URL 直接返回，本地路径加 `BASE_URL`） |
 
 ### 5.6 `src/styles/` —— 样式
 
@@ -614,15 +615,15 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 ### 5.7 `src/types/` —— 类型定义
 
-与 `src/config/` 同构，每个配置文件对应一个类型定义文件。统一在 [src/types/config.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/types/config.ts) barrel 导出。新增配置项时务必同步修改类型定义。
+与 `src/config/` 同构，每个配置文件对应一个类型定义文件。统一在 [src/types/config.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/types/config.ts) barrel 导出。新增配置项时务必同步修改类型定义。
 
 ### 5.8 `src/constants/` —— 构建期生成常量
 
 | 文件 | 作用 | 生成方式 |
 |------|------|---------|
-| [constants.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/constants/constants.ts) | 常量：`PAGE_SIZE` / `LIGHT_MODE` / `DARK_MODE` / `SYSTEM_MODE` / `WALLPAPER_*` / `BANNER_HEIGHT`(35) / `BANNER_HEIGHT_EXTEND`(30) / `BANNER_HEIGHT_HOME`(65) / `MAIN_PANEL_OVERLAPS_BANNER_HEIGHT`(3.5rem) / `PAGE_WIDTH`(100) / `UNCATEGORIZED` | 手工维护 |
+| [constants.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/constants.ts) | 常量：`PAGE_SIZE` / `LIGHT_MODE` / `DARK_MODE` / `SYSTEM_MODE` / `WALLPAPER_*` / `BANNER_HEIGHT`(35) / `BANNER_HEIGHT_EXTEND`(30) / `BANNER_HEIGHT_HOME`(65) / `MAIN_PANEL_OVERLAPS_BANNER_HEIGHT`(3.5rem) / `PAGE_WIDTH`(100) / `UNCATEGORIZED` | 手工维护 |
 | `icon.ts` | `defaultFavicons` 等图标常量 | 手工维护 |
-| `icons.ts` | Svelte 组件中使用的图标内联 SVG 数据 | `pnpm icons` 自动生成（**不要手改**） |
+| `icons-data.json` | Svelte 组件中使用的图标数据（`@iconify/svelte` 离线模式消费） | 手工维护（从 `@iconify-json/*` 包提取） |
 | `lqips.json` | 图片 LQIP 渐变 hex 紧凑格式 | `pnpm lqips` 自动生成（**不要手改**） |
 
 ### 5.9 `src/content/` —— 内容集合源
@@ -641,11 +642,11 @@ content/
 
 | 脚本 | 命令 | 作用 |
 |------|------|------|
-| [generate-icons.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/scripts/generate-icons.js) | `pnpm icons` | 扫描 Svelte 组件中使用的图标，从 `@iconify-json/*` 包提取 SVG，生成内联数据到 `src/constants/icons.ts` |
-| [generate-lqips.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/scripts/generate-lqips.ts) | `pnpm lqips` | 用 sharp 将 src 与 public 下图片缩到 2×2 像素，提取 4 个像素颜色生成 18 字符 hex 紧凑格式，写入 `src/constants/lqips.json`。忽略 `public/favicon/`、`public/pio/`、`public/assets/images/effects/`、`public/assets/music/` |
-| [subset-fonts.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/scripts/subset-fonts.ts) | （`pnpm build` 调用） | 扫描页面字符并生成轻量 woff2 字体子集 |
-| [new-post.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/scripts/new-post.js) | `pnpm new-post <filename>` | 在 `src/content/posts/` 创建带 frontmatter 的 .md 文件 |
-| [quarantine-bad-posts.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/scripts/quarantine-bad-posts.mjs) | 手动 | 隔离问题文章（非构建流水线一部分） |
+| [generate-lqips.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/generate-lqips.ts) | `pnpm lqips` | 用 sharp 将 src 与 public 下图片缩到 2×2 像素，提取 4 个像素颜色生成 18 字符 hex 紧凑格式，写入 `src/constants/lqips.json`。忽略 `public/favicon/`、`public/pio/`、`public/assets/images/effects/`、`public/assets/music/` |
+| [subset-fonts.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/subset-fonts.ts) | （`pnpm build` 调用） | 扫描页面字符并生成轻量 woff2 字体子集 |
+| [new-post.js](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/new-post.js) | `pnpm new-post <filename>` | 在 `src/content/posts/` 创建带 frontmatter 的 .md 文件 |
+| [new-dynamic.js](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/new-dynamic.js) | `pnpm new-dynamic` | 在 `src/content/dynamic/` 创建带 frontmatter 的动态条目 .md 文件 |
+| [quarantine-bad-posts.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/quarantine-bad-posts.mjs) | 手动 | 隔离问题文章（非构建流水线一部分） |
 
 ### 5.11 `.github/` —— CI 与协作
 
@@ -661,7 +662,7 @@ content/
 
 ## 6. 关键类与函数说明
 
-### 6.1 加密文章（[crypto-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/crypto-utils.ts)）
+### 6.1 加密文章（[crypto-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/crypto-utils.ts)）
 
 ```ts
 function encryptContent(html: string, password: string, slug: string): string
@@ -673,7 +674,7 @@ function encryptContent(html: string, password: string, slug: string): string
 - **输出格式**：`base64(salt[16] + iv[12] + authTag[16] + ciphertext)`
 - **触发**：构建时若文章 frontmatter 含 `password` 字段，则对渲染后的 HTML 调用此函数加密；客户端由 `EncryptedPost.astro` / `EncryptedContent.astro` 提示输入密码并解密
 
-### 6.2 内容处理（[content-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/content-utils.ts)）
+### 6.2 内容处理（[content-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/content-utils.ts)）
 
 #### `getSortedPosts()`
 
@@ -694,13 +695,13 @@ totalScore = tagMatchScore + titleSimilarityScore + timeFreshnessScore + categor
 
 优先取有标签匹配的，不足时从无标签匹配的候选中按 `timeFreshnessScore + categoryBonus` 降序补充。
 
-### 6.3 TOC 管理（[toc-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/toc-utils.ts) + [toc-shared.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/toc-shared.ts)）
+### 6.3 TOC 管理（[toc-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/toc-utils.ts) + [toc-shared.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/toc-shared.ts)）
 
 `toc-shared.ts` 显式设计为无 DOM 依赖模块，SSR（`SidebarTOC.astro` / `FloatingTOC.astro`）与客户端（`TOCManager`）共用 `computeTocItems`，确保服务端渲染与客户端 fallback 重建产生完全相同的目录结构。
 
 `TOCManager.attach()` 通过 `anchorsMatchCurrentContent` 检测 SSR 锚点是否过期（Swup 站内导航后侧栏 DOM 未被替换时回退 `render()` 重建），避免显示旧目录。
 
-### 6.4 设置中心（[setting-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/setting-utils.ts)）
+### 6.4 设置中心（[setting-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/setting-utils.ts)）
 
 **最大的 utils 文件**（约 1286 行）。每个设置项遵循四件套模式：
 
@@ -713,7 +714,7 @@ applyXToDocument()    // 直接操作 DOM
 
 大量 SSR-safe 守卫（`typeof localStorage === "undefined"`）。壁纸切换有 `is-wallpaper-transitioning` 过渡保护类与 `requestAnimationFrame` 防闪屏。`adjustMainContentPosition` 处理 fullscreen 模式动画的 `setTimeout` 竞态。
 
-### 6.5 响应式侧边栏（[responsive-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/responsive-utils.ts)）
+### 6.5 响应式侧边栏（[responsive-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/responsive-utils.ts)）
 
 ```ts
 function getResponsiveSidebarConfig(): ResponsiveSidebarConfig
@@ -729,7 +730,7 @@ function generateMainContentClasses(config): string
 - **768-1279px**：`md:grid-cols-[17.5rem_1fr]` 或 `md:grid-cols-[1fr_17.5rem]`（两列，平板端显示主侧栏）
 - **>= 1280px**：`xl:grid-cols-[17.5rem_1fr_17.5rem]`（三列，仅 both 模式）
 
-### 6.6 PlantUML 编码（[plantuml-encoder.js](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/plugins/plantuml-encoder.js)）
+### 6.6 PlantUML 编码（[plantuml-encoder.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/plantuml-encoder.js)）
 
 ```ts
 function encodePlantUML(source: string): string  // UTF-8 → raw DEFLATE → PlantUML base64
@@ -906,7 +907,7 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 | `pnpm build` | 完整构建流水线（见 §9.1） |
 | `pnpm preview` | 本地预览生产构建 |
 | `pnpm new-post <filename>` | 在 `src/content/posts/` 创建新文章 |
-| `pnpm icons` | 重新生成 `src/constants/icons.ts` |
+| `pnpm new-dynamic` (`new-d`) | 在 `src/content/dynamic/` 创建动态条目 |
 | `pnpm lqips` | 重新生成 `src/constants/lqips.json` |
 | `pnpm astro ...` | 直接调用 Astro CLI |
 
@@ -927,25 +928,23 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 
 ### 9.1 构建流水线
 
-`pnpm build` 实际执行（见 [package.json](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/package.json#L9)）：
+`pnpm build` 实际执行（见 [package.json](file:///e:/Dev/Projects/Firefly-trae-custom/package.json#L9)）：
 
 ```
-node scripts/generate-icons.js      # 1. 扫描 Svelte 组件图标 → src/constants/icons.ts
+npx tsx scripts/generate-lqips.ts   # 1. 生成图片 LQIP 渐变 → src/constants/lqips.json
   ↓
-npx tsx scripts/generate-lqips.ts   # 2. 生成图片 LQIP 渐变 → src/constants/lqips.json
+astro build                         # 2. Astro 构建（含 remark/rehype 插件链 + Expressive Code）
   ↓
-astro build                         # 3. Astro 构建（含 remark/rehype 插件链 + Expressive Code）
+npx tsx scripts/subset-fonts.ts     # 3. 字体子集化
   ↓
-npx tsx scripts/subset-fonts.ts     # 4. 字体子集化
-  ↓
-pagefind --site dist                # 5. Pagefind 全文搜索索引
+pagefind --site dist                # 4. Pagefind 全文搜索索引
 ```
 
 ### 9.2 部署目标
 
 #### Vercel（默认）
 
-配置见 [vercel.json](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/vercel.json)：
+配置见 [vercel.json](file:///e:/Dev/Projects/Firefly-trae-custom/vercel.json)：
 
 - `buildCommand`: `pnpm build`
 - `outputDirectory`: `dist`
@@ -957,7 +956,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 
 #### Cloudflare Workers
 
-设置环境变量 `CF_WORKERS=1` 启用 `@astrojs/cloudflare` 适配器（见 [astro.config.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/astro.config.mjs#L51-L55)），配置见 [wrangler.jsonc](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/wrangler.jsonc)：
+设置环境变量 `CF_WORKERS=1` 启用 `@astrojs/cloudflare` 适配器（见 [astro.config.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/astro.config.mjs#L51-L55)），配置见 [wrangler.jsonc](file:///e:/Dev/Projects/Firefly-trae-custom/wrangler.jsonc)：
 
 - `compatibility_date`: `2025-01-01`
 - `compatibility_flags`: `["nodejs_compat"]`
@@ -970,7 +969,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 
 ### 9.3 Pagefind 搜索
 
-配置见 [pagefind.yml](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/pagefind.yml)，排除索引的选择器：
+配置见 [pagefind.yml](file:///e:/Dev/Projects/Firefly-trae-custom/pagefind.yml)，排除索引的选择器：
 
 - `span.katex` / `span.katex-display`（数学公式）
 - `[data-pagefind-ignore]`（手动标记忽略的元素，如锚点图标）
@@ -990,13 +989,13 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 
 ## 10. 约定与最佳实践
 
-### 10.1 代码风格（[biome.json](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/biome.json)）
+### 10.1 代码风格（[biome.json](file:///e:/Dev/Projects/Firefly-trae-custom/biome.json)）
 
 - **缩进**：tab
 - **JS/TS 字符串**：双引号
 - **Linter**：Biome recommended 规则集 + 自定义 style 规则（`noParameterAssign` / `useAsConstAssertion` / `useDefaultParameterLast` / `useEnumInitializers` / `useSelfClosingElements` / `useSingleVarDeclarator` / `noUnusedTemplateLiteral` / `useNumberNamespace` / `noInferrableTypes` / `noUselessElse` 等为 `error`）
 - **`.svelte` / `.astro` / `.vue` 放宽**：`useConst: off` / `useImportType: off` / `noUnusedVariables: off` / `noUnusedImports: off`
-- **忽略**：`src/**/*.css` / `src/public/**` / `dist/**` / `node_modules/**` / `src/constants/icons.ts`（自动生成）/ `src/constants/lqips.json`（自动生成）
+- **忽略**：`src/**/*.css` / `src/public/**` / `dist/**` / `node_modules/**` / `src/constants/icons-data.json`（手工维护但 Biome 不格式化）/ `src/constants/lqips.json`（自动生成）
 
 ### 10.2 命名约定
 
@@ -1010,7 +1009,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - **Conventional Commits**：`feat: ...` / `fix: ...` / `chore: ...`
 - **聚焦单一关注点**：一个 PR 只解决一个问题
 - **不提交敏感信息**：secrets / tokens / service keys 不进 config 文件
-- **审查生成文件**：`dist/` / `src/constants/lqips.json` / `src/constants/icons.ts` 提交前需复核
+- **审查生成文件**：`dist/` / `src/constants/lqips.json` 提交前需复核；`src/constants/icons-data.json` 手工追加图标后需复核 JSON 合法性
 - **UI 变更需截图**：PR 描述中附验证截图
 
 ### 10.4 路径别名优先
@@ -1021,7 +1020,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 
 新增需要在页面切换时被 Swup 替换的 DOM 区块时，**必须**：
 
-1. 在 [astro.config.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/astro.config.mjs#L100-L108) 的 `swup.containers` 数组中追加容器 id
+1. 在 [astro.config.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/astro.config.mjs#L100-L108) 的 `swup.containers` 数组中追加容器 id
 2. 在每个页面（包括 404）都渲染该容器（哪怕空），否则 Swup 会找不到容器而回退整页加载
 3. 给容器添加 `transition-swup-fade` 等 transition 类
 4. 注意：Swup 不会替换静态容器（`#left-sidebar-wrapper` / `#right-sidebar-static`），需要替换的用动态容器（`#left-sidebar-dynamic` / `#right-sidebar-dynamic`）
@@ -1041,7 +1040,7 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 - **构建慢**：`src/` 下图片越多 Astro 优化越慢；考虑用 `public/` 直接服务
 - **Pagefind 索引异常**：检查元素是否误加 `data-pagefind-ignore`
 - **自定义光标切页后失效**：检查 `CustomCursor.astro` 的三重 Swup 监听器是否齐全（`swup:contentReplaced` / `swup:content:replace` / `swup:enable` + `window.swup.hooks.on('content:replace')`），以及 `localStorage.cursorEnabled` 是否被正确读取
-- **自定义光标/光标尾迹开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 或修改图标名后必须运行 `pnpm icons` 重新生成 `src/constants/icons.ts`，否则运行时 `hasIcon()` 返回 false 显示占位圆圈
+- **自定义光标/光标尾迹开关图标不显示**：在 [DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) 中新增 `icon="mdi:xxx"` 或修改图标名后，必须从 `node_modules/@iconify-json/<prefix>/icons.json` 提取对应图标的 `body` 字段，追加到 [icons-data.json](file:///e:/Dev/Projects/Firefly-trae-custom/src/constants/icons-data.json) 对应集合的 `icons` 对象中，否则运行时 `iconExists()` 返回 false 显示占位灰圈
 - **自定义光标对右键菜单无效**：浏览器系统级 UI 限制，CSS `cursor: url()` 无法覆盖右键菜单、滚动条、原生表单下拉等，非 Bug
 
 ---
@@ -1050,31 +1049,31 @@ pagefind --site dist                # 5. Pagefind 全文搜索索引
 
 ### 入口文件
 
-- [astro.config.mjs](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/astro.config.mjs) —— Astro 主配置
-- [src/config/index.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/config/index.ts) —— 配置 barrel
-- [src/content.config.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/content.config.ts) —— 内容集合 schema
-- [src/layouts/Layout.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/layouts/Layout.astro) —— 基础 HTML 壳
-- [src/layouts/MainGridLayout.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/layouts/MainGridLayout.astro) —— 主网格布局
+- [astro.config.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/astro.config.mjs) —— Astro 主配置
+- [src/config/index.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/index.ts) —— 配置 barrel
+- [src/content.config.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/content.config.ts) —— 内容集合 schema
+- [src/layouts/Layout.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/Layout.astro) —— 基础 HTML 壳
+- [src/layouts/MainGridLayout.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/layouts/MainGridLayout.astro) —— 主网格布局
 
 ### 关键工具
 
-- [src/utils/content-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/content-utils.ts) —— 内容处理
-- [src/utils/setting-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/setting-utils.ts) —— 客户端设置中心
-- [src/utils/responsive-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/responsive-utils.ts) —— 响应式侧栏
-- [src/utils/crypto-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/crypto-utils.ts) —— 文章加密
-- [src/utils/url-utils.ts](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/utils/url-utils.ts) —— URL 工具
+- [src/utils/content-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/content-utils.ts) —— 内容处理
+- [src/utils/setting-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/setting-utils.ts) —— 客户端设置中心
+- [src/utils/responsive-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/responsive-utils.ts) —— 响应式侧栏
+- [src/utils/crypto-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/crypto-utils.ts) —— 文章加密
+- [src/utils/url-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/url-utils.ts) —— URL 工具
 
 ### 关键组件
 
-- [src/components/layout/SideBar.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/layout/SideBar.astro) —— 侧边栏容器
-- [src/components/layout/Navbar.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/layout/Navbar.astro) —— 导航栏
-- [src/components/controls/DisplaySettings.svelte](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/controls/DisplaySettings.svelte) —— 显示设置面板
-- [src/components/features/EncryptedPost.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/features/EncryptedPost.astro) —— 加密文章容器
+- [src/components/layout/SideBar.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/layout/SideBar.astro) —— 侧边栏容器
+- [src/components/layout/Navbar.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/layout/Navbar.astro) —— 导航栏
+- [src/components/controls/DisplaySettings.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettings.svelte) —— 显示设置面板
+- [src/components/features/EncryptedPost.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/EncryptedPost.astro) —— 加密文章容器
 - [src/components/features/CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) —— 自定义光标注入（详见 §4.8 / §6.7）
 - [src/components/features/CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) —— 光标尾迹粒子特效（详见 §4.9 / §6.8）
 - [src/config/cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) —— 自定义光标配置
 - [src/config/effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) —— 樱花飘落 + 光标尾迹特效配置
-- [src/components/comment/index.astro](file:///c:/Users/Kagamihara%20Nadeshiko/.trae-cn/worktrees/Firefly/feat-generate-code-wiki-5g5qqx/src/components/comment/index.astro) —— 评论系统路由
+- [src/components/comment/index.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/comment/index.astro) —— 评论系统路由
 
 ### 官方资源
 

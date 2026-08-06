@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Firefly is an Astro 7 site with Svelte islands and TypeScript configuration. Main source code lives in `src/`: routes in `src/pages`, layouts in `src/layouts`, reusable UI in `src/components`, styles in `src/styles`, content in `src/content`, helpers in `src/utils`, and Markdown/HTML plugins in `src/plugins`. Site configuration is split across `src/config` with matching type definitions in `src/types`; prefer imports from `@/config` when available. Static files served directly belong in `public`, source-managed images in `src/assets`, docs in `docs` and `Firefly-Docs`, and automation in `scripts`.
+Firefly is an Astro 7 site with Svelte islands and TypeScript configuration. Main source code lives in `src/`: routes in `src/pages`, layouts in `src/layouts`, reusable UI in `src/components`, styles in `src/styles`, content in `src/content`, helpers in `src/utils`, and Markdown/HTML plugins in `src/plugins`. Site configuration is split across `src/config` with matching type definitions in `src/types`; prefer imports from `@/config` when available. Static files served directly belong in `public`, source-managed images in `src/assets`, docs in `docs`, and automation in `scripts`.
 
 ## Build, Test, and Development Commands
 
@@ -10,12 +10,14 @@ Use `pnpm`; the `preinstall` script enforces it.
 
 - `pnpm dev` or `pnpm start`: run the local Astro dev server.
 - `pnpm check`: run Astro diagnostics.
-- `pnpm type-check`: run TypeScript with `--noEmit`.
+- `pnpm type-check`: run TypeScript with `--noEmit --isolatedDeclarations`.
 - `pnpm format`: format `src` with Biome.
 - `pnpm lint`: run Biome checks and safe fixes on `src`.
-- `pnpm build`: generate icons, LQIPs, the Astro build, font subsets, and Pagefind search output in `dist`.
+- `pnpm build`: generate LQIPs, the Astro build, font subsets, and Pagefind search output in `dist`.
 - `pnpm preview`: preview the production build locally.
-- `pnpm new-post`: scaffold a new content post.
+- `pnpm new-post <filename>`: scaffold a new content post.
+- `pnpm new-dynamic` (`new-d`): scaffold a new dynamic (microblog) entry.
+- `pnpm lqips`: regenerate LQIP data into `src/constants/lqips.json`.
 
 ## Coding Style & Naming Conventions
 
@@ -31,4 +33,4 @@ Use Conventional Commits, matching the current history: `feat: ...`, `fix: ...`,
 
 ## Security & Configuration Tips
 
-Do not commit secrets, tokens, or service keys in config files. Keep deployment-specific settings in the target platform environment, and review generated files such as `dist`, `src/constants/lqips.json`, and `src/constants/icons.ts` before committing them.
+Do not commit secrets, tokens, or service keys in config files. Keep deployment-specific settings in the target platform environment, and review generated files such as `dist`, `src/constants/lqips.json`, and `src/constants/icons-data.json` before committing them. Icon data in `icons-data.json` is hand-maintained (extracted from `@iconify-json/*` packages) — there is no `pnpm icons` generator script in the current build.
