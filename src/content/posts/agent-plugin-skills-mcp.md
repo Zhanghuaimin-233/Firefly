@@ -5,7 +5,7 @@ description: 通俗讲解 AI Agent 的三种扩展机制——Plugin、Skills �
 image: ""
 tags: [AI Agent, Plugin, Skills, MCP]
 category: AI Agent
-draft: true
+draft: false
 slug: agent-plugin-skills-mcp
 ---
 

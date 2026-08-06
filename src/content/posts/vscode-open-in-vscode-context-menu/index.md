@@ -5,7 +5,7 @@ description: 如何把“在 VSCode 中打开”添加到 Windows 右键菜单�
 image: "./images/0_1.png"
 tags: [VSCode, Windows, 技巧]
 category: Windows
-draft: true
+draft: false
 slug: vscode-open-in-vscode-context-menu
 author: "__Witheart__"
 sourceLink: "https://blog.csdn.net/Beihai_Van/article/details/138591394"

@@ -5,7 +5,7 @@ description: Claude Code 启动失败（含 ps1 不是可执行程序）时，�
 image: ""
 tags: [Claude Code, 排错]
 category: Claude Code
-draft: true
+draft: false
 slug: claude-startup-failed
 ---
 

@@ -5,7 +5,7 @@ description: Windows 下 `py` 命令找不到 Python 时的排查思路与修复
 image: ""
 tags: [Python, Windows, 排错]
 category: Python
-draft: true
+draft: false
 slug: windows-py-launcher-not-found
 ---
 

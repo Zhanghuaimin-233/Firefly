@@ -5,7 +5,7 @@ description: opencode 启动时 Bun 崩溃问题的排查与修复记录。
 image: ""
 tags: [opencode, Bun, 排错]
 category: 开发工具
-draft: true
+draft: false
 slug: opencode-bun-crash
 ---
 

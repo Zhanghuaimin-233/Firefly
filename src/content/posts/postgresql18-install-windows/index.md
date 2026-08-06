@@ -5,7 +5,7 @@ description: Windows 10/11 下安装 PostgreSQL 18 的完整图文教程，覆�
 image: "./images/0_1.png"
 tags: [PostgreSQL, 数据库, Windows, 安装教程]
 category: 数据库
-draft: true
+draft: false
 slug: postgresql18-install-windows
 author: "獨梟"
 sourceLink: "https://blog.csdn.net/m0_58648890/article/details/155314594"

@@ -5,7 +5,7 @@ description: Windows 下 Nginx 的下载、安装、目录结构与基础使用�
 image: "./images/0_1.png"
 tags: [Nginx, Windows, 安装教程, Web服务器]
 category: 运维
-draft: true
+draft: false
 slug: nginx-install-windows
 author: "来一份辣子鸡丁"
 sourceLink: "https://blog.csdn.net/weixin_44251179/article/details/129700793"

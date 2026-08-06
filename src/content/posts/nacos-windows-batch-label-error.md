@@ -5,7 +5,7 @@ description: Windows 下 Nacos 启动报错“找不到指定的批处理标签�
 image: ""
 tags: [Nacos, Windows, 排错]
 category: 微服务
-draft: true
+draft: false
 slug: nacos-windows-batch-label-error
 ---
 

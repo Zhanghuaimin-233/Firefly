@@ -5,7 +5,7 @@ description: Windows 下 Maven 的下载、安装与环境变量配置，含国�
 image: "./images/0_1.png"
 tags: [Maven, Java, Windows, 安装教程]
 category: Java
-draft: true
+draft: false
 slug: maven-install-windows
 author: "程序猿_极客"
 sourceLink: "https://blog.csdn.net/qq_51572290/article/details/154796308"

@@ -5,7 +5,7 @@ description: 记录 Windows 下 Codex 的 Computer Use 插件不可用问题的�
 image: ""
 tags: [Codex, Windows, 排错, AI Agent]
 category: 开发工具
-draft: true
+draft: false
 slug: codex-windows-computer-use-fix
 ---
 

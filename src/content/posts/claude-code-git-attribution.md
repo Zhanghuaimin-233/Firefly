@@ -5,7 +5,7 @@ description: 关闭 Claude Code 的提交署名，并清理已经写入 Git 历�
 image: ""
 tags: [Claude Code, Git, 配置]
 category: Claude Code
-draft: true
+draft: false
 slug: claude-code-git-attribution
 author: "Eric"
 sourceLink: "https://www.jetems.com/posts/claude-code-git-attribution-guide/"

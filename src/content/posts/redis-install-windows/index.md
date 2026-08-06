@@ -5,7 +5,7 @@ description: Windows 下 Redis 的安装部署，以及 treeNMS、RedisStudio、
 image: "./images/0_1.png"
 tags: [Redis, 数据库, Windows, 安装教程]
 category: 数据库
-draft: true
+draft: false
 slug: redis-install-windows
 author: "明金同学"
 sourceLink: "https://blog.csdn.net/weixin_44893902/article/details/123087435"
