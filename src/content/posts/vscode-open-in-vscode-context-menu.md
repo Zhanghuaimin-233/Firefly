@@ -1,6 +1,6 @@
 ---
 title: 超简单！把“在 VSCode 中打开”添加到右键菜单
-published: 2025-07-15
+published: 2025-08-10
 description: 如何把“在 VSCode 中打开”添加到 Windows 右键菜单的超简单方法（原图缺失）。
 image: ""
 tags: [VSCode, Windows, 技巧]

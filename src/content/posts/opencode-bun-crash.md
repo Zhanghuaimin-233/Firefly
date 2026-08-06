@@ -1,6 +1,6 @@
 ---
 title: opencode 启动时 Bun 崩溃的排查与修复
-published: 2025-05-06
+published: 2026-05-06
 description: opencode 启动时 Bun 崩溃问题的排查与修复记录。
 image: ""
 tags: [opencode, Bun, 排错]

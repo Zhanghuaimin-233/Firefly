@@ -1,6 +1,6 @@
 ---
 title: Windows 下 Maven 下载安装与配置教程（超详细图文版）
-published: 2025-07-31
+published: 2026-04-08
 description: Windows 下 Maven 的下载、安装与环境变量配置，含国内镜像源与基础命令实战。
 image: "./images/0_1.png"
 tags: [Maven, Java, Windows, 安装教程]

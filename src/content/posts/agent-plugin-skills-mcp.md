@@ -1,6 +1,6 @@
 ---
 title: Agent 扩展机制入门：Plugin、Skills 与 MCP 有什么区别？
-published: 2025-05-28
+published: 2026-05-28
 description: 通俗讲解 AI Agent 的三种扩展机制——Plugin、Skills 与 MCP——的定位、区别与适用场景。
 image: ""
 tags: [AI Agent, Plugin, Skills, MCP]

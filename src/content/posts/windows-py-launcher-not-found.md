@@ -1,6 +1,6 @@
 ---
 title: Windows 下 `py` 找不到 Python 的排查与修复
-published: 2025-07-10
+published: 2026-07-10
 description: Windows 下 `py` 命令找不到 Python 时的排查思路与修复方法。
 image: ""
 tags: [Python, Windows, 排错]

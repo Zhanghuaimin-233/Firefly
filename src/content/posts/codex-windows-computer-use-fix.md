@@ -1,6 +1,6 @@
 ---
 title: Codex Windows Computer Use 插件不可用修复记录
-published: 2025-06-29
+published: 2026-06-29
 description: 记录 Windows 下 Codex 的 Computer Use 插件不可用问题的排查与修复过程。
 image: ""
 tags: [Codex, Windows, 排错, AI Agent]

@@ -1,6 +1,6 @@
 ---
 title: Nacos Windows 启动报错：找不到指定的批处理标签
-published: 2025-06-28
+published: 2026-06-28
 description: Windows 下 Nacos 启动报错“找不到指定的批处理标签”的原因与解决办法。
 image: ""
 tags: [Nacos, Windows, 排错]

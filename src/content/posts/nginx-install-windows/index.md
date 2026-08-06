@@ -1,6 +1,6 @@
 ---
 title: Windows 下 Nginx 安装与简单使用详解
-published: 2025-06-28
+published: 2023-03-22
 description: Windows 下 Nginx 的下载、安装、目录结构与基础使用（反向代理、静态服务）详解。
 image: "./images/0_1.png"
 tags: [Nginx, Windows, 安装教程, Web服务器]
