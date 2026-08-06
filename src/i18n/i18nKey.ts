@@ -305,6 +305,11 @@ enum I18nKey {
 	settingsTabAppearance = "settingsTabAppearance",
 	settingsTabWallpaper = "settingsTabWallpaper",
 	settingsTabEffects = "settingsTabEffects",
+	settingsTabPio = "settingsTabPio",
+
+	// 看板娘设置
+	pioSettings = "pioSettings",
+	pioModel = "pioModel",
 
 	// 卡片样式
 	cardSettings = "cardSettings",

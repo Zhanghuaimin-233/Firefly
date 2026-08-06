@@ -301,6 +301,8 @@ export const ko: Translation = {
 	[Key.customCursor]: "커스텀 커서",
 	[Key.cursorTrail]: "커서 트레일",
 	[Key.effectsSettings]: "효과 설정",
+	[Key.pioSettings]: "마스코트 설정",
+	[Key.pioModel]: "마스코트 모델",
 	[Key.overlaySettings]: "투명도 설정",
 	[Key.overlayOpacity]: "배경화면 불투명도",
 	[Key.overlayBlur]: "배경 흐림",
@@ -310,6 +312,7 @@ export const ko: Translation = {
 	[Key.settingsTabAppearance]: "외형",
 	[Key.settingsTabWallpaper]: "배경화면",
 	[Key.settingsTabEffects]: "효과",
+	[Key.settingsTabPio]: "마스코트",
 
 	// 카드 스타일
 	[Key.cardSettings]: "카드 스타일",

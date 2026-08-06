@@ -301,6 +301,8 @@ export const ja: Translation = {
 	[Key.customCursor]: "カスタムカーソル",
 	[Key.cursorTrail]: "カーソルトレイル",
 	[Key.effectsSettings]: "エフェクト設定",
+	[Key.pioSettings]: "マスコット設定",
+	[Key.pioModel]: "マスコットモデル",
 	[Key.overlaySettings]: "透明設定",
 	[Key.overlayOpacity]: "壁紙の透明度",
 	[Key.overlayBlur]: "背景ぼかし",
@@ -310,6 +312,7 @@ export const ja: Translation = {
 	[Key.settingsTabAppearance]: "外観",
 	[Key.settingsTabWallpaper]: "壁紙",
 	[Key.settingsTabEffects]: "エフェクト",
+	[Key.settingsTabPio]: "マスコット",
 
 	// カードスタイル
 	[Key.cardSettings]: "カードスタイル",

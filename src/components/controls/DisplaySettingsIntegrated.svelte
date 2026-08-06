@@ -17,6 +17,8 @@ import {
 	getDefaultOverlayBlur,
 	getDefaultOverlayCardOpacity,
 	getDefaultOverlayOpacity,
+	getDefaultPioEnabled,
+	getDefaultPioModel,
 	getDefaultSakuraEnabled,
 	getDefaultCursorTrailEnabled,
 	getDefaultWavesEnabled,
@@ -30,6 +32,8 @@ import {
 	getStoredOverlayBlur,
 	getStoredOverlayCardOpacity,
 	getStoredOverlayOpacity,
+	getStoredPioEnabled,
+	getStoredPioModel,
 	getStoredSakuraEnabled,
 	getStoredCursorEnabled,
 	getStoredCursorTrailEnabled,
@@ -44,6 +48,8 @@ import {
 	setOverlayBlur,
 	setOverlayCardOpacity,
 	setOverlayOpacity,
+	setPioEnabled,
+	setPioModel,
 	setSakuraEnabled,
 	setCursorEnabled,
 	setCursorTrailEnabled,
@@ -58,6 +64,7 @@ import {
 	cursorTrailConfig,
 	displaySettingsConfig,
 	siteConfig,
+	spineModelConfig,
 } from "@/config";
 import type { WALLPAPER_MODE } from "@/types/config";
 
@@ -74,7 +81,7 @@ type OverlaySliderItem = {
 	onValueChange: (value: number) => void;
 };
 
-type TabKey = "appearance" | "wallpaper" | "effects";
+type TabKey = "appearance" | "wallpaper" | "effects" | "pio";
 
 let hue = $state(getHue());
 const defaultHue = getDefaultHue();
@@ -106,6 +113,10 @@ let cursorEnabled = $state(false);
 const defaultCursorEnabled = getDefaultCursorEnabled();
 let cursorTrailEnabled = $state(false);
 const defaultCursorTrailEnabled = getDefaultCursorTrailEnabled();
+let pioEnabled = $state(getStoredPioEnabled());
+const defaultPioEnabled = getDefaultPioEnabled();
+let pioModelKey = $state(getStoredPioModel());
+const defaultPioModel = getDefaultPioModel();
 let overlayOpacity = $state(getDefaultOverlayOpacity());
 const defaultOverlayOpacity = getDefaultOverlayOpacity();
 let overlayBlur = $state(getDefaultOverlayBlur());
@@ -138,6 +149,9 @@ const isSakuraSwitchable = displaySettingsConfig.sakuraSwitchable;
 const isCursorSwitchable = cursorConfig?.switchable ?? false;
 // 是否允许用户切换光标花瓣特效
 const isCursorTrailSwitchable = cursorTrailConfig?.switchable ?? false;
+// 是否允许用户切换看板娘（有可切换模型列表时才显示）
+const isPioSwitchable =
+	(spineModelConfig?.models?.length ?? 0) > 0 && (spineModelConfig?.enable ?? false);
 // 是否允许用户切换卡片边框
 const isCardBorderSwitchable = displaySettingsConfig.cardBorderSwitchable;
 // 是否允许用户切换卡片跟随主题
@@ -216,6 +230,7 @@ const hasWallpaperTab = $derived(
 const hasEffectsTab = $derived(
 	isSakuraSwitchable || isCursorSwitchable || isCursorTrailSwitchable,
 );
+const hasPioTab = $derived(isPioSwitchable);
 
 let visibleTabs = $derived.by(() => {
 	const tabs: { key: TabKey; icon: string; label: string }[] = [];
@@ -236,6 +251,12 @@ let visibleTabs = $derived.by(() => {
 			key: "effects",
 			icon: "mdi:flower-poppy",
 			label: i18n(I18nKey.settingsTabEffects),
+		});
+	if (hasPioTab)
+		tabs.push({
+			key: "pio",
+			icon: "mdi:cat",
+			label: i18n(I18nKey.settingsTabPio),
 		});
 	return tabs;
 });
@@ -413,6 +434,17 @@ function toggleCursorTrailEnabled() {
 	setCursorTrailEnabled(cursorTrailEnabled);
 }
 
+function togglePioEnabled() {
+	pioEnabled = !pioEnabled;
+	setPioEnabled(pioEnabled);
+}
+
+function selectPioModel(key: string) {
+	if (key === pioModelKey) return;
+	pioModelKey = key;
+	setPioModel(key);
+}
+
 function toggleCardBorderEnabled() {
 	cardBorderEnabled = !cardBorderEnabled;
 	setCardBorderEnabled(cardBorderEnabled);
@@ -529,6 +561,10 @@ onMount(() => {
 	sakuraEnabled = getStoredSakuraEnabled();
 	cursorEnabled = getStoredCursorEnabled();
 	cursorTrailEnabled = getStoredCursorTrailEnabled();
+
+	// 从localStorage读取看板娘状态与模型选择
+	pioEnabled = getStoredPioEnabled();
+	pioModelKey = getStoredPioModel();
 
 	// 从localStorage读取卡片样式状态
 	cardBorderEnabled = getStoredCardBorderEnabled();
@@ -1031,6 +1067,61 @@ $effect(() => {
 						 class:left-5={cursorTrailEnabled}></div>
 				</div>
 			</button>
+			{/if}
+		</div>
+		{/if}
+	{/if}
+
+	{#if activeTab === "pio"}
+		{#if isPioSwitchable}
+		<div class="">
+			<div class="section-title">
+				{i18n(I18nKey.pioSettings)}
+				<button aria-label="Reset to Default" class="btn-regular rounded-md active:scale-90"
+						class:opacity-0={pioEnabled === defaultPioEnabled && pioModelKey === defaultPioModel}
+						class:pointer-events-none={pioEnabled === defaultPioEnabled && pioModelKey === defaultPioModel}
+						disabled={pioEnabled === defaultPioEnabled && pioModelKey === defaultPioModel}
+						aria-hidden={pioEnabled === defaultPioEnabled && pioModelKey === defaultPioModel ? "true" : undefined}
+						onclick={() => { pioEnabled = defaultPioEnabled; setPioEnabled(defaultPioEnabled); pioModelKey = defaultPioModel; setPioModel(defaultPioModel); }}>
+					<div class="text-(--btn-content)">
+						<Icon icon="fa7-solid:arrow-rotate-left" class="text-[0.75rem]"></Icon>
+					</div>
+				</button>
+			</div>
+			<button
+				class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+				class:bg-(--btn-regular-bg-hover)={pioEnabled}
+				onclick={togglePioEnabled}
+			>
+				<Icon icon="mdi:cat" class="text-[1.25rem] shrink-0"></Icon>
+				<span class="text-sm flex-1">{i18n(I18nKey.pioSettings)}</span>
+				<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+					 class:bg-(--primary)={pioEnabled}
+					 class:bg-(--btn-regular-bg-active)={!pioEnabled}>
+					<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+						 class:left-0.5={!pioEnabled}
+						 class:left-5={pioEnabled}></div>
+				</div>
+			</button>
+
+			{#if pioEnabled}
+			<div class="mt-3">
+				<div class="section-title mb-2">{i18n(I18nKey.pioModel)}</div>
+				<div class="flex gap-2">
+					{#each spineModelConfig.models as model}
+					<button
+						class="flex-1 btn-regular rounded-md py-2 px-3 flex items-center justify-center gap-2 active:scale-95 transition-all relative overflow-hidden"
+						class:bg-(--btn-regular-bg-hover)={pioModelKey === model.key}
+						class:opacity-60={pioModelKey !== model.key}
+						title={model.name}
+						onclick={() => selectPioModel(model.key)}
+					>
+						<Icon icon="mdi:cat" class="w-4 h-4"></Icon>
+						<span class="text-xs font-medium">{model.name}</span>
+					</button>
+					{/each}
+				</div>
+			</div>
 			{/if}
 		</div>
 		{/if}

@@ -305,6 +305,8 @@ export const ru: Translation = {
 	[Key.customCursor]: "Кастомный курсор",
 	[Key.cursorTrail]: "След курсора",
 	[Key.effectsSettings]: "Настройки эффектов",
+	[Key.pioSettings]: "Настройки маскота",
+	[Key.pioModel]: "Модель маскота",
 	[Key.overlaySettings]: "Настройки прозрачности",
 	[Key.overlayOpacity]: "Прозрачность обоев",
 	[Key.overlayBlur]: "Размытие фона",
@@ -314,6 +316,7 @@ export const ru: Translation = {
 	[Key.settingsTabAppearance]: "Оформление",
 	[Key.settingsTabWallpaper]: "Обои",
 	[Key.settingsTabEffects]: "Эффекты",
+	[Key.settingsTabPio]: "Маскот",
 
 	// Стиль карточек
 	[Key.cardSettings]: "Стиль карточек",

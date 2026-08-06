@@ -1,6 +1,47 @@
+// Spine 看板娘单模型定义（用于前端切换）。未提供的字段回退到 spineModelConfig 全局默认
+export type SpineModelEntry = {
+	key: string; // 唯一标识，如 "firefly"、"105913"
+	name: string; // 设置面板显示名，如 "流萤"
+	model: {
+		path: string; // 模型文件路径 (.json)
+		scale?: number;
+		x?: number;
+		y?: number;
+		skin?: string;
+		premultipliedAlpha?: boolean;
+		// viewport padding（px 或 "10%" 等字符串）。全设 0 则 skeleton 贴 canvas 边；不配则用 SpinePlayer 默认 10%
+		viewportPadding?: {
+			left?: number | string;
+			right?: number | string;
+			top?: number | string;
+			bottom?: number | string;
+		};
+	};
+	size?: { width?: number; height?: number };
+	position?: {
+		corner?: "bottom-left" | "bottom-right" | "top-left" | "top-right";
+		offsetX?: number;
+		offsetY?: number;
+	};
+	interactive?: {
+		enabled?: boolean;
+		clickAnimations?: string[];
+		clickMessages?: string[];
+		messageDisplayTime?: number;
+		idleAnimations?: string[];
+		idleInterval?: number;
+	};
+};
+
 // Spine 看板娘配置
 export type SpineModelConfig = {
-	enable: boolean; // 是否启用 Spine 看板娘
+	enable: boolean; // 是否启用 Spine 看板娘（总开关默认值，可被前端设置覆盖）
+	// 可切换的模型列表。若为空数组则回退到下面的单 model 字段（向后兼容）
+	models: SpineModelEntry[];
+	// 默认激活的模型 key（前端未选择时使用）
+	defaultModel: string;
+
+	// 单模型字段（向后兼容，models 为空时使用）
 	model: {
 		path: string; // 模型文件路径 (.json)
 		scale?: number; // 模型缩放比例，默认1.0
@@ -8,6 +49,12 @@ export type SpineModelConfig = {
 		y?: number; // Y轴偏移，默认0
 		skin?: string; // 默认皮肤名，用于立绘类模型（base 在 default 皮肤、表情在命名皮肤时需指定，如 "normal"）
 		premultipliedAlpha?: boolean; // 纹理是否预乘 alpha，默认 false。Spine 3.6 导出的纹理通常为 true，与 straight alpha 混用会导致半透明区域变灰
+		viewportPadding?: {
+			left?: number | string;
+			right?: number | string;
+			top?: number | string;
+			bottom?: number | string;
+		};
 	};
 	position: {
 		corner: "bottom-left" | "bottom-right" | "top-left" | "top-right"; // 显示位置

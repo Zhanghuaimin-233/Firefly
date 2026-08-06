@@ -2,6 +2,18 @@
 import MessageBox from "@/components/common/PioMessageBox.astro";
 import { spineModelConfig } from "@/config/pioConfig";
 import { url } from "@/utils/url-utils";
+
+// 预处理模型列表，把 path 转成完整 URL 供运行时使用
+const modelsWithURL = (spineModelConfig.models || []).map((m) => ({
+	key: m.key,
+	name: m.name,
+	model: { ...m.model, path: url(m.model.path) },
+	size: m.size,
+	position: m.position,
+	interactive: m.interactive,
+}));
+const fallbackModelPath = url(spineModelConfig.model.path);
+const fallbackAtlasPath = url(spineModelConfig.model.path.replace(".json", ".atlas"));
 ---
 
 <!-- Spine Web Player CSS 将在 script 中动态加载 -->{
@@ -27,7 +39,7 @@ import { url } from "@/utils/url-utils";
 <!-- 引入消息框组件 -->
 <MessageBox />
 
-<script is:inline define:vars={{ spineModelConfig, modelPath: url(spineModelConfig.model.path), atlasPath: url(spineModelConfig.model.path.replace(".json", ".atlas")), cssPath: url("/pio/static/spine-player.min.css"), jsPath: url("/pio/static/spine-player.min.js") }}>
+<script is:inline define:vars={{ spineModelConfig, modelsWithURL, fallbackModelPath, fallbackAtlasPath, cssPath: url("/pio/static/spine-player.min.css"), jsPath: url("/pio/static/spine-player.min.js") }}>
   // 动态加载 Spine CSS（带本地备用）
   function loadSpineCSS() {
     if (!spineModelConfig.enable) return;
@@ -69,17 +81,72 @@ import { url } from "@/utils/url-utils";
   let isClickProcessing = false; // 防止重复点击的标志
   let lastClickTime = 0; // 记录最后一次点击时间
 
+  // 根据前端 localStorage 选择当前激活的模型，合并全局默认与 entry 覆盖
+  function getActiveModelConfig() {
+    const cfg = spineModelConfig;
+    // 无可切换模型列表，回退到单模型字段
+    if (!modelsWithURL || modelsWithURL.length === 0) {
+      return {
+        path: fallbackModelPath,
+        atlas: fallbackAtlasPath,
+        skin: cfg.model.skin,
+        premultipliedAlpha: cfg.model.premultipliedAlpha ?? false,
+        viewportPadding: cfg.model.viewportPadding,
+        size: { width: cfg.size.width ?? 280, height: cfg.size.height ?? 400 },
+        position: { corner: cfg.position.corner, offsetX: cfg.position.offsetX ?? 0, offsetY: cfg.position.offsetY ?? 0 },
+        interactive: cfg.interactive || {},
+      };
+    }
+    const stored = localStorage.getItem("pioModel");
+    const key = stored || cfg.defaultModel;
+    const entry = modelsWithURL.find((m) => m.key === key) || modelsWithURL[0];
+    const pad = entry.model.viewportPadding ?? cfg.model.viewportPadding;
+    return {
+      path: entry.model.path,
+      atlas: entry.model.path.replace(".json", ".atlas"),
+      skin: entry.model.skin ?? cfg.model.skin,
+      premultipliedAlpha: entry.model.premultipliedAlpha ?? cfg.model.premultipliedAlpha ?? false,
+      viewportPadding: pad,
+      size: {
+        width: entry.size?.width ?? cfg.size.width ?? 280,
+        height: entry.size?.height ?? cfg.size.height ?? 400,
+      },
+      position: {
+        corner: entry.position?.corner ?? cfg.position.corner,
+        offsetX: entry.position?.offsetX ?? cfg.position.offsetX ?? 0,
+        offsetY: entry.position?.offsetY ?? cfg.position.offsetY ?? 0,
+      },
+      interactive: { ...cfg.interactive, ...entry.interactive },
+    };
+  }
+
+  // 根据激活模型配置应用容器尺寸与位置
+  function applyContainerStyle(mc) {
+    const container = document.getElementById("spine-model-container");
+    if (!container) return;
+    const pos = mc.position;
+    const isRight = pos.corner.includes("right");
+    const isTop = pos.corner.includes("top");
+    container.style.left = isRight ? "auto" : `${pos.offsetX}px`;
+    container.style.right = isRight ? `${pos.offsetX}px` : "auto";
+    container.style.top = isTop ? `${pos.offsetY}px` : "auto";
+    container.style.bottom = isTop ? "auto" : `${pos.offsetY}px`;
+    container.style.width = `${mc.size.width}px`;
+    container.style.height = `${mc.size.height}px`;
+    container.style.display = "block";
+  }
+
   // 全局变量，防止重复初始化
   window.spineModelInitialized = window.spineModelInitialized || false;
   window.spinePlayerInstance = window.spinePlayerInstance || null;
 
   // 消息显示函数 - 使用公共消息框组件
-  function showMessage(message) {
+  function showMessage(message, displayTime) {
     // 使用公共消息框组件
     if (window.showModelMessage) {
       window.showModelMessage(message, {
         containerId: "spine-model-container",
-        displayTime: spineModelConfig.interactive.messageDisplayTime || 3000
+        displayTime: displayTime || 3000
       });
     }
   }
@@ -136,6 +203,18 @@ import { url } from "@/utils/url-utils";
   async function initSpineModel() {
     if (!spineModelConfig.enable) return;
 
+    // 读 localStorage 决定是否启用（前端设置面板可关闭）
+    const storedEnabled = localStorage.getItem("pioEnabled");
+    const pioEnabled = storedEnabled === null ? spineModelConfig.enable : storedEnabled === "true";
+    if (!pioEnabled) {
+      const container = document.getElementById("spine-model-container");
+      if (container) container.style.display = "none";
+      return;
+    }
+
+    // 获取当前激活模型配置
+    const mc = getActiveModelConfig();
+
     // 检查移动端显示设置，如果隐藏则不加载运行时
     if (
       spineModelConfig.responsive.hideOnMobile &&
@@ -153,7 +232,10 @@ import { url } from "@/utils/url-utils";
       return;
     }
 
-    console.log("🎯 Initializing Spine Model...");
+    console.log("🎯 Initializing Spine Model:", mc.path);
+
+    // 应用容器尺寸与位置（按激活模型）
+    applyContainerStyle(mc);
 
     // 先清理可能存在的旧实例
     cleanupSpineModel();
@@ -229,15 +311,27 @@ import { url } from "@/utils/url-utils";
       window.spineModelInitialized = true;
 
       // 创建 SpinePlayer
+      const pad = mc.viewportPadding;
+      const viewportCfg = pad
+        ? {
+            padLeft: pad.left ?? "10%",
+            padRight: pad.right ?? "10%",
+            padTop: pad.top ?? "10%",
+            padBottom: pad.bottom ?? "10%",
+          }
+        : undefined;
+
       new window.spine.SpinePlayer("spine-player-container", {
-        skeleton: modelPath,
-        atlas: atlasPath,
+        skeleton: mc.path,
+        atlas: mc.atlas,
         // 初始动画读配置，避免硬编码 "idle" 在无该动画的模型上 loadSkeleton 阶段报错
-        animation: spineModelConfig.interactive.idleAnimations?.[0] || "idle",
+        animation: mc.interactive?.idleAnimations?.[0] || "idle",
         backgroundColor: "#00000000", // 透明背景
         showControls: false, // 隐藏控件
         alpha: true,
-        premultipliedAlpha: spineModelConfig.model.premultipliedAlpha ?? false,
+        premultipliedAlpha: mc.premultipliedAlpha,
+        // viewport padding：配置了用配置值（立绘贴底全 0），未配置则不传（用 SpinePlayer 默认 10%）
+        ...(viewportCfg ? { viewport: viewportCfg } : {}),
         success: (player) => {
           console.log("🎉 Spine model loaded successfully!");
 
@@ -255,13 +349,13 @@ import { url } from "@/utils/url-utils";
             list[Math.floor(Math.random() * list.length)];
 
           const configuredClickAnims =
-            spineModelConfig.interactive.clickAnimations ||
-            (spineModelConfig.interactive.clickAnimation
-              ? [spineModelConfig.interactive.clickAnimation]
+            mc.interactive?.clickAnimations ||
+            (mc.interactive?.clickAnimation
+              ? [mc.interactive.clickAnimation]
               : []);
 
           const configuredIdleAnims =
-            spineModelConfig.interactive.idleAnimations || ["idle"];
+            mc.interactive?.idleAnimations || ["idle"];
 
           const validClickAnims = configuredClickAnims.filter((name) =>
             availableAnimations.has(name)
@@ -311,7 +405,7 @@ import { url } from "@/utils/url-utils";
             if (player.skeleton) {
               try {
                 // 立绘类模型眼嘴贴图在命名皮肤里，需显式设置皮肤才会显示
-                const skinName = spineModelConfig.model.skin;
+                const skinName = mc.skin;
                 if (skinName) {
                   player.skeleton.setSkinByName(skinName);
                 }
@@ -329,7 +423,7 @@ import { url } from "@/utils/url-utils";
           }, 500);
 
           // 设置交互功能
-          if (spineModelConfig.interactive.enabled) {
+          if (mc.interactive?.enabled) {
             const canvas = document.querySelector(
               "#spine-player-container canvas"
             );
@@ -362,11 +456,11 @@ import { url } from "@/utils/url-utils";
                 }
 
                 // 显示随机消息
-                const messages = spineModelConfig.interactive.clickMessages;
+                const messages = mc.interactive?.clickMessages;
                 if (messages && messages.length > 0) {
                   const randomMessage =
                     messages[Math.floor(Math.random() * messages.length)];
-                  showMessage(randomMessage);
+                  showMessage(randomMessage, mc.interactive?.messageDisplayTime);
                 }
 
                 // 500ms 后重置防抖标志
@@ -380,7 +474,7 @@ import { url } from "@/utils/url-utils";
                 setInterval(() => {
                   const randomIdle = pickRandom(validIdleAnims);
                   safeSetAnimation(randomIdle, true);
-                }, spineModelConfig.interactive.idleInterval);
+                }, mc.interactive?.idleInterval);
               }
             }
           }
@@ -446,6 +540,26 @@ import { url } from "@/utils/url-utils";
 
   // 监听窗口大小变化
   window.addEventListener("resize", updateResponsiveDisplay);
+
+  // 监听前端设置面板的看板娘开关事件
+  window.addEventListener("pioToggle", (e) => {
+    if (e.detail.enabled) {
+      // 重新初始化
+      initSpineModel();
+    } else {
+      // 清理并隐藏
+      cleanupSpineModel();
+      const container = document.getElementById("spine-model-container");
+      if (container) container.style.display = "none";
+    }
+  });
+
+  // 监听前端设置面板的模型切换事件
+  window.addEventListener("pioModelChange", () => {
+    // 切换模型：清理旧实例后重新初始化
+    cleanupSpineModel();
+    initSpineModel();
+  });
 
   // 页面加载完成后初始化（只初始化一次）
   if (document.readyState === "loading") {

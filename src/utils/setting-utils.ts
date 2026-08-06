@@ -18,6 +18,7 @@ import {
 	expressiveCodeConfig,
 	sakuraConfig,
 	siteConfig,
+	spineModelConfig,
 } from "../config";
 import { isHomePage as checkIsHomePage } from "./layout-utils";
 
@@ -1238,6 +1239,72 @@ export function setCursorTrailEnabled(enabled: boolean): void {
 	// 实时切换光标花瓣特效
 	window.dispatchEvent(
 		new CustomEvent("cursorTrailToggle", { detail: { enabled } }),
+	);
+}
+
+// Spine 看板娘开关函数
+export function getDefaultPioEnabled(): boolean {
+	return spineModelConfig?.enable ?? false;
+}
+
+export function getStoredPioEnabled(): boolean {
+	if (typeof localStorage === "undefined") {
+		return getDefaultPioEnabled();
+	}
+	const stored = localStorage.getItem("pioEnabled");
+	if (stored === null) {
+		return getDefaultPioEnabled();
+	}
+	return stored === "true";
+}
+
+export function setPioEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("pioEnabled", String(enabled));
+	document.documentElement.setAttribute("data-pio-enabled", String(enabled));
+	// 实时切换看板娘
+	window.dispatchEvent(
+		new CustomEvent("pioToggle", { detail: { enabled } }),
+	);
+}
+
+// Spine 看板娘模型选择函数
+export function getDefaultPioModel(): string {
+	return spineModelConfig?.defaultModel ?? "";
+}
+
+export function getStoredPioModel(): string {
+	if (typeof localStorage === "undefined") {
+		return getDefaultPioModel();
+	}
+	const stored = localStorage.getItem("pioModel");
+	if (stored === null) {
+		return getDefaultPioModel();
+	}
+	// 校验 stored key 是否仍在可用模型列表中，否则回退默认
+	const keys = (spineModelConfig?.models ?? []).map((m) => m.key);
+	if (keys.length > 0 && !keys.includes(stored)) {
+		return getDefaultPioModel();
+	}
+	return stored;
+}
+
+export function setPioModel(modelKey: string): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("pioModel", modelKey);
+	// 实时切换看板娘模型
+	window.dispatchEvent(
+		new CustomEvent("pioModelChange", { detail: { modelKey } }),
 	);
 }
 

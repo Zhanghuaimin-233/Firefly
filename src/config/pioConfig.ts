@@ -2,80 +2,134 @@ import type { Live2DWidgetConfig, SpineModelConfig } from "../types/pioConfig";
 
 // Spine 看板娘配置
 export const spineModelConfig: SpineModelConfig = {
-	// Spine 看板娘开关
+	// Spine 看板娘总开关默认值（可被前端设置面板覆盖）
 	enable: true,
 
-	// Spine模型配置
+	// 可切换的模型列表
+	models: [
+		{
+			// 立绘类模型（Spine 3.6 升级至 4.2），半身腿部截断，贴底显示
+			key: "105913",
+			name: "立绘",
+			model: {
+				path: "/pio/models/spine/105913/105913.json",
+				scale: 0.24,
+				x: 0,
+				y: 0,
+				// 立绘类模型眼嘴贴图在命名皮肤里，不指定则只显示 base 身体
+				skin: "normal",
+				// Spine 3.6 默认导出预乘 alpha，必须配 true 否则半透明区域（如脸颊粉色）会变灰
+				premultipliedAlpha: true,
+				// 全 0 = skeleton 贴 canvas 边，立绘截断处贴窗口底部
+				viewportPadding: { left: 0, right: 0, top: 0, bottom: 0 },
+			},
+			size: { width: 150, height: 245 },
+			position: { corner: "bottom-left", offsetX: 0, offsetY: 0 },
+			interactive: {
+				enabled: true,
+				// 105913 为部件级动画：mouth_talk 为说话动画，配合消息气泡
+				clickAnimations: ["mouth_talk", "eye_blink"],
+				clickMessages: [
+					"你好呀！",
+					"今天也要加油哦！✨",
+					"想要一起去看星空吗？🌟",
+					"记得要好好休息呢~",
+					"有什么想对我说的吗？💫",
+				],
+				messageDisplayTime: 3000,
+				// eye_idle 为循环眨眼，是 105913 唯一适合循环的待机动画
+				idleAnimations: ["eye_idle"],
+				idleInterval: 8000,
+			},
+		},
+		{
+			// 博客自带完整角色形象，保留原版与底部的间距
+			key: "firefly",
+			name: "流萤",
+			model: {
+				path: "/pio/models/spine/firefly/1310.json",
+				scale: 1.0,
+				x: 0,
+				y: 0,
+				// firefly 纹理为 straight alpha，不配 premultipliedAlpha（默认 false）
+				// 不配 viewportPadding，用 SpinePlayer 默认 10% padding，保留与底部间距
+			},
+			size: { width: 135, height: 165 },
+			position: { corner: "bottom-left", offsetX: 0, offsetY: 20 },
+			interactive: {
+				enabled: true,
+				clickAnimations: [
+					"emoji_0",
+					"emoji_1",
+					"emoji_2",
+					"emoji_3",
+					"emoji_4",
+					"emoji_5",
+				],
+				clickMessages: [
+					"你好呀！我是流萤~",
+					"今天也要加油哦！✨",
+					"想要一起去看星空吗？🌟",
+					"记得要好好休息呢~",
+					"有什么想对我说的吗？💫",
+					"让我们一起探索未知的世界吧！🚀",
+					"每一颗星星都有自己的故事~⭐",
+					"希望能带给你温暖和快乐！💖",
+				],
+				messageDisplayTime: 3000,
+				idleAnimations: ["idle", "emoji_0", "emoji_1", "emoji_3", "emoji_4"],
+				idleInterval: 8000,
+			},
+		},
+	],
+
+	// 默认激活的模型 key
+	defaultModel: "105913",
+
+	// 单模型字段（向后兼容，models 为空时使用）
 	model: {
-		// Spine模型文件路径
 		path: "/pio/models/spine/105913/105913.json",
-		// 模型缩放比例（原模型 606×992，缩放至约 145×238）
 		scale: 0.24,
-		// X轴偏移
 		x: 0,
-		// Y轴偏移
 		y: 0,
-		// 默认皮肤（立绘类模型眼嘴贴图在命名皮肤里，不指定则只显示 base 身体）
 		skin: "normal",
-		// 纹理为预乘 alpha 格式（Spine 3.6 默认导出），必须配 true 否则半透明区域（如脸颊粉色）会变灰
 		premultipliedAlpha: true,
+		viewportPadding: { left: 0, right: 0, top: 0, bottom: 0 },
 	},
 
-	// 位置配置
+	// 全局默认位置配置
 	position: {
-		// 显示位置 bottom-left，bottom-right，top-left，top-right，注意：在右下角可能会挡住返回顶部按钮
 		corner: "bottom-left",
-		// 距离边缘0px
 		offsetX: 0,
-		// 距离下边缘0px
 		offsetY: 0,
 	},
 
-	// 尺寸配置
+	// 全局默认尺寸配置
 	size: {
-		// 容器宽度（按模型 606×992 比例 0.611 设定）
 		width: 150,
-		// 容器高度
 		height: 245,
 	},
 
-	// 交互配置
+	// 全局默认交互配置
 	interactive: {
-		// 交互功能开关
 		enabled: true,
-		// 点击时随机播放的动画列表（105913 为部件级动画：mouth_talk 为说话动画，配合消息气泡）
 		clickAnimations: ["mouth_talk", "eye_blink"],
-		// 点击时随机显示的文字消息
 		clickMessages: [
-			"你好呀！我是流萤~",
+			"你好呀！",
 			"今天也要加油哦！✨",
-			"想要一起去看星空吗？🌟",
-			"记得要好好休息呢~",
-			"有什么想对我说的吗？💫",
-			"让我们一起探索未知的世界吧！🚀",
-			"每一颗星星都有自己的故事~⭐",
-			"希望能带给你温暖和快乐！💖",
 		],
-		// 文字显示时间（毫秒）
 		messageDisplayTime: 3000,
-		// 待机动画列表（eye_idle 为循环眨眼，是 105913 唯一适合循环的待机动画）
 		idleAnimations: ["eye_idle"],
-		// 待机动画切换间隔（毫秒）
 		idleInterval: 8000,
 	},
 
 	// 响应式配置
 	responsive: {
-		// 在移动端隐藏
 		hideOnMobile: true,
-		// 移动端断点
 		mobileBreakpoint: 768,
 	},
 
-	// 层级
-	zIndex: 1000, // 层级
-
-	// 透明度
+	zIndex: 1000,
 	opacity: 1.0,
 };
 

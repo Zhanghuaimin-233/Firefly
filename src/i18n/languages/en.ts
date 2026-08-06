@@ -303,6 +303,8 @@ export const en: Translation = {
 	[Key.customCursor]: "Custom Cursor",
 	[Key.cursorTrail]: "Cursor Trail",
 	[Key.effectsSettings]: "Effects Settings",
+	[Key.pioSettings]: "Mascot Settings",
+	[Key.pioModel]: "Mascot Model",
 	[Key.overlaySettings]: "Transparency Settings",
 	[Key.overlayOpacity]: "Wallpaper Opacity",
 	[Key.overlayBlur]: "Background Blur",
@@ -312,6 +314,7 @@ export const en: Translation = {
 	[Key.settingsTabAppearance]: "Appearance",
 	[Key.settingsTabWallpaper]: "Wallpaper",
 	[Key.settingsTabEffects]: "Effects",
+	[Key.settingsTabPio]: "Mascot",
 
 	// Card Style
 	[Key.cardSettings]: "Card Style",

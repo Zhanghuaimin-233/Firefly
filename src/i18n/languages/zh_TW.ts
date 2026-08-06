@@ -296,6 +296,8 @@ export const zh_TW: Translation = {
 	[Key.customCursor]: "自訂游標",
 	[Key.cursorTrail]: "游標尾跡",
 	[Key.effectsSettings]: "特效設定",
+	[Key.pioSettings]: "看板娘設定",
+	[Key.pioModel]: "看板娘形象",
 	[Key.overlaySettings]: "透明設定",
 	[Key.overlayOpacity]: "桌布透明度",
 	[Key.overlayBlur]: "背景模糊度",
@@ -305,6 +307,7 @@ export const zh_TW: Translation = {
 	[Key.settingsTabAppearance]: "外觀",
 	[Key.settingsTabWallpaper]: "壁紙",
 	[Key.settingsTabEffects]: "特效",
+	[Key.settingsTabPio]: "看板娘",
 
 	// 卡片樣式
 	[Key.cardSettings]: "卡片樣式",
