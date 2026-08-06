@@ -24,6 +24,25 @@ export const en: Translation = {
 	[Key.tableOfContents]: "Table of Contents",
 	[Key.tocEmpty]: "No table of contents on this page",
 	[Key.music]: "Music",
+	[Key.dynamic]: "Moments",
+	[Key.latestDynamics]: "Latest Moments",
+	[Key.moreDynamics]: "More moments",
+	[Key.dynamicDescription]: "Short thoughts and everyday moments.",
+	[Key.dynamicEmpty]: "No moments have been posted yet",
+	[Key.dynamicSearch]: "Search moments...",
+	[Key.dynamicNoResults]: "No matching moments found",
+	[Key.dynamicLoading]: "Loading moments",
+	[Key.dynamicAllYears]: "All years",
+	[Key.dynamicLoadMore]: "Load more",
+	[Key.dynamicBackToList]: "Back to moments",
+	[Key.dynamicProfile]: "View {name}'s profile",
+	[Key.dynamicPermalink]: "Permalink to this moment",
+	[Key.dynamicCollapseGallery]: "Collapse",
+	[Key.dynamicViewOriginal]: "View full size",
+	[Key.dynamicPreviousImage]: "Previous image",
+	[Key.dynamicNextImage]: "Next image",
+	[Key.dynamicViewImage]: "View image {index}",
+	[Key.dynamicSelectImage]: "Select image {index}",
 	[Key.musicNoPlaying]: "No playing",
 	[Key.musicLyrics]: "Lyrics",
 	[Key.musicVolume]: "Volume",
@@ -59,6 +78,11 @@ export const en: Translation = {
 		"Here are my friends, welcome to visit and communicate with each other",
 	[Key.searchFriends]: "Search friends...",
 	[Key.friendsEmpty]: "No friends yet.",
+	[Key.booknav]: "Bookmark Directory",
+	[Key.booknavDescription]:
+		"A curated collection of useful sites, organized by category.",
+	[Key.searchBooknav]: "Search bookmarks...",
+	[Key.booknavEmpty]: "No bookmarks yet.",
 	[Key.guestbook]: "Guestbook",
 	[Key.guestbookDescription]:
 		"Welcome to leave your mark here, share your thoughts and suggestions",
@@ -284,6 +308,16 @@ export const en: Translation = {
 	[Key.overlayBlur]: "Background Blur",
 	[Key.overlayCardOpacity]: "Card Opacity",
 
+	// Settings Panel Tabs
+	[Key.settingsTabAppearance]: "Appearance",
+	[Key.settingsTabWallpaper]: "Wallpaper",
+	[Key.settingsTabEffects]: "Effects",
+
+	// Card Style
+	[Key.cardSettings]: "Card Style",
+	[Key.cardBorder]: "Card Border & Shadow",
+	[Key.cardFollowTheme]: "Card Follow Theme Color",
+
 	// Post List Layout
 	[Key.postListLayout]: "Post List Layout",
 	[Key.postListLayoutList]: "List",
@@ -314,6 +348,7 @@ export const en: Translation = {
 	// Site Statistics
 	[Key.siteStats]: "Site Statistics",
 	[Key.siteStatsPostCount]: "Posts",
+	[Key.siteStatsDynamicCount]: "Moments",
 	[Key.siteStatsCategoryCount]: "Categories",
 	[Key.siteStatsTagCount]: "Tags",
 	[Key.siteStatsTotalWords]: "Total Words",

@@ -7,10 +7,16 @@ export type {
 	AnalyticsConfig,
 	AnnouncementConfig,
 	BackgroundWallpaperConfig,
+	BooknavFaviconConfig,
+	BooknavGroup,
+	BooknavItem,
+	BooknavPageConfig,
 	CommentConfig,
 	CoverImageConfig,
 	CursorConfig,
 	CursorTrailConfig,
+	DisplaySettingsConfig,
+	DynamicConfig,
 	ExpressiveCodeConfig,
 	FooterConfig,
 	GalleryAlbum,
@@ -41,11 +47,14 @@ export { analyticsConfig } from "./analyticsConfig"; // 统计分析配置
 export { announcementConfig } from "./announcementConfig"; // 公告配置
 // 样式配置
 export { backgroundWallpaper } from "./backgroundWallpaper"; // 背景壁纸配置
+export { booknavConfig, booknavPageConfig } from "./booknavConfig"; // 书签导航配置
 // 功能配置
 export { commentConfig } from "./commentConfig"; // 评论系统配置
 export { coverImageConfig } from "./coverImageConfig"; // 封面图配置
 export { cursorConfig } from "./cursorConfig"; // 自定义光标配置
 export { cursorTrailConfig, sakuraConfig } from "./effectsConfig"; // 动画特效配置（樱花、光标尾迹等）
+export { displaySettingsConfig } from "./displaySettingsConfig"; // 显示设置面板开关配置
+export { dynamicConfig } from "./dynamicConfig"; // 动态页面配置
 export { expressiveCodeConfig } from "./expressiveCodeConfig"; // 代码高亮配置
 export { fontConfig, fontsList } from "./fontConfig"; // 字体配置
 export { footerConfig } from "./footerConfig"; // 页脚配置

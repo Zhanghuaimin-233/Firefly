@@ -1,9 +1,17 @@
 export type { AnalyticsConfig } from "./analyticsConfig";
 export type { AnnouncementConfig } from "./announcementConfig";
 export type { BackgroundWallpaperConfig } from "./backgroundWallpaper";
+export type {
+	BooknavFaviconConfig,
+	BooknavGroup,
+	BooknavItem,
+	BooknavPageConfig,
+} from "./booknavConfig";
 export type { CommentConfig } from "./commentConfig";
 export type { CoverImageConfig } from "./coverImageConfig";
 export type { CursorConfig, CursorTrailConfig, SakuraConfig } from "./effectsConfig";
+export type { DisplaySettingsConfig } from "./displaySettingsConfig";
+export type { DynamicConfig } from "./dynamicConfig";
 export type {
 	ExpressiveCodeConfig,
 	PluginCollapsibleConfig,
