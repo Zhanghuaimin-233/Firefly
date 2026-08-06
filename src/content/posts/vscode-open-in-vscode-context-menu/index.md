@@ -1,8 +1,8 @@
 ---
 title: 超简单！把“在 VSCode 中打开”添加到右键菜单
 published: 2025-08-10
-description: 如何把“在 VSCode 中打开”添加到 Windows 右键菜单的超简单方法（原图缺失）。
-image: ""
+description: 如何把“在 VSCode 中打开”添加到 Windows 右键菜单的超简单方法。
+image: "./images/0_1.png"
 tags: [VSCode, Windows, 技巧]
 category: Windows
 draft: true
@@ -21,7 +21,7 @@ licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
 
 2. 导航到注册表项 `HKEY_CLASSES_ROOT\Directory\Background\shell`。
 
-    *（原图缺失）*
+    ![导航到注册表项](./images/0_1.png)
 
 3. 创建新子项：右键单击 `shell`，选择“新建” -> “项”，将其命名为 `Open in VS Code`（这就是最终显示在右键菜单中的名称）。
 
@@ -39,11 +39,11 @@ licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
     - 在 `Open in VS Code` 项下，创建一个名为 `Icon` 的**新字符串值**（注意别加错位置）。
     - 双击 `Icon` 值，将数值数据设置为图标文件路径，例如 `E:\Microsoft VS Code\favicon.ico`。
 
-    *（原图缺失）*
+    ![配置 Icon 字符串值](./images/0_2.png)
 
 现在右键单击文件夹或桌面空白处时，应该会看到“在 VS Code 中打开”选项。
 
-*（原图缺失）*
+![右键菜单效果](./images/0_3.png)
 
 ## 一键注册表文件
 
