@@ -232,11 +232,12 @@ import { url } from "@/utils/url-utils";
       new window.spine.SpinePlayer("spine-player-container", {
         skeleton: modelPath,
         atlas: atlasPath,
-        animation: "idle",
+        // 初始动画读配置，避免硬编码 "idle" 在无该动画的模型上 loadSkeleton 阶段报错
+        animation: spineModelConfig.interactive.idleAnimations?.[0] || "idle",
         backgroundColor: "#00000000", // 透明背景
         showControls: false, // 隐藏控件
         alpha: true,
-        premultipliedAlpha: false,
+        premultipliedAlpha: spineModelConfig.model.premultipliedAlpha ?? false,
         success: (player) => {
           console.log("🎉 Spine model loaded successfully!");
 
@@ -309,6 +310,11 @@ import { url } from "@/utils/url-utils";
           setTimeout(() => {
             if (player.skeleton) {
               try {
+                // 立绘类模型眼嘴贴图在命名皮肤里，需显式设置皮肤才会显示
+                const skinName = spineModelConfig.model.skin;
+                if (skinName) {
+                  player.skeleton.setSkinByName(skinName);
+                }
                 player.skeleton.setToSetupPose();
                 const physicsMode =
                   window.spine?.Physics?.update ??

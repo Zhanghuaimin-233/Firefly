@@ -3,18 +3,22 @@ import type { Live2DWidgetConfig, SpineModelConfig } from "../types/pioConfig";
 // Spine 看板娘配置
 export const spineModelConfig: SpineModelConfig = {
 	// Spine 看板娘开关
-	enable: false,
+	enable: true,
 
 	// Spine模型配置
 	model: {
 		// Spine模型文件路径
-		path: "/pio/models/spine/firefly/1310.json",
-		// 模型缩放比例
-		scale: 1.0,
+		path: "/pio/models/spine/105913/105913.json",
+		// 模型缩放比例（原模型 606×992，缩放至约 145×238）
+		scale: 0.24,
 		// X轴偏移
 		x: 0,
 		// Y轴偏移
 		y: 0,
+		// 默认皮肤（立绘类模型眼嘴贴图在命名皮肤里，不指定则只显示 base 身体）
+		skin: "normal",
+		// 纹理为预乘 alpha 格式（Spine 3.6 默认导出），必须配 true 否则半透明区域（如脸颊粉色）会变灰
+		premultipliedAlpha: true,
 	},
 
 	// 位置配置
@@ -29,25 +33,18 @@ export const spineModelConfig: SpineModelConfig = {
 
 	// 尺寸配置
 	size: {
-		// 容器宽度
-		width: 135,
+		// 容器宽度（按模型 606×992 比例 0.611 设定）
+		width: 150,
 		// 容器高度
-		height: 165,
+		height: 245,
 	},
 
 	// 交互配置
 	interactive: {
 		// 交互功能开关
 		enabled: true,
-		// 点击时随机播放的动画列表
-		clickAnimations: [
-			"emoji_0",
-			"emoji_1",
-			"emoji_2",
-			"emoji_3",
-			"emoji_4",
-			"emoji_5",
-		],
+		// 点击时随机播放的动画列表（105913 为部件级动画：mouth_talk 为说话动画，配合消息气泡）
+		clickAnimations: ["mouth_talk", "eye_blink"],
 		// 点击时随机显示的文字消息
 		clickMessages: [
 			"你好呀！我是流萤~",
@@ -61,8 +58,8 @@ export const spineModelConfig: SpineModelConfig = {
 		],
 		// 文字显示时间（毫秒）
 		messageDisplayTime: 3000,
-		// 待机动画列表
-		idleAnimations: ["idle", "emoji_0", "emoji_1", "emoji_3", "emoji_4"],
+		// 待机动画列表（eye_idle 为循环眨眼，是 105913 唯一适合循环的待机动画）
+		idleAnimations: ["eye_idle"],
 		// 待机动画切换间隔（毫秒）
 		idleInterval: 8000,
 	},

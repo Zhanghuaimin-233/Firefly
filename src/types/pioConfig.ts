@@ -6,6 +6,8 @@ export type SpineModelConfig = {
 		scale?: number; // 模型缩放比例，默认1.0
 		x?: number; // X轴偏移，默认0
 		y?: number; // Y轴偏移，默认0
+		skin?: string; // 默认皮肤名，用于立绘类模型（base 在 default 皮肤、表情在命名皮肤时需指定，如 "normal"）
+		premultipliedAlpha?: boolean; // 纹理是否预乘 alpha，默认 false。Spine 3.6 导出的纹理通常为 true，与 straight alpha 混用会导致半透明区域变灰
 	};
 	position: {
 		corner: "bottom-left" | "bottom-right" | "top-left" | "top-right"; // 显示位置
