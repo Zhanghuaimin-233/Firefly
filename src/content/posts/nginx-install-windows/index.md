@@ -7,6 +7,7 @@ tags: [Nginx, Windows, 安装教程, Web服务器]
 category: 运维
 draft: true
 slug: nginx-install-windows
+author: "来一份辣子鸡丁"
 sourceLink: "https://blog.csdn.net/weixin_44251179/article/details/129700793"
 licenseName: "CC 4.0 BY-SA"
 licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"

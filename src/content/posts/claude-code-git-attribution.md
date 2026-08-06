@@ -7,6 +7,8 @@ tags: [Claude Code, Git, 配置]
 category: Claude Code
 draft: true
 slug: claude-code-git-attribution
+author: "Eric"
+sourceLink: "https://www.jetems.com/posts/claude-code-git-attribution-guide/"
 ---
 
 ## 1. 背景

@@ -7,6 +7,7 @@ tags: [Redis, 数据库, Windows, 安装教程]
 category: 数据库
 draft: true
 slug: redis-install-windows
+author: "明金同学"
 sourceLink: "https://blog.csdn.net/weixin_44893902/article/details/123087435"
 licenseName: "CC 4.0 BY-SA"
 licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"

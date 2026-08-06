@@ -7,6 +7,10 @@ tags: [VSCode, Windows, 技巧]
 category: Windows
 draft: true
 slug: vscode-open-in-vscode-context-menu
+author: "__Witheart__"
+sourceLink: "https://blog.csdn.net/Beihai_Van/article/details/138591394"
+licenseName: "CC 4.0 BY-SA"
+licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
 ---
 
 # 超简单！把“在 VSCode 中打开”添加到右键菜单

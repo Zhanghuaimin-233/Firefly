@@ -7,6 +7,7 @@ tags: [PostgreSQL, 数据库, Windows, 安装教程]
 category: 数据库
 draft: true
 slug: postgresql18-install-windows
+author: "獨梟"
 sourceLink: "https://blog.csdn.net/m0_58648890/article/details/155314594"
 licenseName: "CC 4.0 BY-SA"
 licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"

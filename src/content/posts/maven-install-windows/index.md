@@ -7,6 +7,7 @@ tags: [Maven, Java, Windows, 安装教程]
 category: Java
 draft: true
 slug: maven-install-windows
+author: "程序猿_极客"
 sourceLink: "https://blog.csdn.net/qq_51572290/article/details/154796308"
 licenseName: "CC 4.0 BY-SA"
 licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/"
