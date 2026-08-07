@@ -38,6 +38,9 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       
       - name: Build site
+        env:
+          SITE_BASE: /Firefly/
+          SITE_URL: https://zhanghuaimin-233.github.io
         run: pnpm run build
 
       - name: Create .nojekyll file

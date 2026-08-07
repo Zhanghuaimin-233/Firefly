@@ -63,11 +63,14 @@ const adapter = process.env.CF_WORKERS
 		})
 	: undefined;
 
+const siteUrl = process.env.SITE_URL ?? siteConfig.site_url;
+const base = process.env.SITE_BASE ?? "/";
+
 // https://astro.build/config
 export default defineConfig({
-	site: siteConfig.site_url,
+	site: siteUrl,
 
-	base: "/Firefly/",
+	base,
 	trailingSlash: "always",
 
 	// 字体配置 - 只加载实际使用的字体，跳过未引用的以加快构建
@@ -295,7 +298,7 @@ export default defineConfig({
 					rehypeImageReferrerPolicy,
 					{ domains: siteConfig.imageOptimization?.noReferrerDomains || [] },
 				],
-				[rehypeExternalLinks, { siteUrl: siteConfig.site_url }],
+				[rehypeExternalLinks, { siteUrl }],
 				[rehypeEmailProtection, { method: "base64" }], // 邮箱保护插件，支持 'base64' 或 'rot13'
 				[
 					rehypeComponents,
