@@ -12,6 +12,8 @@
 		SakuraWorkerOutboundMessage,
 	} from "@/types/sakura-worker";
 
+	const sakuraImageUrl = `${import.meta.env.BASE_URL}assets/images/effects/sakura.png`;
+
 	// ===========================================================================
 	// 主线程回退实现(不支持 OffscreenCanvas 时使用)
 	// 逻辑与原 is:inline 版本完全一致,仅改为 TS + 实现 SakuraManagerLike 接口
@@ -213,7 +215,7 @@
 
 			try {
 				this.img = new Image();
-				this.img.src = "/assets/images/effects/sakura.png";
+				this.img.src = sakuraImageUrl;
 
 				await new Promise<void>((resolve, reject) => {
 					if (!this.img) {

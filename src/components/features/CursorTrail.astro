@@ -1,7 +1,11 @@
 ---
 import { cursorTrailConfig } from "@/config";
+import { url } from "@/utils/url-utils";
 
-const config = cursorTrailConfig;
+const config = {
+	...cursorTrailConfig,
+	imageSrc: url(cursorTrailConfig.imageSrc),
+};
 ---
 
 <script is:inline define:vars={{ cursorTrailConfig: config }}>

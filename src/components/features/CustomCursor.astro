@@ -1,7 +1,13 @@
 ---
 import { cursorConfig } from "@/config";
+import { url } from "@/utils/url-utils";
 
-const config = cursorConfig;
+const config = {
+	...cursorConfig,
+	paths: Object.fromEntries(
+		Object.entries(cursorConfig.paths).map(([name, path]) => [name, url(path)]),
+	),
+};
 ---
 
 <script is:inline define:vars={{ cursorConfig: config }}>

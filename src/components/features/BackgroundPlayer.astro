@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
+import { url } from "@/utils/url-utils";
 
 export interface Props {
 	playerUrl: string | string[];
@@ -10,7 +11,9 @@ export interface Props {
 
 const { playerUrl, playerMode = "order" } = Astro.props;
 
-const urls = Array.isArray(playerUrl) ? playerUrl : [playerUrl];
+const urls = (Array.isArray(playerUrl) ? playerUrl : [playerUrl]).map((value) =>
+	value.startsWith("http://") || value.startsWith("https://") ? value : url(value),
+);
 const hasMultiple = urls.length > 1;
 const urlsJson = JSON.stringify(urls);
 
