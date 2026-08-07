@@ -1,6 +1,8 @@
 ---
 export interface Props {
 	text: string | string[];
+	// 同步切换的翻译文本（数组长度建议与 text 一致），打字完成时显示，删除时隐藏
+	syncText?: string | string[];
 	speed?: number;
 	deleteSpeed?: number;
 	pauseTime?: number;
@@ -9,12 +11,16 @@ export interface Props {
 
 const {
 	text,
+	syncText,
 	speed = 100,
 	deleteSpeed = 50,
 	pauseTime = 2000,
 	class: className = "",
 } = Astro.props;
 const textData = Array.isArray(text) ? JSON.stringify(text) : text;
+const syncData = syncText !== undefined
+	? (Array.isArray(syncText) ? JSON.stringify(syncText) : syncText)
+	: undefined;
 ---
 
 <span
@@ -22,12 +28,16 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
   data-text={textData}
   data-speed={speed}
   data-delete-speed={deleteSpeed}
-  data-pause-time={pauseTime}></span>
+  data-pause-time={pauseTime}></span>{syncData !== undefined && (
+  <span class="typewriter-sync" data-sync-text={syncData}></span>
+)}
 
 <script>
   class TypewriterEffect {
     private element: HTMLElement;
+    private syncElement: HTMLElement | null = null;
     private texts: string[];
+    private syncTexts: string[] = [];
     private currentTextIndex: number = 0;
     private speed: number;
     private deleteSpeed: number;
@@ -46,6 +56,19 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
         this.texts = Array.isArray(parsed) ? parsed : [textData];
       } catch {
         this.texts = [textData];
+      }
+
+      // 查找同级同步翻译元素
+      const next = element.nextElementSibling;
+      if (next instanceof HTMLElement && next.classList.contains("typewriter-sync")) {
+        this.syncElement = next;
+        const syncData = next.dataset.syncText || "";
+        try {
+          const parsedSync = JSON.parse(syncData);
+          this.syncTexts = Array.isArray(parsedSync) ? parsedSync : [syncData];
+        } catch {
+          this.syncTexts = [syncData];
+        }
       }
 
       this.speed = parseInt(element.dataset.speed || "100");
@@ -71,7 +94,19 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
 
     private showRandomText() {
       const randomIndex = Math.floor(Math.random() * this.texts.length);
+      this.currentTextIndex = randomIndex;
       this.element.textContent = this.texts[randomIndex];
+      this.showSync();
+    }
+
+    private showSync() {
+      if (this.syncElement && this.syncTexts.length > 0) {
+        this.syncElement.textContent = this.syncTexts[this.currentTextIndex] || this.syncTexts[0] || "";
+      }
+    }
+
+    private clearSync() {
+      if (this.syncElement) this.syncElement.textContent = "";
     }
 
     private start() {
@@ -115,15 +150,21 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
 
           this.timeoutId = window.setTimeout(() => this.type(), this.speed);
         } else {
-          // 打字完成，暂停后开始删除（如果有多条文本）
+          // 打字完成，显示同步翻译
+          this.showSync();
+          // 暂停后开始删除（如果有多条文本）
           if (this.texts.length > 1) {
             this.isDeleting = true;
             this.timeoutId = window.setTimeout(
-              () => this.type(),
+              () => {
+                // 开始删除前隐藏翻译
+                this.clearSync();
+                this.type();
+              },
               this.pauseTime
             );
           }
-          // 如果只有一条文本，保持显示不删除
+          // 如果只有一条文本，保持显示不删除，翻译也保持显示
         }
       }
     }
@@ -149,6 +190,11 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
         el.__typewriterInstance.destroy();
       }
       el.textContent = "";
+      // 同步清空翻译元素
+      const next = el.nextElementSibling;
+      if (next instanceof HTMLElement && next.classList.contains("typewriter-sync")) {
+        next.textContent = "";
+      }
       el.__typewriterInstance = new TypewriterEffect(el);
     });
   }
@@ -187,6 +233,14 @@ const textData = Array.isArray(text) ? JSON.stringify(text) : text;
     content: "|";
     animation: blink 1s infinite;
     margin-left: 2px;
+  }
+
+  .typewriter-sync {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: var(--banner-translation-size, 1rem);
+    opacity: 0.75;
+    min-height: 1.2em;
   }
 
   @keyframes blink {

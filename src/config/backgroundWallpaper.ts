@@ -77,6 +77,8 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			enable: true,
 			// 主页横幅主标题
 			title: "With You, My Lord.",
+			// 主页横幅主标题中文翻译（显示在主标题下方，字号较小，可选）
+			titleTranslation: "与你同在，我的主。",
 			// 主页横幅主标题字体大小
 			titleSize: "4.5rem",
 			// 主页横幅副标题
@@ -88,8 +90,19 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
     			"Through Fleeting Seasons, I Stay",
     			"Wherever You May Go, I Shall Follow",
 			],
+			// 主页横幅副标题中文翻译（与 subtitle 一一对应，打字机模式下跟随英文同步切换，可选）
+			subtitleTranslation: [
+				"穿过低语的风，我相随",
+				"在翠绿的叶下，我等候",
+				"沿着遥远的路，我伴你同行",
+				"在温柔的晨光中，我献上祈祷",
+				"穿过流转的四季，我驻留",
+				"无论你去往何方，我都将追随",
+			],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",
+			// 中文翻译字体大小（主标题翻译和副标题翻译共用，可选，默认 "1rem"）
+			translationSize: "1.125rem",
 			typewriter: {
 				// 是否启用打字机效果
 				// 打字机开启 → 循环显示所有副标题

@@ -121,14 +121,22 @@ const shouldRenderCategoryBar = !!siteConfig.categoryBar;
 // 检查是否在文章详情页
 const isPostPage = !!postSlug;
 
-// 随机选择副标题（当打字机关闭且为数组时）
+// 随机选择副标题及对应翻译（当打字机关闭且为数组时）
 const getRandomSubtitle = () => {
-	const subtitle = backgroundWallpaper.common?.homeText?.subtitle;
+	const homeText = backgroundWallpaper.common?.homeText;
+	const subtitle = homeText?.subtitle;
+	const translation = homeText?.subtitleTranslation;
 	if (Array.isArray(subtitle)) {
 		const randomIndex = Math.floor(Math.random() * subtitle.length);
-		return subtitle[randomIndex];
+		const sub = subtitle[randomIndex];
+		const trans = Array.isArray(translation)
+			? (translation[randomIndex] || translation[0] || "")
+			: (translation || "");
+		return { subtitle: sub, translation: trans };
 	}
-	return subtitle;
+	const sub = subtitle || "";
+	const trans = Array.isArray(translation) ? (translation[0] || "") : (translation || "");
+	return { subtitle: sub, translation: trans };
 };
 const randomSubtitle = getRandomSubtitle();
 
@@ -622,23 +630,36 @@ const hasMultipleImages =
     {homeTextEnable && (
         <div class={`banner-home-text-overlay absolute inset-0 z-20 flex items-center justify-center ${!showHomeText ? 'hidden' : ''}`}>
             <div class="w-4/5 lg:w-3/4 text-center mb-0">
-                <div class="flex flex-col">
+                <div class="flex flex-col" style={`--banner-translation-size: ${backgroundWallpaper.common?.homeText?.translationSize || "1rem"}`}>
                     {backgroundWallpaper.common?.homeText?.title && (
                         <div class="banner-title font-bold text-white mb-2 lg:mb-4 leading-tight" style={{ '--banner-title-size': backgroundWallpaper.common.homeText.titleSize || "3rem" }}>
                             {backgroundWallpaper.common.homeText.title}
                         </div>
                     )}
+                    {backgroundWallpaper.common?.homeText?.titleTranslation && (
+                        <div class="banner-title-translation text-white/70 leading-snug mb-2 lg:mb-4" style={{ fontSize: backgroundWallpaper.common.homeText.translationSize || "1rem" }}>
+                            {backgroundWallpaper.common.homeText.titleTranslation}
+                        </div>
+                    )}
                     {backgroundWallpaper.common?.homeText?.subtitle && (
-                        <div id="banner-subtitle" class="banner-subtitle text-white/90 leading-snug" style={{ fontSize: backgroundWallpaper.common.homeText.subtitleSize || "1.5rem" }} data-subtitles={JSON.stringify(backgroundWallpaper.common.homeText.subtitle)}>
+                        <div id="banner-subtitle" class="banner-subtitle text-white/90 leading-snug" style={{ fontSize: backgroundWallpaper.common.homeText.subtitleSize || "1.5rem" }} data-subtitles={JSON.stringify(backgroundWallpaper.common.homeText.subtitle)} data-translations={backgroundWallpaper.common.homeText.subtitleTranslation ? JSON.stringify(backgroundWallpaper.common.homeText.subtitleTranslation) : undefined}>
                             {backgroundWallpaper.common.homeText.typewriter?.enable ? (
                                 <TypewriterText
                                     text={backgroundWallpaper.common.homeText.subtitle}
+                                    syncText={backgroundWallpaper.common.homeText.subtitleTranslation}
                                     speed={backgroundWallpaper.common.homeText.typewriter.speed}
                                     deleteSpeed={backgroundWallpaper.common.homeText.typewriter.deleteSpeed}
                                     pauseTime={backgroundWallpaper.common.homeText.typewriter.pauseTime}
                                 />
                             ) : (
-                                randomSubtitle
+                                <>
+                                    <span class="banner-subtitle-main">{randomSubtitle.subtitle}</span>
+                                    {randomSubtitle.translation && (
+                                        <span class="banner-subtitle-translation" style={{ fontSize: backgroundWallpaper.common.homeText.translationSize || "1rem", opacity: 0.75, display: "block", marginTop: "0.5rem" }}>
+                                            {randomSubtitle.translation}
+                                        </span>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}
@@ -657,6 +678,12 @@ const hasMultipleImages =
 
             try {
                 const subtitles = JSON.parse(subtitlesData);
+                const translationsData = subtitleElement.dataset.translations;
+                let translations = [];
+                if (translationsData) {
+                    try { translations = JSON.parse(translationsData); } catch { translations = []; }
+                    if (!Array.isArray(translations)) translations = [translations];
+                }
                 // Only randomize if it's an array and typewriter is NOT enabled (check for typewriter class)
                 if (Array.isArray(subtitles) && subtitles.length > 0 && !subtitleElement.querySelector('.typewriter')) {
                     // Use a global variable to persist the subtitle across Swup navigations
@@ -664,8 +691,20 @@ const hasMultipleImages =
                     if (!window.fireflyCachedSubtitle) {
                         const randomIndex = Math.floor(Math.random() * subtitles.length);
                         window.fireflyCachedSubtitle = subtitles[randomIndex];
+                        window.fireflyCachedSubtitleIndex = randomIndex;
                     }
-                    subtitleElement.textContent = window.fireflyCachedSubtitle;
+                    const mainEl = subtitleElement.querySelector('.banner-subtitle-main');
+                    if (mainEl) {
+                        mainEl.textContent = window.fireflyCachedSubtitle;
+                    } else {
+                        subtitleElement.textContent = window.fireflyCachedSubtitle;
+                    }
+                    // 同步更新翻译
+                    const transEl = subtitleElement.querySelector('.banner-subtitle-translation');
+                    if (transEl && Array.isArray(translations) && translations.length > 0) {
+                        const idx = window.fireflyCachedSubtitleIndex || 0;
+                        transEl.textContent = translations[idx] || translations[0] || "";
+                    }
                 }
             } catch (e) {
                 console.error("Failed to parse subtitles", e);

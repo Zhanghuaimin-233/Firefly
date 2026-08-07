@@ -16,9 +16,12 @@ export type BackgroundWallpaperConfig = {
 		homeText?: {
 			enable: boolean; // 是否在首页显示自定义文字（全局开关）
 			title?: string; // 主标题
+			titleTranslation?: string; // 主标题中文翻译（显示在主标题下方，字号较小）
 			subtitle?: string | string[]; // 副标题，支持单个字符串或字符串数组
+			subtitleTranslation?: string | string[]; // 副标题中文翻译，与 subtitle 一一对应（数组长度需一致）
 			titleSize?: string; // 主标题字体大小，如 "3.5rem"
 			subtitleSize?: string; // 副标题字体大小，如 "1.5rem"
+			translationSize?: string; // 中文翻译字体大小，如 "1rem"，默认 "1rem"
 			typewriter?: {
 				enable: boolean; // 是否启用打字机效果
 				speed: number; // 打字速度（毫秒）
