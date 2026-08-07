@@ -51,7 +51,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 			{
 				name: "心想い ～ココロオモイ～",
 				artist: "内海孝彰",
-				url: "/assets/music/内海孝彰 - 心想い ～ココロオモイ～ -絆、つないで。こころ、結んで。離別と決意-.flac",
+				url: "/assets/music/内海孝彰 - 心想い ～ココロオモイ～ -絆、つないで。こころ、結んで。離別と決意-.opus",
 				cover: "/assets/music/cover/内海孝彰 - 心想い ～ココロオモイ～ -絆、つないで。こころ、結んで。離別と決意-.avif",
 				lrc: "",
 				instrumental: true
