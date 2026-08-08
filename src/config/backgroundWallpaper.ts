@@ -76,9 +76,9 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 是否启用主页横幅文字
 			enable: true,
 			// 主页横幅主标题
-			title: "With You, My Lord.",
+			title: "With You, My Lord~",
 			// 主页横幅主标题中文翻译（显示在主标题下方，字号较小，可选）
-			titleTranslation: "与你同在，我的主。",
+			titleTranslation: "愿与你，共赴远方~",
 			// 主页横幅主标题字体大小
 			titleSize: "4.5rem",
 			// 主页横幅副标题
@@ -92,12 +92,12 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			],
 			// 主页横幅副标题中文翻译（与 subtitle 一一对应，打字机模式下跟随英文同步切换，可选）
 			subtitleTranslation: [
-				"穿过低语的风，我相随",
-				"在翠绿的叶下，我等候",
-				"沿着遥远的路，我伴你同行",
-				"在温柔的晨光中，我献上祈祷",
-				"穿过流转的四季，我驻留",
-				"无论你去往何方，我都将追随",
+				"循着风声，我来到你身旁",
+				"静候绿荫之下，等待与你相逢",
+				"走过漫长旅途，也不曾与你分离",
+				"星光沉入夜色，我为你轻声祈愿",
+				"任四季流转，我依然留在这里",
+				"只愿前路漫漫，始终伴你左右",
 			],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",
@@ -113,7 +113,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 				// 删除速度（毫秒）
 				deleteSpeed: 50,
 				// 完全显示后的暂停时间（毫秒）
-				pauseTime: 2000,
+				pauseTime: 5000,
 			},
 		},
 		// 文章横幅信息："description" 显示描述，"meta" 显示日期、字数和阅读时长
