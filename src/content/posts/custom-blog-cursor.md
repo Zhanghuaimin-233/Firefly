@@ -49,7 +49,7 @@ export const cursorConfig: CursorConfig = {
     default:    "/assets/cursors/Arrow.cur",
     pointer:    "/assets/cursors/hand.cur",
     text:       "/assets/cursors/IBeam.cur",
-    // ... 十四种语义
+    // ... 其他各种语义
   },
 };
 ```
