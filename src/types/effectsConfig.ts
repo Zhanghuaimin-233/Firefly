@@ -53,24 +53,32 @@ export type CursorTrailConfig = {
 export type CursorConfig = {
 	enable: boolean; // 是否启用自定义光标
 	switchable?: boolean; // 是否允许用户在设置中切换
-	// 光标资源路径（相对于 public 目录），每个对应一种 CSS 光标类型
+	// 光标资源路径（相对于 public 目录），每个对应一种 CSS cursor 关键字
 	// 留空则该类型使用浏览器默认光标
+	// 字段覆盖 MDN cursor 规范中有 .cur 资源支撑或可语义复用的关键字
 	paths: {
-		default?: string; // 默认指针（Arrow）
-		pointer?: string; // 链接/可点击（hand）
-		text?: string; // 文本选择（IBeam）
-		crosshair?: string; // 十字（Cross）
-		help?: string; // 帮助（Help）
-		notAllowed?: string; // 不可用（No）
-		move?: string; // 移动（SizeAll）
-		nResize?: string; // 上下调整（SizeNS）
-		sResize?: string; // 上下调整（SizeNS）
-		eResize?: string; // 左右调整（SizeWE）
-		wResize?: string; // 左右调整（SizeWE）
-		neResize?: string; // 东北西南调整（SizeNESW）
-		swResize?: string; // 东北西南调整（SizeNESW）
-		nwResize?: string; // 西北东南调整（SizeNWSE）
-		seResize?: string; // 西北东南调整（SizeNWSE）
+		default?: string; // default：默认指针（Arrow）
+		pointer?: string; // pointer：链接/可点击（hand）
+		help?: string; // help：帮助（Help）
+		progress?: string; // progress：后台忙碌可交互（AppStarting）
+		text?: string; // text：文本选择（IBeam）
+		crosshair?: string; // crosshair：十字（Cross）
+		move?: string; // move：移动（SizeAll）
+		notAllowed?: string; // not-allowed：不可用（No）
+		noDrop?: string; // no-drop：不可放置（复用 No）
+		grab?: string; // grab：可抓取（复用 SizeAll）
+		grabbing?: string; // grabbing：抓取中（复用 SizeAll）
+		allScroll?: string; // all-scroll：全向滚动（复用 SizeAll）
+		colResize?: string; // col-resize：列宽调整（复用 SizeWE）
+		rowResize?: string; // row-resize：行高调整（复用 SizeNS）
+		nResize?: string; // n-resize：上调整（SizeNS）
+		sResize?: string; // s-resize：下调整（SizeNS）
+		eResize?: string; // e-resize：右调整（SizeWE）
+		wResize?: string; // w-resize：左调整（SizeWE）
+		neResize?: string; // ne-resize：东北调整（SizeNESW）
+		swResize?: string; // sw-resize：西南调整（SizeNESW）
+		nwResize?: string; // nw-resize：西北调整（SizeNWSE）
+		seResize?: string; // se-resize：东南调整（SizeNWSE）
 	};
 };
 

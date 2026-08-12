@@ -16,52 +16,94 @@ const config = {
 		if (window.__fireflyCursorInitialized) return;
 
 		// 构建光标 CSS 规则
+		// 覆盖 MDN cursor 规范中有 .cur 资源支撑或可语义复用的关键字
 		function buildCursorCSS(paths) {
 			const rules = [];
-			// 默认指针应用到所有元素
+			// default：默认指针，应用到所有元素
 			if (paths.default) {
 				rules.push(`*, *::before, *::after { cursor: url('${paths.default}'), auto !important; }`);
 			}
-			// 链接/可点击元素
+			// pointer：链接/可点击元素
 			if (paths.pointer) {
 				rules.push(
 					`a, button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], input[type="checkbox"], input[type="radio"], label, select, summary, [tabindex], .clickable, .cursor-pointer { cursor: url('${paths.pointer}'), pointer !important; }`,
 				);
 			}
-			// 文本选择
+			// help：帮助
+			if (paths.help) {
+				rules.push(`.cursor-help { cursor: url('${paths.help}'), help !important; }`);
+			}
+			// progress：后台忙碌可交互（aria-busy、loading 约定）
+			if (paths.progress) {
+				rules.push(
+					`[aria-busy="true"], .cursor-progress, [data-loading], .is-loading, .loading { cursor: url('${paths.progress}'), progress !important; }`,
+				);
+			}
+			// text：文本选择
 			if (paths.text) {
 				rules.push(
 					`input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="search"], input[type="tel"], input[type="url"], textarea, [contenteditable="true"], [contenteditable=""] { cursor: url('${paths.text}'), text !important; }`,
 				);
 			}
-			// 十字
+			// crosshair：十字
 			if (paths.crosshair) {
-				rules.push(`[class*="cursor-crosshair"], .cursor-crosshair { cursor: url('${paths.crosshair}'), crosshair !important; }`);
+				rules.push(`.cursor-crosshair { cursor: url('${paths.crosshair}'), crosshair !important; }`);
 			}
-			// 帮助
-			if (paths.help) {
-				rules.push(`[class*="cursor-help"], .cursor-help { cursor: url('${paths.help}'), help !important; }`);
+			// move：移动
+			if (paths.move) {
+				rules.push(`.cursor-move { cursor: url('${paths.move}'), move !important; }`);
 			}
-			// 不可用
+			// not-allowed：不可用
 			if (paths.notAllowed) {
 				rules.push(`[disabled], [aria-disabled="true"], .cursor-not-allowed { cursor: url('${paths.notAllowed}'), not-allowed !important; }`);
 			}
-			// 移动
-			if (paths.move) {
-				rules.push(`[class*="cursor-move"], .cursor-move, .cursor-grab { cursor: url('${paths.move}'), move !important; }`);
+			// no-drop：不可放置（语义复用 not-allowed）
+			if (paths.noDrop) {
+				rules.push(`.cursor-no-drop { cursor: url('${paths.noDrop}'), no-drop !important; }`);
 			}
-			// 调整大小：n/s/e/w/ne/sw/nw/se
+			// grab / grabbing：抓取（语义复用 move）
+			if (paths.grab) {
+				rules.push(`.cursor-grab { cursor: url('${paths.grab}'), grab !important; }`);
+			}
+			if (paths.grabbing) {
+				rules.push(`.cursor-grabbing { cursor: url('${paths.grabbing}'), grabbing !important; }`);
+			}
+			// all-scroll：全向滚动（语义复用 move）
+			if (paths.allScroll) {
+				rules.push(`.cursor-all-scroll { cursor: url('${paths.allScroll}'), all-scroll !important; }`);
+			}
+			// col-resize / row-resize：列宽/行高调整（语义复用对应双向 resize）
+			if (paths.colResize) {
+				rules.push(`.cursor-col-resize { cursor: url('${paths.colResize}'), col-resize !important; }`);
+			}
+			if (paths.rowResize) {
+				rules.push(`.cursor-row-resize { cursor: url('${paths.rowResize}'), row-resize !important; }`);
+			}
+			// 8 方向单向 resize：每个方向独立配置，避免对向被静默忽略
+			// 双向 class（ns/ew/nesw/nwse）复用主方向资源
 			if (paths.nResize) {
-				rules.push(`.cursor-n-resize, .cursor-s-resize { cursor: url('${paths.nResize}'), ns-resize !important; }`);
+				rules.push(`.cursor-n-resize, .cursor-ns-resize { cursor: url('${paths.nResize}'), n-resize !important; }`);
+			}
+			if (paths.sResize) {
+				rules.push(`.cursor-s-resize { cursor: url('${paths.sResize}'), s-resize !important; }`);
 			}
 			if (paths.eResize) {
-				rules.push(`.cursor-e-resize, .cursor-w-resize { cursor: url('${paths.eResize}'), ew-resize !important; }`);
+				rules.push(`.cursor-e-resize, .cursor-ew-resize { cursor: url('${paths.eResize}'), e-resize !important; }`);
+			}
+			if (paths.wResize) {
+				rules.push(`.cursor-w-resize { cursor: url('${paths.wResize}'), w-resize !important; }`);
 			}
 			if (paths.neResize) {
-				rules.push(`.cursor-ne-resize, .cursor-sw-resize { cursor: url('${paths.neResize}'), nesw-resize !important; }`);
+				rules.push(`.cursor-ne-resize, .cursor-nesw-resize { cursor: url('${paths.neResize}'), ne-resize !important; }`);
+			}
+			if (paths.swResize) {
+				rules.push(`.cursor-sw-resize { cursor: url('${paths.swResize}'), sw-resize !important; }`);
 			}
 			if (paths.nwResize) {
-				rules.push(`.cursor-nw-resize, .cursor-se-resize { cursor: url('${paths.nwResize}'), nwse-resize !important; }`);
+				rules.push(`.cursor-nw-resize, .cursor-nwse-resize { cursor: url('${paths.nwResize}'), nw-resize !important; }`);
+			}
+			if (paths.seResize) {
+				rules.push(`.cursor-se-resize { cursor: url('${paths.seResize}'), se-resize !important; }`);
 			}
 			return rules.join('\n');
 		}
