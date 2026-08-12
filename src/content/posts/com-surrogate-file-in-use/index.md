@@ -4,7 +4,7 @@ published: 2026-06-25
 description: "文件被 COM Surrogate 占用无法删除时，通过缩略图设置与资源监视器结束关联进程的解决办法。"
 image: "./images/file-20260625171739512.png"
 tags: [Windows, COM Surrogate, 文件占用, 排错]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "com-surrogate-file-in-use"
 ---

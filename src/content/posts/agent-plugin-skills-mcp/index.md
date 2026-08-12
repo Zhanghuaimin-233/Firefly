@@ -5,7 +5,7 @@ updated: 2026-08-12
 description: 用大白话拆解 AI Agent 里最容易混的三个词——Skill、MCP、Plugin。一个教 Agent 怎么干，一个给 Agent 发工具，一个把教程和工具装进一个箱子，三者经常一层套一层。
 image: ./images/01-three-layers-labeled.webp
 tags: [AI Agent, Skill, MCP, Plugin]
-category: AI Agent
+category: AI日常
 draft: false
 slug: agent-plugin-skills-mcp
 ---

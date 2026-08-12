@@ -4,7 +4,7 @@ published: 2026-05-12
 description: "通过注册表 FlightSettingsMaxPauseDays 延长 Windows 系统更新暂停天数的方法。"
 image: ""
 tags: [Windows, 系统更新, 注册表, 技巧]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "windows-extend-update-period"
 ---

@@ -4,7 +4,7 @@ published: 2025-04-18
 description: "VMware Workstation 提示不支持 CPU 虚拟化时的解决办法，开启 BIOS 虚拟化并替换相关组件。"
 image: "./images/file-20260517013421876.png"
 tags: [VMware, 虚拟机, CPU 虚拟化, 排错]
-category: "虚拟机"
+category: Windows 杂谈
 draft: false
 slug: "vmware-cpu-virtualization-fix"
 author: "张先生的深夜课堂"

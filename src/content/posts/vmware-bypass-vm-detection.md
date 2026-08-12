@@ -4,7 +4,7 @@ published: 2026-05-08
 description: "通过在 .vmx 配置文件中添加 monitor_control.restrict_backdoor 等参数，绕过虚拟机检测的方法。"
 image: ""
 tags: [VMware, 虚拟机, 排错]
-category: "虚拟机"
+category: Windows 杂谈
 draft: false
 slug: "vmware-bypass-vm-detection"
 ---

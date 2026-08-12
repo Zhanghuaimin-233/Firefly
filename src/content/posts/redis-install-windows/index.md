@@ -4,7 +4,7 @@ published: 2022-02-23
 description: Windows 下 Redis 的安装部署，以及 treeNMS、RedisStudio、Redis Desktop Manager 等可视化工具的使用。
 image: "./images/0_1.png"
 tags: [Redis, 数据库, Windows, 安装教程]
-category: 数据库
+category: 环境搭建
 draft: false
 slug: redis-install-windows
 author: "明金同学"

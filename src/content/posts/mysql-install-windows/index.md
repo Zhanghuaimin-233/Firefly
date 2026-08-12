@@ -4,7 +4,7 @@ published: 2026-05-28
 description: Windows 下 MySQL 8.0 安装与验证的保姆级图文教程，覆盖安装向导、服务配置、常见失败处理与两种验证方式。
 image: "./images/41bbf33d6e1cc1c3e9487ec9aaefc93e.png"
 tags: [MySQL, 数据库, Windows, 安装教程]
-category: 数据库
+category: 环境搭建
 draft: false
 slug: mysql-install-windows
 author: "忧乐君"

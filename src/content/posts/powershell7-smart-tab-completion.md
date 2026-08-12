@@ -4,7 +4,7 @@ published: 2025-11-05
 description: "通过 PSReadLine 配置，将 Win11 的 Tab 补全与预测补全（右箭头）融合为智能 Tab 处理。"
 image: ""
 tags: [PowerShell, Windows, Tab 补全, 技巧]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "powershell7-smart-tab-completion"
 author: "Merrick"

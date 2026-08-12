@@ -4,7 +4,7 @@ published: 2026-06-29
 description: 记录 Windows 下 Codex 的 Computer Use 插件不可用问题的排查与修复过程。
 image: ""
 tags: [Codex, Windows, 排错, AI Agent]
-category: 开发工具
+category: AI日常
 draft: false
 slug: codex-windows-computer-use-fix
 ---

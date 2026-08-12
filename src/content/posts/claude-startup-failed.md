@@ -4,7 +4,7 @@ published: 2026-05-12
 description: Claude Code 启动失败（含 ps1 不是可执行程序）时，通过重装更新解决的办法。
 image: ""
 tags: [Claude Code, 排错]
-category: Claude Code
+category: AI日常
 draft: false
 slug: claude-startup-failed
 ---

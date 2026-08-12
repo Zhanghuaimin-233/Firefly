@@ -4,7 +4,7 @@ published: 2026-08-06
 description: "对比 Claude Code Auto 与 OpenCode 的免审批机制，讲清静态权限 allow 与运行时 --auto 的区别，并给出无审批但保留危险操作确认的多种配置方案。"
 image: "./images/file-20260806194806621.png"
 tags: [Claude Code, OpenCode, AI 编程, 权限配置]
-category: AI 工具
+category: AI日常
 draft: false
 slug: claude-code-auto-to-opencode
 ---

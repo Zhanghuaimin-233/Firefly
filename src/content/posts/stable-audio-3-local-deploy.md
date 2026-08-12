@@ -4,7 +4,7 @@ published: 2026-06-22
 description: "记录在 Windows 下用 uv + CUDA 本地部署 Stability-AI/stable-audio-3，并运行 medium 与 small-sfx 两个模型的完整流程。"
 image: ""
 tags: [Stable Audio, AI 部署, 本地模型, Gradio]
-category: "AI 部署"
+category: AI日常
 draft: false
 slug: "stable-audio-3-local-deploy"
 ---

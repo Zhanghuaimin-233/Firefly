@@ -4,7 +4,7 @@ published: 2026-05-12
 description: "通过注册表键值恢复 Windows 11 经典右键菜单，或回退到新版菜单的方法（含一键脚本）。"
 image: ""
 tags: [Windows 11, 右键菜单, 注册表, 技巧]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "win11-classic-right-click-menu"
 ---

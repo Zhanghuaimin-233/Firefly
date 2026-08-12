@@ -4,7 +4,7 @@ published: 2026-04-08
 description: Windows 下 Maven 的下载、安装与环境变量配置，含国内镜像源与基础命令实战。
 image: "./images/0_1.png"
 tags: [Maven, Java, Windows, 安装教程]
-category: Java
+category: 环境搭建
 draft: false
 slug: maven-install-windows
 author: "程序猿_极客"

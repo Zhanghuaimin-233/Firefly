@@ -4,7 +4,7 @@ published: 2022-04-11
 description: "解决 Windows 中 WindowsApps 文件夹拒绝访问的问题，通过获取权限与修改所有者访问该目录。"
 image: "./images/0_1.png"
 tags: [Windows, WindowsApps, 权限, 排错]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "windowsapps-folder-access-denied"
 author: "Syc1102g"

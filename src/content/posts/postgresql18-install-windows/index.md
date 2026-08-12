@@ -4,7 +4,7 @@ published: 2025-11-27
 description: Windows 10/11 下安装 PostgreSQL 18 的完整图文教程，覆盖 pgAdmin 4、初次连接、切换中文与建库建用户全流程。
 image: "./images/0_1.png"
 tags: [PostgreSQL, 数据库, Windows, 安装教程]
-category: 数据库
+category: 环境搭建
 draft: false
 slug: postgresql18-install-windows
 author: "獨梟"

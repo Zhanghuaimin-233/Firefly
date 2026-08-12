@@ -4,7 +4,7 @@ published: 2026-05-10
 description: "在 Windows 下获取虚幻 4.26.2 源码、配置 VS2019 编译环境并修改 UnMesh4.cpp 源码的完整步骤。"
 image: ""
 tags: [UE4, Unreal Engine, 编译, 游戏开发]
-category: "游戏开发"
+category: 环境搭建
 draft: false
 slug: "ue4-engine-build-modify"
 ---

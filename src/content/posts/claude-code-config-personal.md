@@ -4,7 +4,7 @@ published: 2026-06-22
 description: 一份个人向的 Claude Code 配置笔记，覆盖设置项、工作流与常用技巧。
 image: ""
 tags: [Claude Code, 配置, 开发工具]
-category: Claude Code
+category: AI日常
 draft: false
 slug: claude-code-config-personal
 ---

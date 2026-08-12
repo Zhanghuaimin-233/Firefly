@@ -4,7 +4,7 @@ published: 2026-07-21
 description: "解决 Windows 图片密码在锁屏界面左侧出现黑边的问题，并记录锁屏图片的保存路径。"
 image: "./images/file-20260721212504913.png"
 tags: [Windows, 锁屏, 图片密码, 排错]
-category: "Windows"
+category: Windows 杂谈
 draft: false
 slug: "windows-picture-password-black-bar"
 ---

@@ -4,7 +4,7 @@ published: 2026-03-13
 description: 关闭 Claude Code 的提交署名，并清理已经写入 Git 历史记录的署名信息。
 image: ""
 tags: [Claude Code, Git, 配置]
-category: Claude Code
+category: AI日常
 draft: false
 slug: claude-code-git-attribution
 author: "Eric"

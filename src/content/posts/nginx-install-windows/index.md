@@ -4,7 +4,7 @@ published: 2023-03-22
 description: Windows 下 Nginx 的下载、安装、目录结构与基础使用（反向代理、静态服务）详解。
 image: "./images/0_1.png"
 tags: [Nginx, Windows, 安装教程, Web服务器]
-category: 运维
+category: 环境搭建
 draft: false
 slug: nginx-install-windows
 author: "来一份辣子鸡丁"

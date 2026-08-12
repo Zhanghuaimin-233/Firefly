@@ -4,7 +4,7 @@ published: 2026-08-12
 description: 介绍 microsoft/playwright-cli 与 eze-is/web-access 两个让 Agent 操作浏览器的项目，解析它们的定位差异、能力边界，以及如何配合使用，让 Coding Agent 真正“亲自看一眼”自己写的页面。
 image: ./images/01-playwright-verification-loop.webp
 tags: [AI Agent, Playwright, Web Access, 浏览器自动化]
-category: AI 工具
+category: AI日常
 draft: false
 slug: playwright-cli-web-access
 ---
