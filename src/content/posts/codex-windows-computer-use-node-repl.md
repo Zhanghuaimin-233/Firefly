@@ -304,4 +304,4 @@ GitHub 上已经存在高度相关的开放 Issue：
 
 ## 上一篇记录
 
-- [Codex Windows Computer Use 插件不可用修复记录](/posts/codex-windows-computer-use-fix)
+- [Codex Windows Computer Use 插件不可用修复记录](/posts/codex-windows-computer-use-fix/)
