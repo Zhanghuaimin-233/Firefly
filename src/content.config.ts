@@ -3,6 +3,15 @@ import type { CollectionConfig } from "astro/content/config";
 import { glob } from "astro/loaders";
 import { type ZodType, z } from "astro/zod";
 
+type PostAudioInput = {
+	url: string;
+	name?: string;
+	artist?: string;
+	cover?: string;
+	lrc?: string;
+	instrumental?: boolean;
+};
+
 type PostData = {
 	title: string;
 	published: Date;
@@ -21,6 +30,7 @@ type PostData = {
 	comment: boolean;
 	password: string;
 	passwordHint: string;
+	audio?: string | PostAudioInput;
 	prevTitle: string;
 	prevSlug: string;
 	nextTitle: string;
@@ -58,6 +68,19 @@ const postsCollection: ContentCollection<PostData> = defineCollection({
 		comment: z.boolean().optional().default(true),
 		password: z.string().optional().default(""),
 		passwordHint: z.string().optional().default(""),
+		audio: z
+			.union([
+				z.string(),
+				z.object({
+					url: z.string(),
+					name: z.string().optional(),
+					artist: z.string().optional(),
+					cover: z.string().optional(),
+					lrc: z.string().optional(),
+					instrumental: z.boolean().optional(),
+				}),
+			])
+			.optional(),
 
 		/* For internal use */
 		prevTitle: z.string().default(""),
