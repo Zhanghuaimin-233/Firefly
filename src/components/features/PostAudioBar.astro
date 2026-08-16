@@ -173,7 +173,9 @@ const trackJson = JSON.stringify({
     }
     window.addEventListener('fm:play-state', onGlobalPlayState);
 
-    // Swup 切页清理：组件随 DOM 移除时停止播放并恢复全局音乐
+    // Swup 切页清理：组件随 DOM 移除时停止播放并恢复全局音乐。
+    // 注意：Swup 替换的是整个 #swup-container 元素（从其父节点摘除），而非其内容，
+    // 因此必须监听 body 的 subtree，监听 root.parentNode 的 childList 永远不会触发。
     var observer = new MutationObserver(function (mutations) {
         for (var i = 0; i < mutations.length; i++) {
             var removed = mutations[i].removedNodes;
@@ -188,8 +190,6 @@ const trackJson = JSON.stringify({
             }
         }
     });
-    if (root.parentNode) {
-        observer.observe(root.parentNode, { childList: true });
-    }
+    observer.observe(document.body, { childList: true, subtree: true });
 })();
 </script>
