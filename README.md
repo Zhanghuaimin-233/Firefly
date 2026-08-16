@@ -220,6 +220,7 @@ draft: false
 lang: zh-CN      # 仅当文章语言与 `siteConfig.ts` 中的网站语言不同时需要设置
 pinned: false    # 置顶
 comment: true    # 是否允许评论
+audio: /assets/music/song.opus  # 文章绑定音频（本仓库扩展）：字符串 URL 或对象 { url, name, artist, cover, lrc, instrumental }
 ---
 ```
 

@@ -1,8 +1,8 @@
 # Firefly 项目 Code Wiki
 
-> **文档版本**：v1.2 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
+> **文档版本**：v1.3 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
 >
-> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步），2026-08-06（v1.2 新增看板娘多模型架构）
+> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步），2026-08-06（v1.2 新增看板娘多模型架构），2026-08-16（v1.3 新增文章绑定音频功能）
 >
 > **适用对象**：维护本仓库的开发者、AI Agent、二次贡献者
 
@@ -196,7 +196,7 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 
 | 集合 | 加载路径 | Schema 概要 |
 |------|---------|------------|
-| `posts` | `src/content/posts/**/*.{md,mdx}` | `title` / `published` / `updated?` / `draft?` / `description?` / `image?` / `tags?` / `category?` / `lang?` / `pinned?` / `author?` / `sourceLink?` / `licenseName?` / `licenseUrl?` / `comment?` / `password?` / `passwordHint?` 以及内部使用的 `prevTitle` / `prevSlug` / `nextTitle` / `nextSlug` |
+| `posts` | `src/content/posts/**/*.{md,mdx}` | `title` / `published` / `updated?` / `draft?` / `description?` / `image?` / `tags?` / `category?` / `lang?` / `pinned?` / `author?` / `sourceLink?` / `licenseName?` / `licenseUrl?` / `comment?` / `password?` / `passwordHint?` / `audio?`（文章绑定音频，字符串 URL 或 `{ url, name?, artist?, cover?, lrc?, instrumental? }` 对象，由 `post-audio.ts` 的 `normalizePostAudio()` 归一）以及内部使用的 `prevTitle` / `prevSlug` / `nextTitle` / `nextSlug` |
 | `spec` | `src/content/spec/**/*.{md,mdx}` | 无 schema 约束（自由 frontmatter） |
 
 **Draft 行为**：`PROD` 环境下自动过滤 `draft: true` 的文章（`content-utils.ts` 中的 `import.meta.env.PROD` 三元判断）。
@@ -605,7 +605,7 @@ new window.spine.SpinePlayer("spine-player-container", {
 | `comment/` | Artalk / Disqus / Giscus / Twikoo / Waline + `index.astro` 路由 | `.astro`，运行时加载远程脚本 |
 | `common/` | ButtonLink / ButtonTag / ClientPagination / CoverImage / DropdownItem / DropdownPanel / FloatingButton / Icon / ImageWrapper / Markdown / Pagination / PioMessageBox / WidgetLayout | `.astro` + `.svelte` 混合 |
 | `controls/` | ArchivePanel / BackToComment / BackToHome / BackToTop / DisplaySettings / FloatingControls / FloatingTOC / LayoutSwitchButton / LightDarkSwitch / ScrollDownIndicator / Search / WallpaperSwitch | `.svelte` 为主（交互控件） |
-| `features/` | BackgroundPlayer / CustomCursor / CursorTrail / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
+| `features/` | BackgroundPlayer / CustomCursor / CursorTrail / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / PostAudioBar / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
 | `layout/` | CategoryBar / ConfigCarrier / DropdownMenu / Footer / NavMenuPanel / Navbar / PostCard / PostMeta / PostPage / PostStats / SideBar | `.astro`，页面骨架 |
 | `misc/` | License / RecommendedPost / SharePoster | `.astro` + `.svelte` |
 | `pages/` | anime / bangumi / gallery / AdvancedSearch | `.svelte` 为主（页面级交互组件） |
@@ -685,6 +685,7 @@ new window.spine.SpinePlayer("spine-player-container", {
 | [crypto-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/crypto-utils.ts) | `encryptContent(html, password, slug)` | AES-256-GCM 加密 HTML：HMAC-SHA256 派生确定性 salt/iv（同输入同输出，便于 sessionStorage 缓存），PBKDF2 10 万次迭代派生密钥，输出 `base64(salt[16]+iv[12]+authTag[16]+ciphertext)` |
 | [fontHelper.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/fontHelper.ts) | `collectUsedFontCssVars(config)`、`toPublicPath(rawSrc)` | 收集 `selected` / `bannerTitleFont` / `navbarTitleFont` / `codeFont` 中非 `system` 的 CSS 变量名；将 `./public/...`、`public/...`、`/public/...` 转为 `/...` 访问路径 |
 | [gallery-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/gallery-utils.ts) | `scanAlbumPhotos(albumId)`、`getAlbumCover(album, photos)` | 扫描 `public/gallery/<albumId>/` 下图片（jpg/png/webp/avif/gif），`cover.*` 排首位；读取 `urls.txt` 远程 URL；封面优先级：手动 > cover.* > 首图 |
+| [post-audio.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/post-audio.ts) | `normalizePostAudio(raw)`、类型 `PostAudioInput`/`PostAudioTrack` | 文章 frontmatter `audio` 字段归一：字符串/对象双模式统一为曲目对象；`url`/`cover` 完整 URL 透传、相对路径经 `url()` 解析，`lrc` 区分 URL 与内联 LRC 文本，字符串模式 `name` 取文件名（decodeURIComponent，去扩展名） |
 | [lqip-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/lqip-utils.ts) | `getLqipGradient(src, basePath?, isPublic?)`、`isExternalImage(src)`、`getLqipStyle(src, ...)`、`getLqipProps(src, ...)` | LQIP 渐变：从 `@constants/lqips.json` 读取 18 字符 hex 紧凑格式，解码为 `linear-gradient(135deg, #xxx 0%, #xxx 50%, #xxx 100%)`；外部图片降级 |
 | [responsive-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/responsive-utils.ts) | `getResponsiveSidebarConfig()`、`generateGridClasses(config)`、`generateSidebarClasses(config)`、`generateRightSidebarClasses(config)`、`generateMainContentClasses(config)`、类型 `ResponsiveSidebarConfig` | 基于 `sidebarLayoutConfig.position` 与 `tabletSidebar` 生成 Tailwind 网格类（768px / 769px / 1280px 三档断点） |
 | [image-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/image-utils.ts) | `processCoverImageSync(image, seed)`、`getApiUrlList(image, seed)`、`getImageFormats()`、`getImageQuality()`、`getFallbackFormat()`、`shouldAddNoReferrer(urlStr)` | 封面图处理：`image==="api"` 返回随机封面 API URL（带 seed 哈希）；读取 `siteConfig.imageOptimization`；通配符域名匹配 |
