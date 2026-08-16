@@ -1,0 +1,195 @@
+---
+import { Icon } from "astro-icon/components";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import type { PostAudioTrack } from "@/utils/post-audio";
+
+interface Props {
+	track: PostAudioTrack;
+}
+
+const { track } = Astro.props;
+
+const barId = `post-audio-bar-${Math.random().toString(36).slice(2, 9)}`;
+
+const labels = {
+	play: i18n(I18nKey.musicPlay),
+	pause: i18n(I18nKey.musicPause),
+};
+
+const trackJson = JSON.stringify({
+	name: track.name,
+	artist: track.artist,
+	url: track.url,
+	cover: track.cover || "",
+});
+---
+
+<div id={barId} class="post-audio-bar mb-6 rounded-xl bg-black/5 dark:bg-white/10 p-3 sm:p-4 flex items-center gap-3 sm:gap-4 onload-animation">
+	<div class="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden shrink-0 bg-black/10 dark:bg-white/10 flex items-center justify-center text-black/40 dark:text-white/40">
+		{track.cover ? (
+			<img src={track.cover} alt={track.name} class="h-full w-full object-cover" loading="lazy" />
+		) : (
+			<Icon is:inline name="material-symbols:music-note-rounded" class="text-2xl" />
+		)}
+	</div>
+	<div class="flex-1 min-w-0">
+		<div class="text-sm font-medium truncate text-black/80 dark:text-white/80">{track.name}</div>
+		{track.artist && (
+			<div class="text-xs truncate text-black/45 dark:text-white/45">{track.artist}</div>
+		)}
+		<div class="mt-1.5 flex items-center gap-2">
+			<span class="post-audio-current text-[11px] tabular-nums text-black/45 dark:text-white/45">0:00</span>
+			<div class="post-audio-progress-wrapper relative flex-1 h-1.5 rounded-full bg-black/10 dark:bg-white/15 cursor-pointer">
+				<div class="post-audio-progress absolute inset-y-0 left-0 rounded-full bg-(--primary)" style="width: 0%"></div>
+			</div>
+			<span class="post-audio-duration text-[11px] tabular-nums text-black/45 dark:text-white/45">0:00</span>
+		</div>
+	</div>
+	<button
+		type="button"
+		class="post-audio-toggle h-10 w-10 rounded-full bg-(--primary) text-white dark:text-black/70 flex items-center justify-center shrink-0 transition hover:scale-105 active:scale-95"
+		aria-label={labels.play}
+		title={labels.play}
+	>
+		<span class="post-audio-icon-play"><Icon is:inline name="material-symbols:play-arrow-rounded" class="text-xl" /></span>
+		<span class="post-audio-icon-pause hidden"><Icon is:inline name="material-symbols:pause-rounded" class="text-xl" /></span>
+	</button>
+	<div class="post-audio-error hidden text-xs text-red-400 shrink-0"></div>
+	<audio class="post-audio-element hidden" preload="metadata" src={track.url}></audio>
+</div>
+
+<script is:inline define:vars={{ barId, trackJson, labels }}>
+(function () {
+    var root = document.getElementById(barId);
+    if (!root) return;
+
+    var audio = root.querySelector('.post-audio-element');
+    var toggleBtn = root.querySelector('.post-audio-toggle');
+    var iconPlay = root.querySelector('.post-audio-icon-play');
+    var iconPause = root.querySelector('.post-audio-icon-pause');
+    var progressEl = root.querySelector('.post-audio-progress');
+    var progressWrapper = root.querySelector('.post-audio-progress-wrapper');
+    var currentEl = root.querySelector('.post-audio-current');
+    var durationEl = root.querySelector('.post-audio-duration');
+    var errorEl = root.querySelector('.post-audio-error');
+
+    var wasGlobalPlaying = false;
+
+    function mgr() { return window.__fireflyMusic; }
+
+    function formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        var min = Math.floor(seconds / 60);
+        var sec = Math.floor(seconds % 60);
+        return min + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    function setPlayingUI(playing) {
+        iconPlay.classList.toggle('hidden', playing);
+        iconPause.classList.toggle('hidden', !playing);
+        toggleBtn.setAttribute('aria-label', playing ? labels.pause : labels.play);
+        toggleBtn.setAttribute('title', playing ? labels.pause : labels.play);
+    }
+
+    // 播放前互斥：暂停全局背景音乐并记录状态
+    function pauseGlobalIfPlaying() {
+        var m = mgr();
+        if (m && m.getState().isPlaying) {
+            wasGlobalPlaying = true;
+            m.togglePlay();
+        }
+    }
+
+    // 离页/销毁时：恢复全局背景音乐
+    function resumeGlobalIfNeeded() {
+        if (!wasGlobalPlaying) return;
+        wasGlobalPlaying = false;
+        var m = mgr();
+        if (m && !m.getState().isPlaying) m.togglePlay();
+    }
+
+    function play() {
+        pauseGlobalIfPlaying();
+        audio.play().then(function () {
+            setPlayingUI(true);
+        }).catch(function (e) {
+            if (e.name === 'AbortError') return;
+            showError();
+        });
+    }
+
+    function pause() {
+        audio.pause();
+        setPlayingUI(false);
+    }
+
+    function showError() {
+        errorEl.textContent = '音频加载失败';
+        errorEl.classList.remove('hidden');
+        setPlayingUI(false);
+    }
+
+    toggleBtn.addEventListener('click', function () {
+        if (audio.paused) play();
+        else pause();
+    });
+
+    audio.addEventListener('timeupdate', function () {
+        if (!audio.duration || isNaN(audio.duration)) return;
+        currentEl.textContent = formatTime(audio.currentTime);
+        durationEl.textContent = formatTime(audio.duration);
+        progressEl.style.width = (audio.currentTime / audio.duration) * 100 + '%';
+    });
+
+    audio.addEventListener('loadedmetadata', function () {
+        durationEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('ended', function () {
+        setPlayingUI(false);
+        progressEl.style.width = '0%';
+        currentEl.textContent = '0:00';
+        resumeGlobalIfNeeded();
+    });
+
+    audio.addEventListener('error', function () {
+        if (audio.src) showError();
+    });
+
+    progressWrapper.addEventListener('click', function (e) {
+        if (!audio.duration || isNaN(audio.duration)) return;
+        var rect = progressWrapper.getBoundingClientRect();
+        var percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        audio.currentTime = percent * audio.duration;
+    });
+
+    // 读者手动操作全局播放器时：文章音频让路，且不记恢复标记
+    function onGlobalPlayState(e) {
+        if (e.detail && e.detail.isPlaying) {
+            wasGlobalPlaying = false;
+            if (!audio.paused) pause();
+        }
+    }
+    window.addEventListener('fm:play-state', onGlobalPlayState);
+
+    // Swup 切页清理：组件随 DOM 移除时停止播放并恢复全局音乐
+    var observer = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            var removed = mutations[i].removedNodes;
+            for (var j = 0; j < removed.length; j++) {
+                if (removed[j] === root || (removed[j].contains && removed[j].contains(root))) {
+                    pause();
+                    resumeGlobalIfNeeded();
+                    window.removeEventListener('fm:play-state', onGlobalPlayState);
+                    observer.disconnect();
+                    return;
+                }
+            }
+        }
+    });
+    if (root.parentNode) {
+        observer.observe(root.parentNode, { childList: true });
+    }
+})();
+</script>

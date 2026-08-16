@@ -4,6 +4,8 @@ import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
 import EncryptedPost from "@components/features/EncryptedPost.astro";
 import KatexManager from "@components/features/KatexManager.astro";
+import PostAudioBar from "@/components/features/PostAudioBar.astro";
+import { normalizePostAudio } from "@/utils/post-audio";
 import License from "@components/misc/License.astro";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
@@ -104,6 +106,7 @@ const jsonLd = {
 	// TODO include cover image here
 };
 
+const postAudio = normalizePostAudio(entry.data.audio);
 const relatedPosts = await getRelatedPosts(entry, 5);
 ---
 
@@ -303,6 +306,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
 
       {entry.data.password ? (
         <EncryptedPost password={entry.data.password} slug={entry.id} hint={entry.data.passwordHint}>
+          {postAudio && <PostAudioBar track={postAudio} />}
           <Markdown class="mb-6 markdown-content onload-animation">
             <Content />
           </Markdown>
@@ -393,6 +397,7 @@ const relatedPosts = await getRelatedPosts(entry, 5);
         </EncryptedPost>
       ) : (
         <>
+          {postAudio && <PostAudioBar track={postAudio} />}
           <Markdown class="mb-6 markdown-content onload-animation">
             <Content />
           </Markdown>
