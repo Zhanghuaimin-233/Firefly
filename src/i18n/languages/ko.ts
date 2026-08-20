@@ -300,6 +300,7 @@ export const ko: Translation = {
 	[Key.sakuraEffect]: "벚꽃 효과",
 	[Key.customCursor]: "커스텀 커서",
 	[Key.cursorTrail]: "커서 트레일",
+	[Key.postAudioAutoPlay]: "게시글 오디오 자동 재생",
 	[Key.effectsSettings]: "효과 설정",
 	[Key.pioSettings]: "마스코트 설정",
 	[Key.pioModel]: "마스코트 모델",

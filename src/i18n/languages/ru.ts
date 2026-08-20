@@ -304,6 +304,7 @@ export const ru: Translation = {
 	[Key.sakuraEffect]: "Эффект сакуры",
 	[Key.customCursor]: "Кастомный курсор",
 	[Key.cursorTrail]: "След курсора",
+	[Key.postAudioAutoPlay]: "Автовоспроизведение аудио статьи",
 	[Key.effectsSettings]: "Настройки эффектов",
 	[Key.pioSettings]: "Настройки маскота",
 	[Key.pioModel]: "Модель маскота",

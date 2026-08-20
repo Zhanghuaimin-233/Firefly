@@ -295,6 +295,7 @@ export const zh_TW: Translation = {
 	[Key.sakuraEffect]: "櫻花特效",
 	[Key.customCursor]: "自訂游標",
 	[Key.cursorTrail]: "游標尾跡",
+	[Key.postAudioAutoPlay]: "文章音訊自動播放",
 	[Key.effectsSettings]: "特效設定",
 	[Key.pioSettings]: "看板娘設定",
 	[Key.pioModel]: "看板娘形象",

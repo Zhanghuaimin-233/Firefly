@@ -105,7 +105,7 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 - `EncryptedPost.astro` - 加密文章组件
 - `Live2DWidget.astro` - Live2D 看板娘组件
 - `MusicPlayer.astro` - 音乐播放器 UI 视图控制器（纯 UI，委托 MusicManager 进行播放控制）
-- `PostAudioBar.astro` - 文章绑定音频播放条（frontmatter `audio` 字段驱动，独立 audio 元素；与全局音乐互斥：播放时暂停全局音乐，离页恢复；监听 body subtree 感知 Swup 容器替换；加密文章中随解密注入）
+- `PostAudioBar.astro` - 文章绑定音频播放条（frontmatter `audio` 字段驱动，独立 audio 元素；与全局音乐互斥：播放时暂停全局音乐，离页恢复；监听 body subtree 感知 Swup 容器替换；加密文章中随解密注入；支持"文章音频自动播放"用户开关，见特效设置）
 - `SakuraEffect.astro` - 樱花飘落特效
 - `SpineModel.astro` - Spine 看板娘组件
 - `TypewriterText.astro` - 打字机动画效果

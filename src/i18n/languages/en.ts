@@ -302,6 +302,7 @@ export const en: Translation = {
 	[Key.sakuraEffect]: "Sakura Effect",
 	[Key.customCursor]: "Custom Cursor",
 	[Key.cursorTrail]: "Cursor Trail",
+	[Key.postAudioAutoPlay]: "Post Audio Autoplay",
 	[Key.effectsSettings]: "Effects Settings",
 	[Key.pioSettings]: "Mascot Settings",
 	[Key.pioModel]: "Mascot Model",

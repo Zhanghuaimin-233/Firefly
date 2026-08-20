@@ -295,6 +295,7 @@ enum I18nKey {
 	sakuraEffect = "sakuraEffect",
 	customCursor = "customCursor",
 	cursorTrail = "cursorTrail",
+	postAudioAutoPlay = "postAudioAutoPlay",
 	effectsSettings = "effectsSettings",
 	overlaySettings = "overlaySettings",
 	overlayOpacity = "overlayOpacity",

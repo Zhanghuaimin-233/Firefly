@@ -300,6 +300,7 @@ export const ja: Translation = {
 	[Key.sakuraEffect]: "桜エフェクト",
 	[Key.customCursor]: "カスタムカーソル",
 	[Key.cursorTrail]: "カーソルトレイル",
+	[Key.postAudioAutoPlay]: "記事オーディオ自動再生",
 	[Key.effectsSettings]: "エフェクト設定",
 	[Key.pioSettings]: "マスコット設定",
 	[Key.pioModel]: "マスコットモデル",

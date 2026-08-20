@@ -293,6 +293,7 @@ export const zh_CN: Translation = {
 	[Key.sakuraEffect]: "樱花特效",
 	[Key.customCursor]: "自定义光标",
 	[Key.cursorTrail]: "光标尾迹",
+	[Key.postAudioAutoPlay]: "文章音频自动播放",
 	[Key.effectsSettings]: "特效设置",
 	[Key.pioSettings]: "看板娘设置",
 	[Key.pioModel]: "看板娘形象",

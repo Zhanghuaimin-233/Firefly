@@ -21,6 +21,7 @@ import {
 	getDefaultPioModel,
 	getDefaultSakuraEnabled,
 	getDefaultCursorTrailEnabled,
+	getDefaultPostAudioAutoPlayEnabled,
 	getDefaultWavesEnabled,
 	getDefaultCursorEnabled,
 	getHue,
@@ -37,6 +38,7 @@ import {
 	getStoredSakuraEnabled,
 	getStoredCursorEnabled,
 	getStoredCursorTrailEnabled,
+	getStoredPostAudioAutoPlayEnabled,
 	getStoredWallpaperMode,
 	getStoredWavesEnabled,
 	setBannerCarouselEnabled,
@@ -53,6 +55,7 @@ import {
 	setSakuraEnabled,
 	setCursorEnabled,
 	setCursorTrailEnabled,
+	setPostAudioAutoPlayEnabled,
 	setWallpaperMode,
 	setWavesEnabled,
 } from "@utils/setting-utils";
@@ -113,6 +116,8 @@ let cursorEnabled = $state(false);
 const defaultCursorEnabled = getDefaultCursorEnabled();
 let cursorTrailEnabled = $state(false);
 const defaultCursorTrailEnabled = getDefaultCursorTrailEnabled();
+let postAudioAutoPlayEnabled = $state(false);
+const defaultPostAudioAutoPlayEnabled = getDefaultPostAudioAutoPlayEnabled();
 let pioEnabled = $state(getStoredPioEnabled());
 const defaultPioEnabled = getDefaultPioEnabled();
 let pioModelKey = $state(getStoredPioModel());
@@ -149,6 +154,8 @@ const isSakuraSwitchable = displaySettingsConfig.sakuraSwitchable;
 const isCursorSwitchable = cursorConfig?.switchable ?? false;
 // 是否允许用户切换光标花瓣特效
 const isCursorTrailSwitchable = cursorTrailConfig?.switchable ?? false;
+// 文章音频自动播放：始终允许用户切换（默认关闭）
+const isPostAudioAutoPlaySwitchable = true;
 // 是否允许用户切换看板娘（有可切换模型列表时才显示）
 const isPioSwitchable =
 	(spineModelConfig?.models?.length ?? 0) > 0 && (spineModelConfig?.enable ?? false);
@@ -434,6 +441,11 @@ function toggleCursorTrailEnabled() {
 	setCursorTrailEnabled(cursorTrailEnabled);
 }
 
+function togglePostAudioAutoPlayEnabled() {
+	postAudioAutoPlayEnabled = !postAudioAutoPlayEnabled;
+	setPostAudioAutoPlayEnabled(postAudioAutoPlayEnabled);
+}
+
 function togglePioEnabled() {
 	pioEnabled = !pioEnabled;
 	setPioEnabled(pioEnabled);
@@ -561,6 +573,7 @@ onMount(() => {
 	sakuraEnabled = getStoredSakuraEnabled();
 	cursorEnabled = getStoredCursorEnabled();
 	cursorTrailEnabled = getStoredCursorTrailEnabled();
+	postAudioAutoPlayEnabled = getStoredPostAudioAutoPlayEnabled();
 
 	// 从localStorage读取看板娘状态与模型选择
 	pioEnabled = getStoredPioEnabled();
@@ -1066,6 +1079,23 @@ $effect(() => {
 						<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
 							 class:left-0.5={!cursorTrailEnabled}
 							 class:left-5={cursorTrailEnabled}></div>
+					</div>
+				</button>
+				{/if}
+				{#if isPostAudioAutoPlaySwitchable}
+				<button
+					class="w-full btn-regular rounded-md py-2 px-3 flex items-center gap-3 text-left active:scale-95 transition-all relative overflow-hidden"
+					class:bg-(--btn-regular-bg-hover)={postAudioAutoPlayEnabled}
+					onclick={togglePostAudioAutoPlayEnabled}
+				>
+					<Icon icon="material-symbols:music-note-rounded" class="text-[1.25rem] shrink-0"></Icon>
+					<span class="text-sm flex-1">{i18n(I18nKey.postAudioAutoPlay)}</span>
+					<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
+						 class:bg-(--primary)={postAudioAutoPlayEnabled}
+						 class:bg-(--btn-regular-bg-active)={!postAudioAutoPlayEnabled}>
+						<div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+							 class:left-0.5={!postAudioAutoPlayEnabled}
+							 class:left-5={postAudioAutoPlayEnabled}></div>
 					</div>
 				</button>
 				{/if}

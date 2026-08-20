@@ -109,12 +109,15 @@ const trackJson = JSON.stringify({
         if (m && !m.getState().isPlaying) m.togglePlay();
     }
 
-    function play() {
+    // silent=true 用于挂载时的自动播放尝试：被浏览器拦截时静默降级为手动播放，
+    // 不显示错误提示（手动点击播放失败仍走 showError）
+    function play(silent) {
         pauseGlobalIfPlaying();
         audio.play().then(function () {
             setPlayingUI(true);
         }).catch(function (e) {
             if (e.name === 'AbortError') return;
+            if (silent) return; // NotAllowedError 等自动播放拦截：静默降级
             showError();
         });
     }
@@ -191,5 +194,16 @@ const trackJson = JSON.stringify({
         }
     });
     observer.observe(document.body, { childList: true, subtree: true });
+
+    // 文章音频自动播放（特效设置开关，默认关闭）：
+    // 开关开启时挂载即尝试播放；SPA 导航（有用户手势）可成功，
+    // 新标签页直达被浏览器拦截时静默降级为手动播放
+    try {
+        if (localStorage.getItem('postAudioAutoPlayEnabled') === 'true') {
+            play(true);
+        }
+    } catch (e) {
+        // localStorage 不可用时忽略，保持手动播放行为
+    }
 })();
 </script>

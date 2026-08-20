@@ -1242,6 +1242,35 @@ export function setCursorTrailEnabled(enabled: boolean): void {
 	);
 }
 
+// 文章音频自动播放开关函数（默认关闭，用户可在特效设置中启用）
+export function getDefaultPostAudioAutoPlayEnabled(): boolean {
+	return false;
+}
+
+export function getStoredPostAudioAutoPlayEnabled(): boolean {
+	if (typeof localStorage === "undefined") {
+		return getDefaultPostAudioAutoPlayEnabled();
+	}
+	const stored = localStorage.getItem("postAudioAutoPlayEnabled");
+	if (stored === null) {
+		return getDefaultPostAudioAutoPlayEnabled();
+	}
+	return stored === "true";
+}
+
+export function setPostAudioAutoPlayEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("postAudioAutoPlayEnabled", String(enabled));
+	window.dispatchEvent(
+		new CustomEvent("postAudioAutoPlayToggle", { detail: { enabled } }),
+	);
+}
+
 // Spine 看板娘开关函数
 export function getDefaultPioEnabled(): boolean {
 	return spineModelConfig?.enable ?? false;
