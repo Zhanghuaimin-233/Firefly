@@ -1088,7 +1088,7 @@ $effect(() => {
 					class:bg-(--btn-regular-bg-hover)={postAudioAutoPlayEnabled}
 					onclick={togglePostAudioAutoPlayEnabled}
 				>
-					<Icon icon="material-symbols:music-note-rounded" class="text-[1.25rem] shrink-0"></Icon>
+					<Icon icon="material-symbols:headphones-rounded" class="text-[1.25rem] shrink-0"></Icon>
 					<span class="text-sm flex-1">{i18n(I18nKey.postAudioAutoPlay)}</span>
 					<div class="w-10 h-5 rounded-full transition-all duration-200 relative"
 						 class:bg-(--primary)={postAudioAutoPlayEnabled}
