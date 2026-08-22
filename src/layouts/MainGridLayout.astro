@@ -369,7 +369,7 @@ const hasMultipleImages =
         {backgroundImages.mobile.map((src, index) => (
             <div class:list={["slide-item block lg:hidden", index === 0 && "active"]} data-index={index}>
                 <ImageWrapper
-                    alt="Mobile background image of the blog"
+                    alt=""
                     class="object-cover h-full w-full"
                     src={src}
                     position={backgroundWallpaper.banner?.position}
@@ -385,7 +385,7 @@ const hasMultipleImages =
             <div class:list={["slide-item hidden lg:block", index === 0 && "active"]} data-index={index}>
                 <ImageWrapper
                     id="banner"
-                    alt="Desktop background image of the blog"
+                    alt=""
                     class="object-cover h-full"
                     src={src}
                     position={backgroundWallpaper.banner?.position}
@@ -404,7 +404,7 @@ const hasMultipleImages =
         {backgroundImages.mobile.length > 0 && (
             <div class="banner-image-slot-mobile absolute inset-0 block lg:hidden">
                 <ImageWrapper
-                    alt="Mobile background image of the blog"
+                    alt=""
                     class="object-cover h-full w-full"
                     src={backgroundImages.mobile[0]}
                     position={backgroundWallpaper.banner?.position}
@@ -420,7 +420,7 @@ const hasMultipleImages =
             <div class="banner-image-slot-desktop absolute inset-0 hidden lg:block">
                 <ImageWrapper
                     id="banner"
-                    alt="Desktop background image of the blog"
+                    alt=""
                     class="object-cover h-full"
                     src={backgroundImages.desktop[0]}
                     position={backgroundWallpaper.banner?.position}
