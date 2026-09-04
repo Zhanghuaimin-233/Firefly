@@ -6,7 +6,7 @@ const SITE_LANG = "zh_CN";
 
 export const siteConfig: SiteConfig = {
 	// 站点标题
-	title: "Firefly",
+	title: "Kokkoro",
 
 	// 站点副标题
 	subtitle: "Demo site",
@@ -16,11 +16,11 @@ export const siteConfig: SiteConfig = {
 
 	// 站点描述
 	description:
-		"Firefly 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。",
+		"Kokkoro 是一个基于 Astro 框架和 Firefly 主题构建的个人博客，以可可萝为核心的清新治愈风格，记录学习笔记、开发过程与生活中的小小想法。",
 
 	// 站点关键词
 	keywords: [
-		"Firefly",
+		"Kokkoro",
 		"Fuwari",
 		"Astro",
 		"ACGN",
@@ -95,7 +95,7 @@ export const siteConfig: SiteConfig = {
 			alt: "🌸",
 		},
 		// 导航栏标题
-		title: "Firefly",
+		title: "Kokkoro",
 		// 全宽导航栏，导航栏是否占满屏幕宽度
 		widthFull: false,
 		// 导航菜单对齐方式，left：左对齐，center：居中

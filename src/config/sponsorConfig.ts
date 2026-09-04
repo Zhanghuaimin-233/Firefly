@@ -44,7 +44,7 @@ export const sponsorConfig: SponsorConfig = {
 			icon: "simple-icons:kofi",
 			qrCode: "",
 			link: "",
-			description: "Buy a Coffee for Firefly",
+			description: "Buy a Coffee for Kokkoro",
 			enabled: false,
 		},
 		{
