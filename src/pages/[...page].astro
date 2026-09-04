@@ -18,7 +18,7 @@ const { page } = Astro.props;
 const len = page.data.length;
 ---
 
-<MainGridLayout title={siteConfig.title}>
+<MainGridLayout>
   <PostPage page={page} />
   {
     page.total > page.size && (

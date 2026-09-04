@@ -9,7 +9,7 @@ export const siteConfig: SiteConfig = {
 	title: "Kokkoro",
 
 	// 站点副标题
-	subtitle: "Demo site",
+	subtitle: "Garden",
 
 	// 站点 URL
 	site_url: "https://zhanghuaimin-233.github.io",
@@ -59,22 +59,18 @@ export const siteConfig: SiteConfig = {
 		{
 			src: "/favicon/flower-32.png",
 			sizes: "32x32",
-			type: "image/png",
 		},
 		{
 			src: "/favicon/flower-128.png",
 			sizes: "128x128",
-			type: "image/png",
 		},
 		{
 			src: "/favicon/flower-180.png",
 			sizes: "180x180",
-			type: "image/png",
 		},
 		{
 			src: "/favicon/flower-192.png",
 			sizes: "192x192",
-			type: "image/png",
 		},
 	],
 
