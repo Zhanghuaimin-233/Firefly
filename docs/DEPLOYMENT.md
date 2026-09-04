@@ -1,7 +1,7 @@
-# Firefly 部署说明
+# Kokkoro 部署说明
 
 本文记录个人博客当前已验证的部署方式。部署目标分支统一为
-`trae/firefly-personal`，不是 `main` 或其他分支。
+`kokkoro/main`，不是 `main` 或其他分支。
 
 ## GitHub Pages
 
@@ -9,7 +9,7 @@ GitHub Pages 是当前可持续使用的公开部署入口：
 
 - 地址：<https://zhanghuaimin-233.github.io/Firefly/>。
 - 工作流：`.github/workflows/deploy.yml`。
-- 触发条件：每次推送到 `trae/firefly-personal`，或在 Actions 页面手动触发。
+- 触发条件：每次推送到 `kokkoro/main`，或在 Actions 页面手动触发。
 - 构建命令：`pnpm run build`。
 
 工作流为 GitHub Pages 注入下列环境变量：
@@ -23,7 +23,7 @@ SITE_URL=https://zhanghuaimin-233.github.io
 
 ## 阿里云 ESA Pages
 
-ESA 项目名为 `firefly`，已连接仓库 `Zhanghuaimin-233/Firefly`，生产分支同样为 `trae/firefly-personal`。当前已成功构建并发布提交 `f4383a6`。
+ESA 项目名为 `firefly`，已连接仓库 `Zhanghuaimin-233/Firefly`，生产分支同样为 `kokkoro/main`。当前已成功构建并发布提交 `f4383a6`。
 
 控制台构建配置：
 
@@ -57,7 +57,7 @@ corepack pnpm build:esa
 ### 后续 ESA 构建
 
 当前已通过控制台“新增构建”验证部署流程。后续若要把新的
-`trae/firefly-personal` 提交发布到 ESA，应先在控制台确认构建使用
+`kokkoro/main` 提交发布到 ESA，应先在控制台确认构建使用
 `pnpm build:esa`，再查看构建历史为“构建成功”、生产环境版本为 100%。
 GitHub Pages 的自动发布与此流程独立。
 
