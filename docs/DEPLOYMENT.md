@@ -23,7 +23,7 @@ SITE_URL=https://zhanghuaimin-233.github.io
 
 ## 阿里云 ESA Pages
 
-ESA 项目名为 `firefly`，已连接仓库 `Zhanghuaimin-233/Firefly`，生产分支同样为 `kokkoro/main`。当前已成功构建并发布提交 `f4383a6`。
+ESA 项目名为 `firefly`，已连接仓库 `Zhanghuaimin-233/Firefly`，生产分支同样为 `kokkoro/main`。
 
 控制台构建配置：
 
@@ -63,16 +63,15 @@ GitHub Pages 的自动发布与此流程独立。
 
 ## ESA 自定义域名：当前状态
 
-计划绑定的域名是 `firefly.cuteleaf.cn`。该域名目前仍由 EdgeOne Pages 提供服务，尚未切换到 ESA。
+ESA 生产域名为 <https://kokkoro.me/>，站点 ID 为 `176473522002136`，采用 CNAME 接入和“全球（不包含中国内地）”区域。
 
-在 ESA Pages 中直接绑定时，控制台返回 `ActiveSiteNotExist`。根因是该 ESA 账号下没有已激活、可供 Pages 绑定的对应站点；因此没有写入新的域名绑定或 DNS 记录。
+当前权威 DNS 记录：
 
-恢复此项工作前，需要：
+```text
+@         CNAME  kokkoro.me.a1.initjj.com
+_dnsauth  CNAME  kokkoro.me.176473522002136.dcv.aliyun-esa.com
+```
 
-1. 在 ESA“站点管理”中创建并激活 `firefly.cuteleaf.cn` 的站点。
-2. 选择 CNAME 接入，避免迁移整个域名的 NS。
-3. 选择区域：包含中国内地的区域需要完成备案；未备案时选择“全球（不包含中国内地）”。
-4. 按控制台给出的 CNAME 记录在当前 DNS 服务商处切换解析，并等待站点激活。
-5. 回到 ESA Pages 的“域名”页，为 `firefly` 项目添加该域名并验证 HTTPS 访问。
+`_dnsauth` 是 DigiCert 免费证书签发和自动续期使用的托管 DCV 记录，不要删除。ESA 已签发并部署免费证书，同时开启强制 HTTPS；HTTP 请求会以 `301` 重定向到 HTTPS。
 
 不要将 ESA 测试访问链接、短时鉴权 token、账号信息或 DNS 凭据写入仓库。

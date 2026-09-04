@@ -12,7 +12,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Garden",
 
 	// 站点 URL
-	site_url: "https://zhanghuaimin-233.github.io",
+	site_url: "https://kokkoro.me",
 
 	// 站点描述
 	description:
