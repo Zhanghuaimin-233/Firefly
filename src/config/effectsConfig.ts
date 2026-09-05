@@ -58,7 +58,7 @@ export const sakuraConfig: SakuraConfig = {
 // 参数对照 WE: particles/workshop/2093672045/Cherry_Blossoms_2.json
 export const cursorTrailConfig: CursorTrailConfig = {
 	// 是否启用
-	enable: false,
+	enable: true,
 
 	// 是否允许用户在设置中切换
 	switchable: true,

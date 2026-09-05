@@ -5,7 +5,7 @@ import type { CursorConfig } from "../types/effectsConfig";
 // 浏览器原生支持 .cur 格式（含热点坐标），无需额外指定热点位置
 export const cursorConfig: CursorConfig = {
 	// 是否启用自定义光标
-	enable: false,
+	enable: true,
 
 	// 是否允许用户在设置中切换
 	switchable: true,
