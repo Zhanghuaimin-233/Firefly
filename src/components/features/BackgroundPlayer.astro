@@ -227,4 +227,9 @@ const tLoadError = i18n(I18nKey.videoLoadError);
 		opacity: 0 !important;
 		transition: opacity 0.5s ease;
 	}
+
+	/* 仅横幅模式：视频内容对齐顶部，露出上部、裁掉下部（图片不受影响，其他模式保持居中） */
+	:global(html[data-wallpaper-mode="banner"] #bg-player-video) {
+		object-position: top;
+	}
 </style>
