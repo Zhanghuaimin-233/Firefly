@@ -86,6 +86,15 @@ if (title) {
 		: siteConfig.title;
 }
 
+const deploymentBase = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+const canonicalPath =
+	deploymentBase && Astro.url.pathname === deploymentBase
+		? "/"
+		: deploymentBase && Astro.url.pathname.startsWith(`${deploymentBase}/`)
+			? Astro.url.pathname.slice(deploymentBase.length)
+			: Astro.url.pathname;
+const canonicalUrl = new URL(canonicalPath, siteConfig.site_url).toString();
+
 let ogImageUrl: string | undefined;
 if (siteConfig.post.generateOgImages && postSlug) {
 	ogImageUrl = new URL(`/og/${postSlug}.png`, Astro.site).toString();
@@ -148,9 +157,10 @@ const siteLang = lang.replace("_", "-");
       )
     }
     <meta name="author" content={profileConfig.name} />
+	<link rel="canonical" href={canonicalUrl} />
 
     <meta property="og:site_name" content={siteConfig.title} />
-    <meta property="og:url" content={Astro.url} />
+    <meta property="og:url" content={canonicalUrl} />
     <meta property="og:title" content={pageTitle} />
     <meta
       property="og:description"
@@ -166,7 +176,7 @@ const siteLang = lang.replace("_", "-");
     }
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:url" content={canonicalUrl} />
     <meta name="twitter:title" content={pageTitle} />
     <meta
       name="twitter:description"
