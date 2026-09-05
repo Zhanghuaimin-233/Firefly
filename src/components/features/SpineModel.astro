@@ -519,8 +519,14 @@ const fallbackAtlasPath = url(spineModelConfig.model.path.replace(".json", ".atl
     }
   }
 
-  // 监听页面卸载事件，清理资源
-  window.addEventListener("beforeunload", cleanupSpineModel);
+  // 监听页面离开事件，清理资源。
+  // 用 pagehide 而非 beforeunload：beforeunload 是「即将离开」的询问阶段，
+  // mailto:/tel: 等协议导航会先进来再被系统拦截，导航取消后页面仍在，
+  // 若在这里 cleanup 会把桌宠销毁且不会重建；pagehide 只在页面真正卸载时触发。
+  // persisted=true 表示进入 bfcache（返回时可恢复），无需也不应清理。
+  window.addEventListener("pagehide", (e) => {
+    if (!e.persisted) cleanupSpineModel();
+  });
 
   // 监听 Swup 页面切换事件（如果使用了 Swup）
   if (typeof window.swup !== "undefined" && window.swup.hooks) {
