@@ -20,6 +20,7 @@ const viewConfigStr = JSON.stringify({
 		noLyrics: i18n(I18nKey.musicNoLyrics),
 		loadingLyrics: i18n(I18nKey.musicLoadingLyrics),
 		failedLyrics: i18n(I18nKey.musicFailedLyrics),
+		instrumental: i18n(I18nKey.musicInstrumental),
 		noSongs: i18n(I18nKey.musicNoSongs),
 		error: i18n(I18nKey.musicError),
 		play: i18n(I18nKey.musicPlay),
@@ -426,16 +427,24 @@ const viewConfigStr = JSON.stringify({
         function renderLyricsUI(lyrics, status) {
             local.currentLrcIndex = -1;
             ui.lrcContainer.innerHTML = '';
+            // 空状态（无歌词/加载中/失败/纯音乐）时内容居中对齐；
+            // 有歌词时去掉居中，让长歌词列表从顶部排列并正常滚动
+            var isEmpty = status === 'loading' || status === 'failed' || status === 'instrumental' || !lyrics || lyrics.length === 0;
+            ui.lrcContainer.classList.toggle('justify-center', isEmpty);
             if (status === 'loading') {
-                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10">' + cfg.i18n.loadingLyrics + '</div>';
+                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-4">' + cfg.i18n.loadingLyrics + '</div>';
                 return;
             }
             if (status === 'failed') {
-                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10">' + cfg.i18n.failedLyrics + '</div>';
+                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-4">' + cfg.i18n.failedLyrics + '</div>';
+                return;
+            }
+            if (status === 'instrumental') {
+                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-4" role="option">' + cfg.i18n.instrumental + '</div>';
                 return;
             }
             if (!lyrics || lyrics.length === 0) {
-                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-10" role="option">' + cfg.i18n.noLyrics + '</div>';
+                ui.lrcContainer.innerHTML = '<div class="text-neutral-400 text-sm py-4" role="option">' + cfg.i18n.noLyrics + '</div>';
                 return;
             }
             lyrics.forEach(function (line, index) {
@@ -509,7 +518,7 @@ const viewConfigStr = JSON.stringify({
             }
 
             // Lyrics
-            renderLyricsUI(s.lyrics, s.lyrics.length > 0 ? 'loaded' : 'none');
+            renderLyricsUI(s.lyrics, s.lyricsStatus || (s.lyrics.length > 0 ? 'loaded' : 'none'));
             if (s.currentLrcIndex >= 0) updateLrcHighlight(s.currentLrcIndex);
 
             // Cover image: if already set, show it
