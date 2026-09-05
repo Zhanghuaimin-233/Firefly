@@ -214,7 +214,7 @@ curl.exe -I https://example.com/
 
 ## 第九步：别忘了网站自己记住的旧地址
 
-域名能打开以后，我还发现了最后一层问题：页面虽然已经通过 `kokkoro.me` 访问，但 HTML 里的 `og:url`、RSS 和社交分享链接仍可能指向旧的 GitHub Pages 地址。
+域名能打开以后，我还发现了最后一层问题：页面虽然已经通过 `kokkoro.me` 访问，但 HTML 里的 canonical、`og:url`、RSS 和社交分享链接仍可能指向旧的 GitHub Pages 地址。
 
 这是静态站点常见的“表面上线了，身份还没迁完”。DNS 和 ESA 只能决定请求往哪里走，无法替你修改构建时写进页面的站点地址。
 
@@ -224,13 +224,13 @@ Firefly 的站点地址来自 `site_url`，也可以被构建环境中的 `SITE_
 site_url: "https://example.com"
 ```
 
-然后重新构建并发布，再检查首页源码、RSS、站点地图和分享卡片。只要这里仍残留旧域名，搜索引擎和社交平台就可能继续把旧地址当成规范链接。
+然后重新构建并发布，再检查首页源码里的 `<link rel="canonical">`、RSS、站点地图和分享卡片。旧 GitHub Pages 地址仍可作为备用入口，但它也应通过 canonical 声明 `kokkoro.me` 才是主版本，避免搜索引擎在两份相同内容之间犹豫。
 
 最后的成品是这样的：
 
 ![通过正式 HTTPS 域名访问已经上线的 Kokkoro 博客](./images/08-live-site.webp)
 
-我还额外检查了首页的 31 张图片，没有发现加载失败；`og:url`、Twitter 分享地址和 RSS 也都切到了 `https://kokkoro.me/`。到这一步，才算真正完成了域名迁移，而不只是“浏览器里能打开”。
+我还额外检查了首页的 31 张图片，没有发现加载失败；canonical、`og:url`、Twitter 分享地址和 RSS 也都切到了 `https://kokkoro.me/`。到这一步，才算真正完成了域名迁移，而不只是“浏览器里能打开”。
 
 ## 一份可以照着收尾的检查表
 
@@ -244,7 +244,7 @@ site_url: "https://example.com"
 - [ ] 边缘证书状态为“正常”，SSL/TLS 已开启；
 - [ ] HTTP 会 301 跳转到 HTTPS，HTTPS 返回 200；
 - [ ] 页面、图片、字体等静态资源没有 404；
-- [ ] `og:url`、RSS、站点地图等元数据不再残留旧域名；
+- [ ] canonical、`og:url`、RSS、站点地图等元数据不再把旧域名声明为主版本；
 - [ ] 已了解当前套餐、流量和 Pages 文件限制，避免把“暂时能用”误当成“以后不会超限”。
 
 ## ESA 对个人博客到底有没有用

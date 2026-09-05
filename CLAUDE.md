@@ -78,7 +78,11 @@ LQIP data is generated into `src/constants/lqips.json` and committed — regener
 
 ## Deployment
 
-- **Vercel** (default, `vercel.json`)
-- **Cloudflare Workers** (`wrangler.jsonc`, set `CF_WORKERS` env var)
-- Static output to `dist/`
+The current personal deployment contract lives in `docs/DEPLOYMENT.md`:
 
+- production branch: `kokkoro/main`
+- primary site: `https://kokkoro.me/` on Alibaba Cloud ESA Pages
+- fallback site: `https://zhanghuaimin-233.github.io/Firefly/` on GitHub Pages
+- ESA build: `pnpm build:esa`; GitHub Pages build: `pnpm build`
+
+`vercel.json` and `wrangler.jsonc` remain available as theme adapters, but they are not the authority for the current Kokkoro production deployment.
