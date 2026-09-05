@@ -30,7 +30,9 @@ type PostData = {
 	comment: boolean;
 	password: string;
 	passwordHint: string;
-	audio?: string | PostAudioInput;
+audio?: string | PostAudioInput;
+	series: string;
+	seriesOrder?: number;
 	prevTitle: string;
 	prevSlug: string;
 	nextTitle: string;
@@ -70,17 +72,19 @@ const postsCollection: ContentCollection<PostData> = defineCollection({
 		passwordHint: z.string().optional().default(""),
 		audio: z
 			.union([
-				z.string(),
-				z.object({
-					url: z.string(),
-					name: z.string().optional(),
-					artist: z.string().optional(),
-					cover: z.string().optional(),
-					lrc: z.string().optional(),
-					instrumental: z.boolean().optional(),
-				}),
-			])
-			.optional(),
+			z.string(),
+			z.object({
+				url: z.string(),
+				name: z.string().optional(),
+				artist: z.string().optional(),
+				cover: z.string().optional(),
+				lrc: z.string().optional(),
+				instrumental: z.boolean().optional(),
+			}),
+		])
+		.optional(),
+	series: z.string().optional().default(""),
+	seriesOrder: z.number().optional(),
 
 		/* For internal use */
 		prevTitle: z.string().default(""),

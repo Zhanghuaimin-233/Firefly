@@ -1,0 +1,183 @@
+---
+import { Icon } from "astro-icon/components";
+import TypewriterText from "@/components/features/TypewriterText.astro";
+import { backgroundWallpaper } from "@/config";
+import { encodeMailto, MAILTO_ONCLICK_SCRIPT } from "@/utils/email-utils";
+
+interface Props {
+	showHomeText: boolean;
+	initialRandomSubtitle: string | undefined;
+}
+
+const { showHomeText, initialRandomSubtitle } = Astro.props;
+const homeText = backgroundWallpaper.common?.homeText;
+const homeTextLinks = homeText?.links;
+const homeTextLinksEnable = homeText?.linksEnable !== false;
+const translationSize = homeText?.translationSize || "1rem";
+---
+{homeText?.enable && (
+	<div
+		class={`banner-home-text-overlay absolute inset-0 z-20 flex items-center justify-center ${!showHomeText ? "hidden" : ""}`}
+	>
+		<div class="w-4/5 lg:w-3/4 text-center mb-0">
+			<div
+				class="flex flex-col"
+				style={`--banner-translation-size: ${translationSize}`}
+			>
+				{homeText.title && (
+					<div
+						class="banner-title font-bold text-white mb-2 lg:mb-4 leading-tight"
+						style={{
+							"--banner-title-size": homeText.titleSize || "3rem",
+						}}
+					>
+						{homeText.title}
+					</div>
+				)}
+				{homeText.titleTranslation && (
+					<div
+						class="banner-title-translation text-white/70 leading-snug mb-2 lg:mb-4"
+						style={{ fontSize: translationSize }}
+					>
+						{homeText.titleTranslation}
+					</div>
+				)}
+				{homeText.subtitle && (
+					<div
+						id="banner-subtitle"
+						class="banner-subtitle text-white/90 leading-snug"
+						style={{ fontSize: homeText.subtitleSize || "1.5rem" }}
+						data-subtitles={JSON.stringify(homeText.subtitle)}
+						data-translations={
+							homeText.subtitleTranslation
+								? JSON.stringify(homeText.subtitleTranslation)
+								: undefined
+						}
+					>
+						{homeText.typewriter?.enable ? (
+							<TypewriterText
+								text={homeText.subtitle}
+								syncText={homeText.subtitleTranslation}
+								speed={homeText.typewriter.speed}
+								deleteSpeed={homeText.typewriter.deleteSpeed}
+								pauseTime={homeText.typewriter.pauseTime}
+							/>
+						) : (
+							<>
+								<span class="banner-subtitle-main">
+									{initialRandomSubtitle}
+								</span>
+								<span
+									class="banner-subtitle-translation"
+									style={{
+										fontSize: translationSize,
+										opacity: 0.75,
+										display: "block",
+										marginTop: "0.5rem",
+									}}
+								/>
+							</>
+						)}
+					</div>
+				)}
+				{/* 横幅标题下方的链接图标（subtitle 的兄弟节点，避免被打字机/随机副标题的 textContent 覆盖清掉） */}
+				{homeTextLinksEnable && homeTextLinks && homeTextLinks.length > 0 && (
+					<div class="banner-links mt-5 flex items-center justify-center gap-3 pointer-events-auto">
+						{homeTextLinks.map((link) => {
+							// mailto 链接做 base64 加密防爬虫（点击时才解码导航，与 Profile 一致）
+							const isMailto = link.url.startsWith("mailto:");
+							const encodedEmail = isMailto
+								? encodeMailto(link.url)
+								: undefined;
+							const isExternal = link.url.startsWith("http");
+							return (
+								<a
+									href={isMailto ? "#" : link.url}
+									aria-label={link.name}
+									title={link.name}
+									data-encoded-email={encodedEmail}
+									target={!isMailto && isExternal ? "_blank" : undefined}
+									rel={!isMailto && isExternal ? "noopener" : undefined}
+									class={
+										link.showName
+											? "banner-link banner-link-text"
+											: "banner-link"
+									}
+									style="color: #fff"
+									onclick={isMailto ? MAILTO_ONCLICK_SCRIPT : undefined}
+								>
+									{/* 内联 fill: currentColor，避免 CSS 加载前 SVG 默认黑色图标闪现 */}
+									<Icon
+										name={link.icon}
+										class="text-[1.25rem]"
+										style="fill: currentColor"
+									/>
+									{link.showName && <span>{link.name}</span>}
+								</a>
+							);
+						})}
+					</div>
+				)}
+			</div>
+		</div>
+	</div>
+)}
+
+<script is:inline>
+	function setRandomSubtitle() {
+		const subtitleElement = document.getElementById("banner-subtitle");
+		if (!subtitleElement) return;
+
+		const subtitlesData = subtitleElement.dataset.subtitles;
+		if (!subtitlesData) return;
+
+		try {
+			const subtitles = JSON.parse(subtitlesData);
+			const translationsData = subtitleElement.dataset.translations;
+			let translations = [];
+			if (translationsData) {
+				try {
+					translations = JSON.parse(translationsData);
+				} catch {
+					translations = [];
+				}
+				if (!Array.isArray(translations)) translations = [translations];
+			}
+			// Only randomize if it's an array and typewriter is NOT enabled (check for typewriter class)
+			if (
+				Array.isArray(subtitles) &&
+				subtitles.length > 0 &&
+				!subtitleElement.querySelector(".typewriter")
+			) {
+				// Use a global variable to persist the subtitle across Swup navigations
+				// This variable will be reset on full page reload (F5), meeting the requirement
+				if (!window.fireflyCachedSubtitle) {
+					const randomIndex = Math.floor(Math.random() * subtitles.length);
+					window.fireflyCachedSubtitle = subtitles[randomIndex];
+					window.fireflyCachedSubtitleIndex = randomIndex;
+				}
+				const mainEl = subtitleElement.querySelector(
+					".banner-subtitle-main",
+				);
+				if (mainEl) {
+					mainEl.textContent = window.fireflyCachedSubtitle;
+				} else {
+					subtitleElement.textContent = window.fireflyCachedSubtitle;
+				}
+				// 同步更新翻译
+				const transEl = subtitleElement.querySelector(
+					".banner-subtitle-translation",
+				);
+				if (transEl && Array.isArray(translations) && translations.length > 0) {
+					const idx = window.fireflyCachedSubtitleIndex || 0;
+					transEl.textContent = translations[idx] || translations[0] || "";
+				}
+			}
+		} catch (e) {
+			console.error("Failed to parse subtitles", e);
+		}
+	}
+
+	// Run on initial load
+	setRandomSubtitle();
+</script>
