@@ -386,7 +386,6 @@ export const cursorTrailConfig: CursorTrailConfig = {
   tangentSpeed: 50,                      // 初始切向速度
   colorRange: { min: [255, 173, 169], max: [249, 222, 255] }, // 粉红→淡紫
   zIndex: 100,
-  ambient: { enable: false, ... },       // 环境落花层（已禁用）
 };
 ```
 

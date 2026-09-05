@@ -194,126 +194,6 @@ const config = {
 			}
 		}
 
-		// 环境落花粒子类：复刻 WE particles/huya.json（从屏幕顶部斜向飘落，长寿命，湍流自转）
-		class AmbientPetalParticle {
-			constructor(config, tintedCache) {
-				this.config = config;
-				this.tintedCache = tintedCache || [];
-				// 发射点：屏幕顶部随机 x，略高于屏幕
-				this.x = Math.random() * window.innerWidth;
-				this.y = -50 - Math.random() * 100;
-				// 初始速度（WE: velocityrandom 140-250, 50-90）
-				const vmin = config.velocity.min;
-				const vmax = config.velocity.max;
-				this.vx = vmin[0] + Math.random() * (vmax[0] - vmin[0]);
-				this.vy = vmin[1] + Math.random() * (vmax[1] - vmin[1]);
-				// 生命周期（WE: lifetimerandom 11-16）
-				this.maxLife =
-					config.particleLife.min +
-					Math.random() *
-						(config.particleLife.max - config.particleLife.min);
-				this.life = this.maxLife;
-				// 尺寸（WE: sizerandom 40-80）
-				this.size =
-					config.size.min +
-					Math.random() * (config.size.max - config.size.min);
-				// 旋转（WE: rotationrandom + angularvelocity）
-				this.rotation = Math.random() * Math.PI * 2;
-				const av = config.angularVelocity;
-				this.rotationSpeed = av.min + Math.random() * (av.max - av.min);
-				// 颜色（WE: colorrandom 255 255 255 → 255 192 248）
-				const t = Math.random();
-				const cmin = config.colorRange.min;
-				const cmax = config.colorRange.max;
-				this.color = [
-					Math.round(cmin[0] + (cmax[0] - cmin[0]) * t),
-					Math.round(cmin[1] + (cmax[1] - cmin[1]) * t),
-					Math.round(cmin[2] + (cmax[2] - cmin[2]) * t),
-				];
-				this.tintedCanvas =
-					this.tintedCache.length > 0
-						? this.tintedCache[
-								Math.min(
-									this.tintedCache.length - 1,
-									Math.floor(t * this.tintedCache.length),
-								)
-							]
-						: null;
-				// 湍流相位（WE: turbulentvelocityrandom）
-				this._turbPhase = Math.random() * Math.PI * 2;
-				this.dead = false;
-			}
-
-			update(dt) {
-				const cfg = this.config;
-				// 湍流：基于时间的正弦扰动（近似 turbulentvelocityrandom）
-				this._turbPhase += dt * 2;
-				const turbSpeed =
-					cfg.turbulent.speedMin +
-					Math.random() *
-						(cfg.turbulent.speedMax - cfg.turbulent.speedMin);
-				const turbScale = cfg.turbulent.scale;
-				this.vx += Math.cos(this._turbPhase) * turbScale * turbSpeed * dt;
-				this.vy +=
-					Math.sin(this._turbPhase * 1.3) * turbScale * turbSpeed * dt;
-				// 重力（Canvas 坐标，斜向下方）
-				this.vx += cfg.gravity.x * dt;
-				this.vy += cfg.gravity.y * dt;
-				// 阻力
-				const dragFactor = Math.max(0, 1 - cfg.drag * dt);
-				this.vx *= dragFactor;
-				this.vy *= dragFactor;
-				// 位置积分
-				this.x += this.vx * dt;
-				this.y += this.vy * dt;
-				this.rotation += this.rotationSpeed * dt;
-				// 生命衰减
-				this.life -= dt;
-				if (this.life <= 0) this.dead = true;
-				// 越界销毁（飞出屏幕下方/右方）
-				if (
-					this.y > window.innerHeight + 100 ||
-					this.x > window.innerWidth + 100 ||
-					this.x < -100
-				) {
-					this.dead = true;
-				}
-			}
-
-			draw(ctx) {
-				// alphafade：淡入 + 淡出（WE: fadeintime 0.1, fadeouttime 0.9）
-				const lifeRatio = this.life / this.maxLife;
-				let alpha = 1;
-				const fadeIn = this.config.fadeIn;
-				const elapsed = this.maxLife - this.life;
-				if (elapsed < fadeIn) {
-					alpha = fadeIn > 0 ? elapsed / fadeIn : 1;
-				} else if (lifeRatio < this.config.fadeOut) {
-					alpha = lifeRatio / this.config.fadeOut;
-				}
-				alpha = Math.max(0, Math.min(1, alpha));
-
-				ctx.save();
-				ctx.globalAlpha = alpha;
-				ctx.globalCompositeOperation = "source-over";
-				ctx.translate(this.x, this.y);
-				ctx.rotate(this.rotation);
-				if (this.tintedCanvas) {
-					const aspect = this.tintedCanvas.height / this.tintedCanvas.width;
-					const drawW = this.size;
-					const drawH = drawW * aspect;
-					ctx.drawImage(
-						this.tintedCanvas,
-						-drawW / 2,
-						-drawH / 2,
-						drawW,
-						drawH,
-					);
-				}
-				ctx.restore();
-			}
-		}
-
 		// 管理器
 		class CursorTrailManager {
 			constructor(config) {
@@ -327,11 +207,8 @@ const config = {
 				this.animationId = null;
 				this.img = null;
 				this.tintedCache = [];
-				this.ambientParticles = [];
-				this.ambientTintedCache = [];
 				this.isRunning = false;
 				this._emitAccum = 0;
-				this._ambientEmitAccum = 0;
 				this._sequenceCounter = 0;
 			}
 
@@ -351,13 +228,6 @@ const config = {
 
 				// 预渲染颜色档位缓存：colorrandom 量化为 N 档，multiply 着色纹理
 				this.tintedCache = this.buildTintedCache(this.img);
-				// 环境落花层独立颜色缓存（颜色范围与光标花瓣不同）
-				if (this.config.ambient && this.config.ambient.enable) {
-					this.ambientTintedCache = this.buildTintedCache(
-						this.img,
-						this.config.ambient.colorRange,
-					);
-				}
 
 				this.createCanvas();
 				this.bindEvents();
@@ -461,21 +331,6 @@ const config = {
 				}
 			}
 
-			emitAmbient(dt) {
-				// 环境落花层发射（WE: huya rate 20/秒）
-				const amb = this.config.ambient;
-				if (!amb || !amb.enable) return;
-				this._ambientEmitAccum += amb.emitRate * dt;
-				while (this._ambientEmitAccum >= 1) {
-					if (this.ambientParticles.length < amb.maxParticles) {
-						this.ambientParticles.push(
-							new AmbientPetalParticle(amb, this.ambientTintedCache),
-						);
-					}
-					this._ambientEmitAccum -= 1;
-				}
-			}
-
 			startAnimation() {
 				const animate = (now) => {
 					if (!this.ctx || !this.canvas) return;
@@ -490,33 +345,21 @@ const config = {
 						this.canvas.height,
 					);
 
-						// 发射新粒子（光标花瓣 + 环境落花）
-					this.emit(dt);
-					this.emitAmbient(dt);
+						// 发射新粒子（光标花瓣）
+				this.emit(dt);
 
-					// 更新并绘制：光标花瓣
-					for (let i = this.particles.length - 1; i >= 0; i--) {
-						const p = this.particles[i];
-						p.update(dt, this.mouseX, this.mouseY);
-						if (p.dead) {
-							this.particles.splice(i, 1);
-						} else {
-							p.draw(this.ctx);
-						}
+				// 更新并绘制：光标花瓣
+				for (let i = this.particles.length - 1; i >= 0; i--) {
+					const p = this.particles[i];
+					p.update(dt, this.mouseX, this.mouseY);
+					if (p.dead) {
+						this.particles.splice(i, 1);
+					} else {
+						p.draw(this.ctx);
 					}
+				}
 
-					// 更新并绘制：环境落花
-					for (let i = this.ambientParticles.length - 1; i >= 0; i--) {
-						const p = this.ambientParticles[i];
-						p.update(dt);
-						if (p.dead) {
-							this.ambientParticles.splice(i, 1);
-						} else {
-							p.draw(this.ctx);
-						}
-					}
-
-					this.animationId = requestAnimationFrame(animate);
+				this.animationId = requestAnimationFrame(animate);
 				};
 				this.animationId = requestAnimationFrame(animate);
 			}
@@ -543,7 +386,6 @@ const config = {
 					this.canvas = null;
 				}
 				this.particles = [];
-				this.ambientParticles = [];
 				this.isRunning = false;
 			}
 

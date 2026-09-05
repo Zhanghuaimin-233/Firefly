@@ -46,7 +46,6 @@ export type CursorTrailConfig = {
 	tangentSpeed: number; // 初始切向速度（WE: speed "0 100 0"，缩小后按比例）
 	colorRange: { min: [number, number, number]; max: [number, number, number] }; // 颜色随机范围 RGB
 	zIndex: number; // 层级
-	ambient?: AmbientPetalConfig; // 环境落花层配置（可选）
 };
 
 // 自定义鼠标光标配置
@@ -78,32 +77,6 @@ export type CursorConfig = {
 		neResize?: string; // ne-resize：东北调整（SizeNESW）
 		swResize?: string; // sw-resize：西南调整（SizeNESW）
 		nwResize?: string; // nw-resize：西北调整（SizeNWSE）
-		seResize?: string; // se-resize：东南调整（SizeNWSE）
+		seResize?: string; // se-resize：东南调整（SizeSE）
 	};
-};
-
-// 环境落花层配置（复刻 WE particles/huya.json）
-export type AmbientPetalConfig = {
-	enable: boolean; // 是否启用环境落花层
-	emitRate: number; // 每秒发射数量（WE: 20）
-	maxParticles: number; // 粒子池上限（WE: 30）
-	particleLife: { min: number; max: number }; // 生命周期秒（WE: 11-16）
-	size: { min: number; max: number }; // 尺寸像素（WE: 40-80）
-	velocity: { min: [number, number]; max: [number, number] }; // 初始速度 xy（WE: 140-250, 50-90）
-	gravity: { x: number; y: number }; // 重力（WE: 5 10 0）
-	drag: number; // 阻力（WE: 0.1）
-	turbulent: {
-		// 湍流（WE: turbulentvelocityrandom）
-		offset: number;
-		scale: number;
-		speedMin: number;
-		speedMax: number;
-	};
-	angularVelocity: { min: number; max: number }; // 自转角速度（WE: -5~5）
-	fadeIn: number; // 淡入时间秒（WE: 0.1）
-	fadeOut: number; // 淡出时间占比 0-1（WE: 0.9）
-	colorRange: {
-		min: [number, number, number];
-		max: [number, number, number];
-	}; // 颜色（WE: 255 255 255 → 255 192 248）
 };

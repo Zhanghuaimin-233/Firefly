@@ -147,22 +147,4 @@ export const cursorTrailConfig: CursorTrailConfig = {
 
 	// 层级
 	zIndex: 100,
-
-	// 环境落花层（复刻 WE particles/huya.json，场景装饰性落花，从屏幕顶部斜向飘落）
-	// 已禁用：用户只需要光标跟随粒子效果
-	ambient: {
-		enable: false,
-		emitRate: 20,
-		maxParticles: 30,
-		particleLife: { min: 11, max: 16 },
-		size: { min: 40, max: 80 },
-		velocity: { min: [140, 50], max: [250, 90] },
-		gravity: { x: 5, y: 10 },
-		drag: 0.1,
-		turbulent: { offset: 3, scale: 0.5, speedMin: 35, speedMax: 100 },
-		angularVelocity: { min: -5, max: 5 },
-		fadeIn: 0.1,
-		fadeOut: 0.9,
-		colorRange: { min: [255, 255, 255], max: [255, 192, 248] },
-	},
 };
