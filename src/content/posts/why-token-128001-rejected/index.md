@@ -3,6 +3,8 @@ title: 为什么 128K 模型塞不进第 128001 个 Token？真正拦住它的�
 published: 2026-09-03
 updated: 2026-09-03
 draft: false
+series: 大模型上下文
+seriesOrder: 3
 category: AI日常
 tags:
   - 大模型
@@ -1202,15 +1204,6 @@ Transformer：
 毕竟这次我们终于抓到人了：
 
 > **很多时候，模型还没说不行，门卫已经先把门关上了。**
-
-## 系列文章
-
-这是「大模型上下文」系列，四篇按顺序读会更顺：
-
-1. [128K 上下文到底是什么意思？大模型的“记忆容量”可能和你想的不一样](/posts/128k-context-window/)
-2. [上下文越长越好吗？为什么大模型“看得见”，却不一定“用得好”](/posts/long-context-why-harder/)
-3. 为什么 128K 模型塞不进第 128001 个 Token？真正拦住它的可能根本不是模型（本文）
-4. [如果不管模型会不会胡说八道，大模型理论上能拥有无限上下文吗？](/posts/can-context-be-infinite/)
 
 ---
 
