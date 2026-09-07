@@ -1,5 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
+import { backgroundWallpaper } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import { url } from "@/utils/url-utils";
@@ -10,6 +11,9 @@ export interface Props {
 }
 
 const { playerUrl, playerMode = "order" } = Astro.props;
+
+// 视频播放时是否保留水波纹（默认 false：播放时淡出）
+const playerShowWaves = backgroundWallpaper.playerShowWaves ?? false;
 
 const urls = (Array.isArray(playerUrl) ? playerUrl : [playerUrl]).map((value) =>
 	value.startsWith("http://") || value.startsWith("https://") ? value : url(value),
@@ -24,7 +28,7 @@ const tLoadError = i18n(I18nKey.videoLoadError);
 
 {
 	urls.length > 0 && (
-		<div id="bg-player">
+			<div id="bg-player" data-show-waves={playerShowWaves ? "true" : undefined}>
 			<div
 				id="bg-player-overlay"
 				class="absolute inset-0 z-15 overflow-hidden pointer-events-none transition-opacity duration-500 ease-in-out opacity-0"
@@ -222,7 +226,9 @@ const tLoadError = i18n(I18nKey.videoLoadError);
 	:global([data-bg-video-playing] #banner-images-container),
 	:global([data-bg-video-playing] #banner-dim-container),
 	:global([data-bg-video-playing] #banner-overlay-container),
-	:global([data-bg-video-playing] #header-waves),
+	/* 视频播放时淡出水波纹（原设计）。#bg-player 带 data-show-waves（配置 playerShowWaves: true）时
+	   规则不匹配，水波纹保留显示；#bg-player 与 #header-waves 同为 #wallpaper-wrapper 子元素 */
+	:global([data-bg-video-playing] #bg-player:not([data-show-waves]) ~ #header-waves),
 	:global([data-bg-video-playing] #wallpaper-gradient) {
 		opacity: 0 !important;
 		transition: opacity 0.5s ease;
