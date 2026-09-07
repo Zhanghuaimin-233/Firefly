@@ -7,8 +7,8 @@
 > 一款清新美观的 Astro 静态博客主题模板
 > 
 > ![Node.js >= 22](https://img.shields.io/badge/node.js-%3E%3D22-brightgreen) 
-![pnpm >= 11](https://img.shields.io/badge/pnpm-%3E%3D9-blue)
-![Astro](https://img.shields.io/badge/Astro-7.2.0-orange)
+> ![pnpm >= 11](https://img.shields.io/badge/pnpm-%3E%3D11-blue)
+> ![Astro](https://img.shields.io/badge/Astro-7.2.10-orange)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-blue)
 >
 > [![Stars](https://img.shields.io/github/stars/CuteLeaf/Firefly?style=social)](https://github.com/CuteLeaf/Firefly/stargazers)
@@ -181,6 +181,7 @@ src/
 │   ├── analyticsConfig.ts        # 统计分析配置
 │   ├── announcementConfig.ts     # 公告配置
 │   ├── backgroundWallpaper.ts    # 背景壁纸配置
+│   ├── booknavConfig.ts          # 书签导航配置
 │   ├── commentConfig.ts          # 评论系统配置
 │   ├── coverImageConfig.ts       # 封面图配置
 │   ├── displaySettingsConfig.ts  # 设置面板配置

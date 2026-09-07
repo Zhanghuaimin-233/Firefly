@@ -1,8 +1,8 @@
 # Firefly 项目 Code Wiki
 
-> **文档版本**：v1.3 · 基于 Firefly `6.15.6`（Astro 7.1.3 / Svelte 5.56.7 / TypeScript 6.0）
+> **文档版本**：v1.4 · 基于 Firefly `6.16.7`（Astro 7.2.10 / Svelte 5.57 / TypeScript 6.0）
 >
-> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步），2026-08-06（v1.2 新增看板娘多模型架构），2026-08-16（v1.3 新增文章绑定音频功能）
+> **生成时间**：2026-07-16（v1.0），2026-08-06（v1.1 上游合并后同步），2026-08-06（v1.2 新增看板娘多模型架构），2026-08-16（v1.3 新增文章绑定音频功能），2026-09-07（v1.4 全局同步：版本/依赖/构建流水线/路由/组件/配置清单）
 >
 > **适用对象**：维护本仓库的开发者、AI Agent、二次贡献者
 
@@ -71,18 +71,18 @@
 
 | 类别 | 技术 | 版本约束 |
 |------|------|---------|
-| 框架 | Astro | `7.1.3` |
-| UI 交互 | Svelte | `^5.56.7` |
+| 框架 | Astro | `7.2.10` |
+| UI 交互 | Svelte | `^5.57.0` |
 | 样式 | Tailwind CSS v4 | `^4.3.3` |
 | 语言 | TypeScript | `^6.0.3` |
-| 包管理 | pnpm | `9.14.4`（`preinstall` 强制） |
-| 运行时 | Node.js | `>= 22` |
-| Linter/Formatter | Biome | `2.5.5` |
-| 图标系统 | @iconify/svelte 离线模式 | `^2.3.0` |
+| 包管理 | pnpm | `11.22.0`（`preinstall` 强制） |
+| 运行时 | Node.js | `>= 22.23.0` |
+| Linter/Formatter | Biome | `2.5.11` |
+| 图标系统 | @iconify/svelte 离线模式 | `^5.2.2` |
 | 页面过渡 | Swup（`@swup/astro`） | `^1.8.0` |
 | 搜索 | Pagefind | `^1.5.2` |
-| 图像处理 | sharp | `^0.35.3` |
-| 日期 | dayjs | `^1.11.21` |
+| 图像处理 | sharp | `^0.35.4` |
+| 日期 | dayjs | `^1.11.23` |
 | Mermaid | `@mermanjs/web`（WASM） | `0.8.0-alpha.3` |
 
 ### 2.2 关键依赖分组
@@ -90,7 +90,7 @@
 - **Astro 集成**：`@astrojs/svelte`、`@astrojs/mdx`、`@astrojs/sitemap`、`@astrojs/rss`、`@astrojs/cloudflare`、`@swup/astro`、`astro-expressive-code`、`astro-icon`
 - **图标集**（`@iconify-json/*`）：`material-symbols`、`fa7-brands`、`fa7-regular`、`fa7-solid`、`simple-icons`、`mdi`、`mingcute`、`svg-spinners`
 - **Markdown 处理**：`remark-math`、`remark-directive`、`remark-sectionize`、`rehype-katex`、`rehype-slug`、`rehype-autolink-headings`、`rehype-callouts`、`rehype-components`
-- **特色功能**：`katex`、`qrcode`、`satori`（OG 图生成）、`pako`（PlantUML 编码）、`l2d-widget`、`@fancyapps/ui`（Fancybox 灯箱）、`sanitize-html`
+- **特色功能**：`katex`、`qrcode`、`takumi-js`（OG 图生成）、`pako`（PlantUML 编码）、`l2d-widget`、`@fancyapps/ui`（Fancybox 灯箱）、`sanitize-html`
 
 完整清单见 [package.json](file:///e:/Dev/Projects/Firefly-trae-custom/package.json)。
 
@@ -101,9 +101,9 @@
 ```
 Firefly/
 ├── .github/                     # CI 工作流（biome / build / deploy）、Issue 模板、dependabot
-├── docs/                         # 多语言 README 与截图
+├── docs/                         # 多语言 README、截图、CODE_WIKI 与部署文档
 ├── public/                       # 直接服务的静态资源（不优化）
-│   ├── assets/                   # css / fonts / images / js / music
+│   ├── assets/                   # css / cursors / fonts / images / js / music
 │   ├── favicon/                  # 多尺寸站点图标
 │   ├── gallery/                  # 相册源图与 urls.txt
 │   └── pio/                      # Live2D / Spine 看板娘模型
@@ -196,8 +196,9 @@ Layout.astro          # 基础 HTML 壳：head / meta / 主题初始化 / analyt
 
 | 集合 | 加载路径 | Schema 概要 |
 |------|---------|------------|
-| `posts` | `src/content/posts/**/*.{md,mdx}` | `title` / `published` / `updated?` / `draft?` / `description?` / `image?` / `tags?` / `category?` / `lang?` / `pinned?` / `author?` / `sourceLink?` / `licenseName?` / `licenseUrl?` / `comment?` / `password?` / `passwordHint?` / `audio?`（文章绑定音频，字符串 URL 或 `{ url, name?, artist?, cover?, lrc?, instrumental? }` 对象，由 `post-audio.ts` 的 `normalizePostAudio()` 归一）以及内部使用的 `prevTitle` / `prevSlug` / `nextTitle` / `nextSlug` |
+| `posts` | `src/content/posts/**/*.{md,mdx}` | `title` / `published` / `updated?` / `draft?` / `description?` / `image?` / `tags?` / `category?` / `lang?` / `pinned?` / `author?` / `sourceLink?` / `licenseName?` / `licenseUrl?` / `comment?` / `password?` / `passwordHint?` / `audio?`（文章绑定音频，字符串 URL 或 `{ url, name?, artist?, cover?, lrc?, instrumental? }` 对象，由 `post-audio.ts` 的 `normalizePostAudio()` 归一）/ `series?` + `seriesOrder?`（系列文章归档）以及内部使用的 `prevTitle` / `prevSlug` / `nextTitle` / `nextSlug` |
 | `spec` | `src/content/spec/**/*.{md,mdx}` | 无 schema 约束（自由 frontmatter） |
+| `dynamic` | `src/content/dynamic/**/*.md` | `published` / `pinned?` / `location?` + Markdown 正文（微博式短内容，可用 `pnpm new-d` 创建，支持 Memos 数据源） |
 
 **Draft 行为**：`PROD` 环境下自动过滤 `draft: true` 的文章（`content-utils.ts` 中的 `import.meta.env.PROD` 三元判断）。
 
@@ -277,7 +278,7 @@ rehype 阶段（HAST）
 
 ```ts
 export const cursorConfig: CursorConfig = {
-  enable: false,           // 默认关闭
+  enable: true,            // 默认开启（用户可在显示设置中覆盖，存 localStorage）
   switchable: true,        // 是否允许用户在显示设置中切换
   paths: {                 // 资源路径（相对于 public 目录）
     default:    "/assets/cursors/Arrow.cur",
@@ -367,7 +368,7 @@ Canvas 2D 粒子系统，鼠标跟随的五瓣花形旋涡特效。复刻自 Wal
 
 ```ts
 export const cursorTrailConfig: CursorTrailConfig = {
-  enable: false,           // 默认关闭
+  enable: true,             // 默认开启（用户可在显示设置中覆盖，存 localStorage）
   switchable: true,        // 是否允许用户在显示设置中切换
   imageSrc: "/assets/images/effects/cursor-petal-trimmed.png",
   maxParticles: 1000,      // 粒子池上限
@@ -570,7 +571,7 @@ new window.spine.SpinePlayer("spine-player-container", {
 
 | 配置文件 | 导出名 | 控制内容 |
 |---------|-------|---------|
-| [siteConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/siteConfig.ts) | `siteConfig` | 站点标题/URL/描述/关键词、主题色、页面宽度、favicon、navbar、页面开关（friends/sponsor/guestbook/bangumi/gallery/anime）、文章列表布局、文章页配置、bangumi、anime、分页、图像优化、语言 |
+| [siteConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/siteConfig.ts) | `siteConfig` | 站点标题/URL/描述/关键词、主题色、页面宽度、favicon、navbar（含 `navbarMode` 三种模式：static / fixed / dynamic）、页面开关（friends/guestbook/dynamic/gallery/booknav/bilibili/bangumi/vndb/mal/sponsor）、文章列表布局、文章页配置、bangumi、bilibili、vndb、mal、分页、图像优化、语言 |
 | [navBarConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/navBarConfig.ts) | `navBarConfig`, `navBarSearchConfig` | 导航栏链接（含子菜单）与搜索配置 |
 | [sidebarConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/sidebarConfig.ts) | `sidebarLayoutConfig` | 侧边栏开关、position（left/right/both）、tabletSidebar、hideSidebarOnPostPage、showBothSidebarsOnPostPage、leftComponents / rightComponents / mobileBottomComponents |
 | [profileConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/profileConfig.ts) | `profileConfig` | 头像、姓名、签名、社交链接 |
@@ -582,6 +583,9 @@ new window.spine.SpinePlayer("spine-player-container", {
 | [expressiveCodeConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/expressiveCodeConfig.ts) | `expressiveCodeConfig` | 代码块主题、折叠插件、语言徽章插件 |
 | [effectsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/effectsConfig.ts) | `sakuraConfig`, `cursorTrailConfig` | 樱花飘落特效、光标尾迹粒子系统 |
 | [cursorConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/cursorConfig.ts) | `cursorConfig` | 自定义鼠标光标（`.cur` 资源映射 + 用户开关，详见 §4.8） |
+| [booknavConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/booknavConfig.ts) | `booknavPageConfig`, `booknavConfig` | 书签导航页配置与分组数据 |
+| [dynamicConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/dynamicConfig.ts) | `dynamicConfig` | 动态页配置（标题、描述、评论开关、每页数量、Memos 数据源） |
+| [displaySettingsConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/displaySettingsConfig.ts) | `displaySettingsConfig` | 视图设置面板总开关与各设置项开关（可用 `PUBLIC_DISPLAY_SETTINGS` 环境变量覆盖） |
 | [announcementConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/announcementConfig.ts) | `announcementConfig` | 公告内容 |
 | [footerConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/footerConfig.ts) | `footerConfig` | 页脚 HTML 注入 |
 | [licenseConfig.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/config/licenseConfig.ts) | `licenseConfig` | 文章许可证显示 |
@@ -596,19 +600,19 @@ new window.spine.SpinePlayer("spine-player-container", {
 
 ### 5.2 `src/components/` —— 组件库
 
-按领域分目录组织，详见各子目录的 README：
+按领域分目录组织，组件清单详见 [src/components/README.md](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/README.md)：
 
 | 子目录 | 内容 | 主要技术 |
 |--------|------|----------|
 | `analytics/` | GoogleAnalytics / La51Analytics / MicrosoftClarity / UmamiAnalytics | `.astro`，按需条件渲染 |
 | `comment/` | Artalk / Disqus / Giscus / Twikoo / Waline + `index.astro` 路由 | `.astro`，运行时加载远程脚本 |
-| `common/` | ButtonLink / ButtonTag / ClientPagination / CoverImage / DropdownItem / DropdownPanel / FloatingButton / Icon / ImageWrapper / Markdown / Pagination / PioMessageBox / WidgetLayout | `.astro` + `.svelte` 混合 |
-| `controls/` | ArchivePanel / BackToComment / BackToHome / BackToTop / DisplaySettings / FloatingControls / FloatingTOC / LayoutSwitchButton / LightDarkSwitch / ScrollDownIndicator / Search / WallpaperSwitch | `.svelte` 为主（交互控件） |
-| `features/` | BackgroundPlayer / CustomCursor / CursorTrail / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / KatexManager / Live2DWidget / MusicManager / MusicPlayer / PostAudioBar / SakuraEffect / SpineModel / TypewriterText | `.astro`，全局特性挂载点 |
-| `layout/` | CategoryBar / ConfigCarrier / DropdownMenu / Footer / NavMenuPanel / Navbar / PostCard / PostMeta / PostPage / PostStats / SideBar | `.astro`，页面骨架 |
-| `misc/` | License / RecommendedPost / SharePoster | `.astro` + `.svelte` |
-| `pages/` | anime / bangumi / gallery / AdvancedSearch | `.svelte` 为主（页面级交互组件） |
-| `widget/` | Advertisement / Announcement / Calendar / Categories / Music / Profile / SidebarTOC / SiteInfo / SiteStats / SpineModel / Tags | `.astro`，侧边栏小组件 |
+| `common/` | Badge / ButtonLink / ButtonTag / ClientPagination / CoverImage / DropdownItem / DropdownPanel / FilterControls / FloatingButton / GridSkeleton / Icon / ImageWrapper / Markdown / PageJump / Pagination / PioMessageBox / Steps / StepItem / TabGroup / TabNav / Timeline / TimelineItem / WidgetLayout | `.astro` + `.svelte` 混合 |
+| `controls/` | ArchivePanel / BackToComment / BackToHome / BackToTop / DisplaySettingsIntegrated / FloatingControls / FloatingTOC / ImmersiveReading / ImmersiveTOC / LightDarkSwitch / ScrollDownIndicator / Search | `.svelte` 为主（交互控件；布局切换与壁纸切换已并入 DisplaySettingsIntegrated 选项卡） |
+| `features/` | BackgroundPlayer / CodeGroupManager / CustomCursor / CursorTrail / EncryptedContent / EncryptedPost / FancyboxManager / FontSetup / GithubCardManager / KatexManager / Live2DWidget / MusicManager / MusicPlayer / MusicPlayerView / PostAudioBar / SakuraEffect / SpineModel / TypewriterText / WavesEffect | `.astro`，全局特性挂载点 |
+| `layout/` | BannerHomeTextOverlay / BannerPostMetaOverlay / CategoryBar / ConfigCarrier / DropdownMenu / Footer / HeaderTopRow / Navbar / NavMenuPanel / PostCard / PostMeta / PostPage / PostStats / SideBar / SidebarColumn / WallpaperSection | `.astro`，页面骨架 |
+| `misc/` | License / RecommendedPost / SeriesNav / SharePoster | `.astro` + `.svelte` |
+| `pages/` | AdvancedSearch / bangumi / bilibili / dynamic / gallery / mal / vndb | `.svelte` 为主（页面级交互组件） |
+| `widget/` | Advertisement / Announcement / Calendar / Categories / Dynamic / DynamicSidebar / Music / Profile / SidebarTOC / SiteInfo / SiteStats / SpineModel / Tags | `.astro`，侧边栏小组件 |
 
 ### 5.3 `src/pages/` —— Astro 文件路由
 
@@ -618,21 +622,30 @@ new window.spine.SpinePlayer("spine-player-container", {
 | `/posts/[slug]` | `posts/[...slug].astro` | 文章详情页，含封面/目录/评论/相关推荐/分享海报/许可证/上下篇 |
 | `/categories/` | `categories/index.astro` | 分类归档 |
 | `/tags/` | `tags/index.astro` | 标签归档 |
+| `/series/` | `series/index.astro` | 系列文章归档（frontmatter `series` / `seriesOrder`） |
 | `/archive` | `archive.astro` | 时间轴归档 |
+| `/dynamic` | `dynamic/index.astro` | 动态页（微博式短内容，dynamic 集合，支持 Memos 数据源） |
+| `/dynamic/comments` | `dynamic/comments.astro` | 单条动态的按需评论区 |
 | `/about` | `about.astro` | 关于页（spec 集合） |
 | `/friends` | `friends.astro` | 友链页（spec 集合，受 `siteConfig.pages.friends` 开关） |
 | `/guestbook` | `guestbook.astro` | 留言板（spec 集合，依赖评论系统） |
 | `/gallery` / `/gallery/[album]` | `gallery/index.astro` / `gallery/[album].astro` | 相册列表与相册详情 |
-| `/anime` | `anime.astro` | 追番页（Bilibili + TMDB） |
+| `/booknav` | `booknav.astro` | 书签导航页（`booknavConfig` 分组数据） |
+| `/bilibili` | `bilibili.astro` | 哔哩哔哩追番页（Bilibili API） |
+| `/myanimelist` | `myanimelist.astro` | MyAnimeList 收藏页（MAL API） |
 | `/bangumi` | `bangumi.astro` | 番组计划页（Bangumi API） |
+| `/vndb` | `vndb.astro` | VNDB 视觉小说收藏页（VNDB API，构建时可下载封面到 `public/vndb-covers/`） |
 | `/sponsor` | `sponsor.astro` | 打赏页 |
 | `/search` | `search.astro` | Pagefind 搜索页 |
 | `/rss/` | `rss.astro` | RSS 介绍页（含复制链接） |
 | `/rss.xml` | `rss.xml.ts` | RSS feed |
 | `/robots.txt` | `robots.txt.ts` | 爬虫规则 |
-| `/og/[...slug].png` | `og/[...slug].ts` | 动态 OG 图生成（satori） |
+| `/og/[...slug].png` | `og/[...slug].ts` | 动态 OG 图生成（takumi-js） |
 | `/api/allPostMeta.json` | `api/allPostMeta.json.ts` | 文章元数据 JSON API（客户端搜索预筛选用） |
+| `/api/dynamic.json` | `api/dynamic.json.ts` | 动态内容 JSON API（客户端动态页数据源） |
 | 404 | `404.astro` | 自定义 404 |
+
+> 页面开关（`siteConfig.pages.*`）：friends / guestbook / dynamic / gallery / booknav / bilibili / bangumi / vndb / mal / sponsor，设为 `false` 时对应路由返回 404 并隐藏导航栏菜单项。
 
 ### 5.4 `src/plugins/` —— 自定义 Markdown 插件
 
@@ -646,6 +659,7 @@ new window.spine.SpinePlayer("spine-player-container", {
 | [remark-reading-time.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-reading-time.mjs) | `remarkReadingTime()` | 用 `reading-time` 计算阅读时长，写入 `frontmatter.minutes`（最小 1）与 `words` |
 | [remark-image-grid.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-image-grid.js) | `remarkImageGrid()` | 解析 `[grid]…[/grid]` 标记，按图片数自动选 1-4 列 Tailwind grid 类，包裹为 `div.image-grid` |
 | [remark-directive-rehype.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-directive-rehype.js) | `parseDirectiveNode()` | 处理 remark directive 节点：将 28 种 admonition 类型转为 `blockquote` 并注入 `[!TYPE]`；其他 directive 转为自定义 HTML 标签（hastscript） |
+| [remark-wiki-link.js](file:///e:/Dev/Projects/Firefly-trae-custom/src/plugins/remark-wiki-link.js) | `remarkWikiLink()` | 解析 `[[wiki链接]]` 语法，转换为指向站内文章的链接 |
 
 #### 5.4.2 Rehype 插件（HAST）
 
@@ -675,6 +689,8 @@ new window.spine.SpinePlayer("spine-player-container", {
 
 ### 5.5 `src/utils/` —— 工具函数
 
+> 下表仅列核心工具。目录下共有 40+ 个模块，其余为按功能域命名的辅助模块（`banner-*`、`bilibili-utils`、`booknav-utils`、`dynamic-utils`、`mal-utils`、`vndb-utils`、`github-card-utils`、`immersive-reading-utils`、`waves-draw` 等），职责可由文件名与所属页面推断。
+
 #### 构建时（SSR / Node.js）
 
 | 文件 | 关键导出 | 作用 |
@@ -695,9 +711,11 @@ new window.spine.SpinePlayer("spine-player-container", {
 |------|---------|------|
 | [icon-loader.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/icon-loader.ts) | `initIconLoader()` | 监听 `[data-icon-container]` 的 iconify-icon shadowRoot，显示加载指示器/图标；`MutationObserver` 监听新增容器，5 秒超时保护 |
 | [navigation-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/navigation-utils.ts) | `navigateToPage(url, options?)`、`isSwupReady()`、`waitForSwup(timeout=5000)`、`preloadPage(url)`、`getCurrentPath()`、`isHomePage()`、`isPostPage()`、`pathsEqual(path1, path2)` | 优先用 `window.swup.navigate` 无刷新跳转，失败降级 `location.href`；外部链接 `window.open`；锚点 `scrollIntoView` |
-| [sakura-manager.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/sakura-manager.ts) | `SakuraManager` 类、`initSakura(config)`、`toggleSakura()`、`stopSakura()`、`getSakuraStatus()` | Canvas + `requestAnimationFrame` 樱花飘落特效；支持位置/速度/旋转/透明度配置、`limitTimes` 限制次数、resize 处理；全局单例 `globalSakuraManager` |
+| [sakura.worker.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/workers/sakura.worker.ts) | Web Worker（`self.onmessage` 协议，消息类型见 `src/types/sakura-worker.ts`） | 樱花飘落特效：优先用 **OffscreenCanvas + Web Worker** 绘制（`SakuraEffect.astro` 的 `WorkerSakuraManager`），绘制循环脱离主线程；不支持时回退主线程 Canvas 实现 |
 | [setting-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/setting-utils.ts) | 见下 | **客户端设置中心**：统一管理 localStorage 持久化 + DOM 应用，涵盖主题/壁纸模式/Overlay 透明度模糊/Waves/Gradient/Sakura/Banner 标题与轮播/自定义光标。每个设置项遵循 `getDefault*` / `getStored*` / `set*` / `apply*ToDocument` 四件套模式（光标仅前三步，DOM 应用在 `CustomCursor.astro` 中完成） |
 | [toc-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/toc-utils.ts) | `TOCManager` 类、`isPostPage()`、类型 `TOCConfig` | `IntersectionObserver` 监听标题可见性、活动指示器定位、点击平滑滚动（节流 100ms）、`anchorsMatchCurrentContent` 检测 SSR 锚点是否过期；`attach()` 优先复用 SSR 锚点，失败回退 `render()` 重建 |
+| [fullscreen-wallpaper-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/fullscreen-wallpaper-utils.ts) | `initFullscreenWallpaper()`、`syncFullscreenBlur()`、`syncFullscreenOverlays()`、`updateFullscreenTitleParallax()` | 全屏模式标题淡入淡出与模糊渐变。**性能约束**：`--fullscreen-blur` 按 2px 量化（值不变时跳过写入）、最大模糊值（`--overlay-blur`）缓存一次读取（由 `#wallpaper-wrapper` 上的 MutationObserver 刷新），禁止每帧 `getComputedStyle` |
+| [grid-layout-utils.ts](file:///e:/Dev/Projects/Firefly-trae-custom/src/utils/grid-layout-utils.ts) | `updateMainGridCols()`、`updateSidebarStickySpacing()`、`refreshSidebarStickyState()`、`updateSidebarComponentsVisibility()` | 侧边栏 sticky 间距等网格布局运行时更新。**性能约束**：`updateSidebarStickySpacing()` 是每滚动路径，禁止读取布局（`offsetHeight` 等）；`hasVisibleTop` 由 `refreshSidebarStickyState()` 缓存，仅在初始化/导航时刷新 |
 
 `setting-utils.ts` 详细导出清单：
 
@@ -759,6 +777,7 @@ content/
 ├── posts/                # 博客文章 (.md / .mdx)
 │   ├── guide/            # 使用指南类文章
 │   └── images/           # 文章引用的图片
+├── dynamic/              # 动态条目 (.md，pnpm new-d 创建)
 └── spec/                 # 特殊页面（about / friends / guestbook）
 ```
 
@@ -768,11 +787,19 @@ content/
 
 | 脚本 | 命令 | 作用 |
 |------|------|------|
+| [generate-github-card-data.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/generate-github-card-data.ts) | （`pnpm build` 调用）/ `pnpm github-cards` | 扫描内容中的 `::github {repo=...}` 指令，抓取仓库元数据（description / language / avatar / license）缓存到 `src/constants/github-card-data.json`，避免运行时请求 GitHub API |
 | [generate-lqips.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/generate-lqips.ts) | `pnpm lqips` | 用 sharp 将 src 与 public 下图片缩到 2×2 像素，提取 4 个像素颜色生成 18 字符 hex 紧凑格式，写入 `src/constants/lqips.json`。忽略 `public/favicon/`、`public/pio/`、`public/assets/images/effects/`、`public/assets/music/` |
+| [generate-vndb-covers.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/generate-vndb-covers.ts) | （`pnpm build` 调用） | VNDB 封面下载到 `public/vndb-covers/`（gitignored）。仅在 `siteConfig.vndb` 配置了 `userId` + `downloadCovers: true` + `mode: "static"` 时生效，已存在的文件跳过 |
+| [prune-pio-assets.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/prune-pio-assets.ts) | （`pnpm build` 调用） | Astro 构建后从 `dist/` 删除未启用的看板娘资产（Live2D / Spine / static），两个看板娘都关闭时删除整个 `dist/pio`（约 15 MiB） |
 | [subset-fonts.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/subset-fonts.ts) | （`pnpm build` 调用） | 扫描页面字符并生成轻量 woff2 字体子集 |
+| [minify-inline-scripts.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/minify-inline-scripts.ts) | （`pnpm build` 调用） | Astro 不压缩 `is:inline` 脚本，此脚本在构建后用 esbuild 压缩 `dist/` HTML 中的内联 JS |
+| [run-pagefind.ts](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/run-pagefind.ts) | （`pnpm build` 调用） | 对准真实站点根目录（本地 `dist` / Cloudflare `dist/client`）运行 Pagefind，避免索引出假路径或索引不随站点部署 |
+| [exclude-esa-large-assets.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/exclude-esa-large-assets.mjs) | （`pnpm build:esa` 调用） | 从 `dist` 移除超过阿里云 ESA 25 MB 单文件上限的大文件（如 FLAC 音乐），不影响 `public/` 源文件，详见 [DEPLOYMENT.md](file:///e:/Dev/Projects/Firefly-trae-custom/docs/DEPLOYMENT.md) |
 | [new-post.js](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/new-post.js) | `pnpm new-post <filename>` | 在 `src/content/posts/` 创建带 frontmatter 的 .md 文件 |
 | [new-dynamic.js](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/new-dynamic.js) | `pnpm new-dynamic` | 在 `src/content/dynamic/` 创建带 frontmatter 的动态条目 .md 文件 |
 | [quarantine-bad-posts.mjs](file:///e:/Dev/Projects/Firefly-trae-custom/scripts/quarantine-bad-posts.mjs) | 手动 | 隔离问题文章（非构建流水线一部分） |
+
+> 另有辅助模块：`site-root.ts`（统一解析构建产物根目录，供 run-pagefind / minify-inline-scripts 复用）与 `subset-font.d.ts`（`subset-font` 包的手写环境声明）。
 
 ### 5.11 `.github/` —— CI 与协作
 
@@ -1018,8 +1045,8 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 
 ### 8.1 环境要求
 
-- **Node.js** ≥ 22.0
-- **pnpm** ≥ 9（`package.json` 的 `preinstall` 脚本通过 `only-allow pnpm` 强制）
+- **Node.js** ≥ 22.23.0（`package.json` engines）
+- **pnpm** ≥ 11（`packageManager` 字段锁定 `pnpm@11.22.0`，`preinstall` 通过 `only-allow pnpm` 强制）
 - **Git**
 
 ### 8.2 开发命令
@@ -1030,8 +1057,8 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 | `pnpm dev` 或 `pnpm start` | 启动开发服务器，默认 `http://localhost:4321` |
 | `pnpm check` | `astro check`，类型与渲染诊断 |
 | `pnpm type-check` | `tsc --noEmit --isolatedDeclarations` |
-| `pnpm format` | Biome 格式化 `src` |
-| `pnpm lint` | Biome 检查 + 安全修复 `src` |
+| `pnpm format` | Biome 格式化 `src` 与 `scripts` |
+| `pnpm lint` | Biome 检查 + 安全修复 `src` 与 `scripts` |
 | `pnpm build` | 完整构建流水线（见 §9.1） |
 | `pnpm preview` | 本地预览生产构建 |
 | `pnpm new-post <filename>` | 在 `src/content/posts/` 创建新文章 |
@@ -1059,18 +1086,30 @@ rehype-image-referrerpolicy.mjs ──► (独立实现域名匹配，逻辑与 
 `pnpm build` 实际执行（见 [package.json](file:///e:/Dev/Projects/Firefly-trae-custom/package.json#L9)）：
 
 ```
-npx tsx scripts/generate-lqips.ts   # 1. 生成图片 LQIP 渐变 → src/constants/lqips.json
+npx tsx scripts/generate-github-card-data.ts  # 1. 抓取 GitHub 卡片数据 → src/constants/github-card-data.json
   ↓
-astro build                         # 2. Astro 构建（含 remark/rehype 插件链 + Expressive Code）
+npx tsx scripts/generate-lqips.ts             # 2. 生成图片 LQIP 渐变 → src/constants/lqips.json
   ↓
-npx tsx scripts/subset-fonts.ts     # 3. 字体子集化
+npx tsx scripts/generate-vndb-covers.ts       # 3. 下载 VNDB 封面（配置开启时，否则 no-op）
   ↓
-pagefind --site dist                # 4. Pagefind 全文搜索索引
+astro build                                   # 4. Astro 构建（remark/rehype 插件链 + Expressive Code）
+  ↓
+npx tsx scripts/prune-pio-assets.ts           # 5. 删除 dist 中未启用的看板娘资产
+  ↓
+npx tsx scripts/subset-fonts.ts               # 6. 字体子集化
+  ↓
+npx tsx scripts/minify-inline-scripts.ts      # 7. 用 esbuild 压缩 dist HTML 内联脚本
+  ↓
+npx tsx scripts/run-pagefind.ts               # 8. Pagefind 全文搜索索引（对准真实站点根目录）
 ```
+
+ESA Pages 生产构建使用 `pnpm build:esa`（= `pnpm build` + `scripts/exclude-esa-large-assets.mjs`）。
 
 ### 9.2 部署目标
 
-#### Vercel（默认）
+> **本仓库实际部署**（权威说明见 [docs/DEPLOYMENT.md](file:///e:/Dev/Projects/Firefly-trae-custom/docs/DEPLOYMENT.md)）：主站为阿里云 ESA Pages（`https://kokkoro.me/`，构建命令 `pnpm build:esa`），备用入口为 GitHub Pages（`pnpm build`）。下方 Vercel / Cloudflare 为主题自带适配器配置，保留供参考，**不是**当前生产部署的权威描述。
+
+#### Vercel（主题适配器）
 
 配置见 [vercel.json](file:///e:/Dev/Projects/Firefly-trae-custom/vercel.json)：
 
@@ -1199,7 +1238,7 @@ pagefind --site dist                # 4. Pagefind 全文搜索索引
 
 - [src/components/layout/SideBar.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/layout/SideBar.astro) —— 侧边栏容器
 - [src/components/layout/Navbar.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/layout/Navbar.astro) —— 导航栏
-- [src/components/controls/DisplaySettings.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettings.svelte) —— 显示设置面板
+- [src/components/controls/DisplaySettingsIntegrated.svelte](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/controls/DisplaySettingsIntegrated.svelte) —— 显示设置面板（外观/壁纸/特效/看板娘选项卡）
 - [src/components/features/EncryptedPost.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/EncryptedPost.astro) —— 加密文章容器
 - [src/components/features/CustomCursor.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CustomCursor.astro) —— 自定义光标注入（详见 §4.8 / §6.7）
 - [src/components/features/CursorTrail.astro](file:///e:/Dev/Projects/Firefly-trae-custom/src/components/features/CursorTrail.astro) —— 光标尾迹粒子特效（详见 §4.9 / §6.8）

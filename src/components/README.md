@@ -17,16 +17,22 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 
 负责整体页面框架和布局结构的组件。
 
+- `BannerHomeTextOverlay.astro` - 首页横幅文字覆盖层（标题/副标题/打字机/双语翻译）
+- `BannerPostMetaOverlay.astro` - 文章页横幅元数据覆盖层
 - `CategoryBar.astro` - 分类栏组件
 - `ConfigCarrier.astro` - 配置载体组件
 - `DropdownMenu.astro` - 下拉菜单组件
 - `Footer.astro` - 页脚组件
-- `Navbar.astro` - 导航栏组件
+- `HeaderTopRow.astro` - 顶部行组件
+- `Navbar.astro` - 导航栏组件（支持 static/fixed/dynamic 三种模式）
 - `NavMenuPanel.astro` - 导航菜单面板
 - `PostCard.astro` - 文章卡片组件
 - `PostMeta.astro` - 文章元数据组件
 - `PostPage.astro` - 文章页面布局组件
+- `PostStats.astro` - 文章统计组件（字数/阅读时长）
 - `SideBar.astro` - 侧边栏组件
+- `SidebarColumn.astro` - 侧边栏列容器组件
+- `WallpaperSection.astro` - 壁纸区域组件（图片/视频背景）
 
 ### 🎮 controls/ - 导航和交互控件
 
@@ -42,12 +48,11 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 - `ArchivePanel.astro` - 归档面板组件（服务端渲染 + 客户端筛选/折叠）
 
 **交互组件**
-- `DisplaySettings.svelte` - 显示设置组件
-- `DisplaySettingsIntegrated.svelte` - 集成显示设置组件
-- `LayoutSwitchButton.svelte` - 布局切换按钮
+- `DisplaySettingsIntegrated.svelte` - 集成显示设置面板（外观/壁纸/特效/看板娘选项卡；布局切换与壁纸模式切换已并入本面板）
+- `ImmersiveReading.astro` - 沉浸式阅读模式
+- `ImmersiveTOC.astro` - 沉浸式阅读目录
 - `LightDarkSwitch.svelte` - 主题切换组件
 - `Search.svelte` - 搜索功能组件
-- `WallpaperSwitch.svelte` - 壁纸模式切换组件
 
 ### 🔧 common/ - 公共可复用组件
 
@@ -77,7 +82,9 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 **列表与筛选组件**
 - `FilterControls.svelte` - 筛选控制组件（胶囊筛选按钮，bangumi/vndb/mal 共用）
 - `TabNav.svelte` - 标签导航组件（支持 URL hash 深链，bangumi/vndb/mal/bilibili 共用）
+- `TabGroup.svelte` - 标签组容器组件
 - `GridSkeleton.svelte` - 媒体网格加载骨架
+- `PageJump.svelte` - 分页页码跳转组件
 
 ### 🧩 widget/ - 小部件
 
@@ -87,6 +94,8 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 - `Announcement.astro` - 公告组件
 - `Calendar.astro` - 日历组件
 - `Categories.astro` - 分类组件
+- `Dynamic.astro` - 最新动态侧边栏组件
+- `DynamicSidebar.svelte` - 动态侧边栏客户端交互（加载与展开）
 - `Music.astro` - 音乐播放器小部件
 - `Profile.astro` - 个人信息/社交链接小部件
 - `SidebarTOC.astro` - 侧边栏目录组件
@@ -100,18 +109,23 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 全局加载的功能增强和特效组件。
 
 **管理器（初始化和管理功能）**
+- `BackgroundPlayer.astro` - 背景视频播放器（banner 模式下视频顶部对齐、仅底部裁切；单视频原生循环，多视频轮播）
+- `CodeGroupManager.astro` - 代码组管理器
 - `CustomCursor.astro` - 自定义光标注入（CSS `cursor: url()` 替换，含 Swup 持久化）
 - `CursorTrail.astro` - 光标尾迹粒子特效（Canvas 2D 粒子系统，五瓣花形旋涡，含 Swup 持久化）
 - `FancyboxManager.astro` - Fancybox 图片查看器管理
 - `FontSetup.astro` - 字体加载和管理（基于 Astro Font API）
+- `GithubCardManager.astro` - GitHub 仓库卡片管理器（消费构建期抓取的卡片数据）
 - `KatexManager.astro` - Katex 数学公式渲染管理
 - `MusicManager.astro` - 全局音乐播放管理器（单例，管理唯一 audio 元素和播放状态，通过 CustomEvent 同步所有 MusicPlayer 视图实例）
+- `WavesEffect.astro` - 水波纹特效（视频播放时可通过 `playerShowWaves` 配置保留）
 
 **功能组件**
 - `EncryptedContent.astro` - 加密内容组件
 - `EncryptedPost.astro` - 加密文章组件
 - `Live2DWidget.astro` - Live2D 看板娘组件
 - `MusicPlayer.astro` - 音乐播放器 UI 视图控制器（纯 UI，委托 MusicManager 进行播放控制）
+- `MusicPlayerView.astro` - 音乐播放器视图组件
 - `PostAudioBar.astro` - 文章绑定音频播放条（frontmatter `audio` 字段驱动，独立 audio 元素；与全局音乐互斥：播放时暂停全局音乐，离页恢复；监听 body subtree 感知 Swup 容器替换；加密文章中随解密注入；支持"文章音频自动播放"用户开关，见特效设置）
 - `SakuraEffect.astro` - 樱花飘落特效
 - `SpineModel.astro` - Spine 看板娘组件
@@ -127,6 +141,21 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 - `BangumiGrid.svelte` - 番组网格布局组件
 - `BangumiSection.svelte` - 番组分类展示组件
 - `Card.svelte` - 番组卡片组件
+
+**pages/bilibili/** - 哔哩哔哩追番页面组件
+- `BilibiliCard.svelte` - 哔哩哔哩卡片组件
+- `BilibiliGrid.svelte` - 哔哩哔哩网格布局组件
+- `BilibiliDetailModal.svelte` - 哔哩哔哩详情弹窗组件
+
+**pages/mal/** - MyAnimeList 页面组件
+- `Card.svelte` - MAL 卡片组件
+- `MalGrid.svelte` - MAL 网格布局组件
+- `MalSection.svelte` - MAL 分类展示组件
+
+**pages/vndb/** - VNDB 页面组件
+- `Card.svelte` - VNDB 卡片组件
+- `VndbGrid.svelte` - VNDB 网格布局组件
+- `VndbSection.svelte` - VNDB 分类展示组件
 
 **pages/gallery/** - 相册页面组件
 - `AlbumCard.astro` - 相册卡片组件
@@ -158,6 +187,7 @@ Firefly 项目中所有可复用组件的集中管理。组件按照功能和职
 
 - `License.astro` - 许可证信息显示
 - `RecommendedPost.astro` - 推荐文章组件
+- `SeriesNav.astro` - 系列文章导航组件（frontmatter `series` 驱动）
 - `SharePoster.svelte` - 分享海报生成
 
 ---

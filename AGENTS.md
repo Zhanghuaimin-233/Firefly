@@ -11,13 +11,15 @@ Use `pnpm`; the `preinstall` script enforces it.
 - `pnpm dev` or `pnpm start`: run the local Astro dev server.
 - `pnpm check`: run Astro diagnostics.
 - `pnpm type-check`: run TypeScript with `--noEmit --isolatedDeclarations`.
-- `pnpm format`: format `src` with Biome.
-- `pnpm lint`: run Biome checks and safe fixes on `src`.
-- `pnpm build`: generate LQIPs, the Astro build, font subsets, and Pagefind search output in `dist`.
+- `pnpm format`: format `src` and `scripts` with Biome.
+- `pnpm lint`: run Biome checks and safe fixes on `src` and `scripts`.
+- `pnpm build`: generate GitHub card data, LQIPs, and VNDB covers, run the Astro build, prune unused pio assets, subset fonts, minify inline scripts, and build Pagefind search output in `dist`.
+- `pnpm build:esa`: Alibaba Cloud ESA Pages production build (`pnpm build` + large-asset exclusion; see `docs/DEPLOYMENT.md`).
 - `pnpm preview`: preview the production build locally.
 - `pnpm new-post <filename>`: scaffold a new content post.
 - `pnpm new-dynamic` (`new-d`): scaffold a new dynamic (microblog) entry.
 - `pnpm lqips`: regenerate LQIP data into `src/constants/lqips.json`.
+- `pnpm github-cards`: regenerate GitHub card data into `src/constants/github-card-data.json`.
 
 ## Coding Style & Naming Conventions
 
