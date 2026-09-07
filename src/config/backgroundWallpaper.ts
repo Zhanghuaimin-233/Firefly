@@ -7,7 +7,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	playerEnable: true,
 	// 视频播放时是否保留水波纹动画（仅横幅/全屏 classic 模式下显示，受水波纹开关与壁纸模式约束）
 	// 默认 false：视频播放时水波纹淡出（原设计）；true：视频播放时水波纹继续显示
-	playerShowWaves: false,
+	playerShowWaves: true,
 	/**
 	 * 背景图片配置
 	 * 图片路径支持三种格式：
