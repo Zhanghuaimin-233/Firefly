@@ -50,6 +50,15 @@ export const friendsConfig: FriendLink[] = [
 		weight: 8,
 		enabled: true,
 	},
+	{
+		title: "Dian66",
+		imgurl: "https://dian66y.top/dian66-favicon.png",
+		desc: "欢迎访问我的个人博客，希望你能喜欢！",
+		siteurl: "https://dian66y.top",
+		tags: ["Blog"],
+		weight: 7,
+		enabled: true,
+	},
 ];
 
 // 获取启用的友链并进行排序
